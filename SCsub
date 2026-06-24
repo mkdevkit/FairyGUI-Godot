@@ -1,0 +1,32 @@
+#!/usr/bin/env python
+from misc.utility.scons_hints import *
+
+Import("env")
+Import("env_modules")
+
+env_fairygui = env_modules.Clone()
+
+# Include paths
+env_fairygui.Append(CPPPATH=[
+    "src/",
+    "src/event/",
+    "src/display/",
+    "src/gears/",
+    "src/tween/",
+    "src/utils/",
+    "src/utils/html/",
+    "src/controller_action/",
+])
+
+# Spine runtime include path (spine_godot module at modules/spine_godot/)
+env_fairygui.Append(CPPPATH=["#modules/spine_godot"])
+
+# Source files
+env_fairygui.add_source_files(env.modules_sources, "src/*.cpp")
+env_fairygui.add_source_files(env.modules_sources, "src/event/*.cpp")
+env_fairygui.add_source_files(env.modules_sources, "src/display/*.cpp")
+env_fairygui.add_source_files(env.modules_sources, "src/gears/*.cpp")
+env_fairygui.add_source_files(env.modules_sources, "src/tween/*.cpp")
+env_fairygui.add_source_files(env.modules_sources, "src/utils/*.cpp")
+env_fairygui.add_source_files(env.modules_sources, "src/utils/html/*.cpp")
+env_fairygui.add_source_files(env.modules_sources, "src/controller_action/*.cpp")

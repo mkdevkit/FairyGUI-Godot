@@ -1,0 +1,24 @@
+#include "InputEvent.h"
+#include "GObject.h"
+
+NS_FGUI_BEGIN
+
+InputEvent::InputEvent() :
+    _target(nullptr),
+    _inputProcessor(nullptr),
+    _touchId(-1),
+    _clickCount(0),
+    _mouseWheelDelta(0),
+    _button(/*EventMouse*/(MouseButton)0),
+    _keyCode(/*EventKeyboard*/(KeyCode)0),
+    _keyModifiers(0)
+{
+}
+
+InputEvent::~InputEvent()
+{
+
+}
+
+
+NS_FGUI_END

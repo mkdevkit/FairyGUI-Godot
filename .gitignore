@@ -1,0 +1,10 @@
+FairyGUI-cocos2dx/
+godot-cpp/
+godot-cpp-4.7
+*.obj
+*.o
+*.lib
+*.pdb
+.sconsign.dblite
+build/
+spine-runtimes/
