@@ -1,4 +1,5 @@
 #include "UIPackage.h"
+#include "GObject.h"
 #include "UIObjectFactory.h"
 #include "UIConfig.h"
 #include "display/BitmapFont.h"
@@ -6,6 +7,8 @@
 #include "utils/ByteBuffer.h"
 #include "utils/ToolSet.h"
 #include "core/io/image.h"
+#include "core/io/image_loader.h"
+#include "core/io/resource_uid.h"
 #include "scene/resources/image_texture.h"
 #include "core/io/file_access.h"
 
@@ -99,7 +102,7 @@ UIPackage* UIPackage::addPackage(const string& assetPath)
 
         Ref<ImageTexture> emptyTex;
         emptyTex.instantiate();
-        emptyTex->create_from_image(emptyImg);
+        emptyTex->set_image(emptyImg);
         _emptyTexture = emptyTex;
     }
 
@@ -608,7 +611,7 @@ void UIPackage::loadAtlas(PackageItem* item)
 {
     Ref<Image> image;
     image.instantiate();
-    Error err = image->load(item->file.c_str());
+    Error err = image->load(GObject::toGodotStr(item->file));
     if (err != Error::OK)
     {
         item->texture = _emptyTexture;
@@ -634,7 +637,7 @@ void UIPackage::loadAtlas(PackageItem* item)
     {
         Ref<Image> alphaImg;
         alphaImg.instantiate();
-        if (alphaImg->load(alphaFilePath.c_str()) == Error::OK)
+        if (ImageLoader::load_image(GObject::toGodotStr(alphaFilePath), alphaImg) == Error::OK)
         {
             // Combine RGB from main image, alpha from alpha image
             // Get pixel data from both images
@@ -668,7 +671,7 @@ void UIPackage::loadAtlas(PackageItem* item)
 
     Ref<ImageTexture> tex;
     tex.instantiate();
-    tex->create_from_image(image);
+    tex->set_image(image);
     item->texture = tex;
 }
 
@@ -703,6 +706,7 @@ void UIPackage::loadImage(PackageItem* item)
     {
         item->imageFrame = ImageFrame();
         createSpriteTexture(sprite, item->imageFrame);
+        item->texture = item->imageFrame.texture;
     }
     else
     {
@@ -712,6 +716,7 @@ void UIPackage::loadImage(PackageItem* item)
         item->imageFrame.region = Rect2(0, 0, 2, 2);
         item->imageFrame.originalSize = Vector2(2, 2);
         item->imageFrame.originalSizeInPixels = Vector2(2, 2);
+        item->texture = _emptyTexture;
     }
 
     if (item->scaleByTile)

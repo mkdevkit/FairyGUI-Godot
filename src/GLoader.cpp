@@ -1,5 +1,6 @@
 #include "GLoader.h"
 #include "GComponent.h"
+#include "GObject.h"
 #include "GMovieClip.h"
 #include "PackageItem.h"
 #include "UIPackage.h"
@@ -8,6 +9,8 @@
 #include "utils/ToolSet.h"
 
 #include "core/io/image.h"
+#include "core/io/image_loader.h"
+#include "core/io/resource_uid.h"
 #include "scene/resources/image_texture.h"
 
 NS_FGUI_BEGIN
@@ -268,11 +271,12 @@ void GLoader::loadExternal()
 {
     Ref<Image> img;
     img.instantiate();
-    if (img->load(_url.c_str()) == OK)
+    String path = ResourceUID::ensure_path(GObject::toGodotStr(_url));
+    if (ImageLoader::load_image(path, img) == OK)
     {
         Ref<ImageTexture> tex;
         tex.instantiate();
-        tex->create_from_image(img);
+        tex->set_image(img);
         ImageFrame* sf = new ImageFrame();
         sf->texture = tex;
         sf->region = Rect2(Vector2(), tex->get_size());

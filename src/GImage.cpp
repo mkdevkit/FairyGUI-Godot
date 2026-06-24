@@ -131,6 +131,9 @@ void GImage::constructFromResource()
     contentItem->load();
 
     _content->setTexture(contentItem->texture);
+    if (!contentItem->imageFrame.region.size.is_zero_approx())
+        _content->set_region_rect(contentItem->imageFrame.region);
+
     if (contentItem->hasScale9Grid)
         ((FUISprite*)_content)->setScale9Grid(contentItem->scale9Grid);
     else if (contentItem->scaleByTile)

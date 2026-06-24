@@ -19,6 +19,7 @@ FUISprite::FUISprite() :
     _grayed(false),
     _scale9Enabled(false)
 {
+    set_centered(false); // FairyGUI uses top-left origin, NOT center origin
     item_rect_changed(); // enable NOTIFICATION_DRAW for Node2D
 }
 
@@ -439,8 +440,8 @@ void FUISprite::_draw()
                 int idx = _fillIndices[i * 3 + j];
                 // Map vertex from normalized coords to pixel coords
                 tri.set(j, Vector2(
-                    _fillVertices[idx].x * contentSize.x - contentSize.x * 0.5f,
-                    -(_fillVertices[idx].y * contentSize.y - contentSize.y * 0.5f)));
+                    _fillVertices[idx].x * contentSize.x,
+                    -_fillVertices[idx].y * contentSize.y));
             }
             draw_colored_polygon(tri, color);
         }
@@ -455,7 +456,7 @@ void FUISprite::_draw()
 
     // Normal sprite draw (already handled by Sprite2D base, but use custom draw for control)
     draw_texture_rect_region(tex,
-        Rect2(-contentSize.x * 0.5f, -contentSize.y * 0.5f, contentSize.x, contentSize.y),
+        Rect2(0, 0, contentSize.x, contentSize.y),
         texRect,
         get_modulate());
 }
@@ -513,14 +514,12 @@ void FUISprite::drawScale9()
     // Bottom-right
     regions[8] = { Rect2(r, b, marginRight, marginBottom), Rect2(marginLeft + destMidW, marginTop + destMidH, marginRight, marginBottom) };
 
-    Vector2 offset(-contentSize.x * 0.5f, -contentSize.y * 0.5f);
     for (int i = 0; i < 9; i++)
     {
         if (regions[i].dst.size.x <= 0 || regions[i].dst.size.y <= 0) continue;
         if (regions[i].src.size.x <= 0 || regions[i].src.size.y <= 0) continue;
 
         Rect2 dst = regions[i].dst;
-        dst.position += offset;
         draw_texture_rect_region(tex, dst, regions[i].src, get_modulate());
     }
 }
