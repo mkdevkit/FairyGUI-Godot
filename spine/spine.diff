@@ -1,0 +1,29 @@
+diff --git a/modules/spine_godot/SCsub b/modules/spine_godot/SCsub
+--- a/modules/spine_godot/SCsub
++++ b/modules/spine_godot/SCsub
+@@ -2,12 +2,12 @@ Import('env')
+ 
+ # Need to add the include path to env so the vsproj generator consumes it.
+ if env["vsproj"]:
+-    env.Append(CPPPATH=["#../spine_godot/spine-cpp/include"])
++    env.Append(CPPPATH=["#modules/spine_godot/spine-cpp/include"])
+ 
+ env_spine_runtime = env.Clone()
+-env_spine_runtime.Append(CPPPATH=["#../spine_godot/spine-cpp/include"])
++env_spine_runtime.Append(CPPPATH=["#modules/spine_godot/spine-cpp/include"])
+ env_spine_runtime.add_source_files(env.modules_sources, "spine-cpp/src/spine/*.cpp")
+ env_spine_runtime.add_source_files(env.modules_sources, "*.cpp")
+ 
+ # Needed on Clang to not have a gazillion -Winconsistent-missing-override warnings for GDCLASS
+ # I do not understand why other modules using GDCLASS do not have this issue when compiling.
+diff --git a/modules/spine_godot/SpineSprite.h b/modules/spine_godot/SpineSprite.h
+--- a/modules/spine_godot/SpineSprite.h
++++ b/modules/spine_godot/SpineSprite.h
+@@ -40,7 +40,7 @@
+ #else
+ #include "scene/2d/node_2d.h"
+ #if VERSION_MAJOR > 3
+-#include "servers/rendering/rendering_server.h"
++#include "servers/rendering_server.h"
+ #endif
+ #endif

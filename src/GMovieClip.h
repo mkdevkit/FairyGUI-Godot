@@ -7,7 +7,7 @@
 NS_FGUI_BEGIN
 
 class FUISprite;
-class MovieClipData;
+struct MovieClipData;
 
 class GMovieClip : public GObject
 {

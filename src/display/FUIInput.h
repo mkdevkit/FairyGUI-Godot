@@ -60,7 +60,7 @@ public:
     TextFormat* getTextFormat() const { return _textFormat; }
 
     static void _bind_methods();
-    virtual void _gui_input(const Ref<InputEvent>& event) override;
+    void _gui_input(const Ref<InputEvent>& event);
 
 protected:
 

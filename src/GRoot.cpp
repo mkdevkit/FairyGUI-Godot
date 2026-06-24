@@ -10,7 +10,6 @@
 #include "scene/main/viewport.h"
 #include "scene/main/window.h"
 #include "servers/display_server.h"
-#include "core/variant/variant_utility.h"
 
 NS_FGUI_BEGIN
 
@@ -494,7 +493,7 @@ void GRoot::showTooltips(const std::string& msg)
         const std::string& resourceURL = UIConfig::tooltipsWin;
         if (resourceURL.empty())
         {
-            UtilityFunctions::print("FairyGUI: UIConfig.tooltipsWin not defined");
+            print_line("FairyGUI: UIConfig.tooltipsWin not defined");
             return;
         }
 
@@ -558,14 +557,14 @@ void GRoot::playSound(const std::string& url, float volumeScale)
     PackageItem* pi = UIPackage::getItemByURL(url);
     if (pi)
     {
-        Ref<AudioStream> stream = ResourceLoader::get_singleton()->load(String(pi->file.c_str()));
+        Ref<AudioStream> stream = ResourceLoader::load(String(pi->file.c_str()));
         if (stream.is_valid())
         {
             AudioStreamPlayer* player = memnew(AudioStreamPlayer);
             player->set_stream(stream);
             float db = _soundVolumeScale * volumeScale;
             if (db > 0.0f)
-                player->set_volume_db(Math::linear2db(db));
+                player->set_volume_db(Math::linear_to_db(db));
             else
                 player->set_volume_db(-80.0f);
             _displayObject->add_child(player);

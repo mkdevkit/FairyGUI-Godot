@@ -41,7 +41,7 @@ public:
     float getTextHeight() const;
 
     static void _bind_methods();
-    virtual void _draw() override;
+    void _draw();
 
 protected:
 

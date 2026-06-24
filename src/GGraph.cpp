@@ -84,7 +84,7 @@ class DrawNode : public Node2D {
         void setLineWidth(float width) { _lineWidth = width; }
 
         static void _bind_methods() {}
-        void _draw() override {
+        void _draw() {
             for (auto& cmd : _cmds) {
                 switch (cmd.type) {
                 case Cmd::RECT:

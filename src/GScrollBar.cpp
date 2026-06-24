@@ -178,7 +178,8 @@ GScrollBar* GScrollBar::create() { Ref<GScrollBar> ref = memnew(GScrollBar); aut
 
 void GScrollBar::_bind_methods()
 {
-    ClassDB::bind_method(D_METHOD("setScrollPane", "target", "vertical"), &GScrollBar::setScrollPane);
+    // setScrollPane uses ScrollPane* which is not a GDCLASS-registered type
+    // ClassDB::bind_method(D_METHOD("setScrollPane", "target", "vertical"), &GScrollBar::setScrollPane);
     ClassDB::bind_method(D_METHOD("setDisplayPerc", "value"), &GScrollBar::setDisplayPerc);
     ClassDB::bind_method(D_METHOD("setScrollPerc", "value"), &GScrollBar::setScrollPerc);
     ClassDB::bind_method(D_METHOD("getMinSize"), &GScrollBar::getMinSize);

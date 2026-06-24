@@ -104,93 +104,92 @@ modules/fairygui/
 │           └── HtmlParser.h/HtmlParser.cpp    # HTML to rich text parser
 ```
 
+## Dependencies
+
+This module depends on the **spine_godot** module, also located under `modules/`.
+
+### Spine Runtime (spine_godot)
+
+Located at `modules/spine_godot/`, this module provides Spine 2D skeletal animation support for `GLoader3D`.
+
+```
+modules/spine_godot/
+├── config.py                           # Module build configuration
+├── SCsub                               # SCons build script
+├── SpineSprite.h / .cpp                # Spine sprite node
+├── SpineSkeleton.h / .cpp              # Skeleton wrapper
+├── SpineAnimation.h / .cpp             # Animation wrapper
+├── SpineAnimationState.h / .cpp        # Animation state wrapper
+├── SpineAtlasResource.h / .cpp         # Atlas resource
+├── SpineSkeletonDataResource.h / .cpp  # Skeleton data resource
+├── SpineSkeletonFileResource.h / .cpp  # Skeleton file resource
+├── SpineTrackEntry.h / .cpp            # Track entry wrapper
+├── SpineCommon.h                       # Common spine utilities
+├── SpineConstant.h                     # Spine constants
+├── spine-cpp/                          # Spine C++ runtime (from spine-runtimes)
+│   ├── include/spine/                  # Runtime headers
+│   │   ├── Animation.h
+│   │   ├── Skeleton.h
+│   │   └── ...
+│   └── src/spine/                      # Runtime source files
+│       ├── Animation.cpp
+│       └── ...
+└── ...
+```
+
+GLoader3D requires spine_godot headers via:
+```cpp
+#include "SpineSprite.h"
+#include "SpineSkeleton.h"
+// etc.
+```
+
 ## Key Architecture Decisions
 
 | Cocos2dx Original | Godot Port |
 |---|---|
-| `cocos2d::Ref` | `godot::Node` / `godot::Object` |
-| `cocos2d::Sprite` / `cocos2d::DrawNode` | `RenderNode` (godot::Node2D with `_draw()`) |
-| `cocos2d::Vec2` / `cocos2d::Size` | `godot::Vector2` |
-| `cocos2d::Color4F` / `Color3B` | `godot::Color` |
-| `cocos2d::Texture2D*` | `godot::Ref<godot::Texture2D>` |
-| `cocos2d::Rect` | `godot::Rect2` |
-| `cocos2d::ui::Scale9Sprite` | Native `draw_texture_rect_region` in RenderNode |
+| `cocos2d::Ref` | `Node` / `Object` |
+| `cocos2d::Sprite` | `Sprite2D` / `FUISprite` |
+| `cocos2d::Vec2` / `cocos2d::Size` | `Vector2` |
+| `cocos2d::Color4F` / `Color3B` | `Color` |
+| `cocos2d::Texture2D*` | `Ref<Texture2D>` |
+| `cocos2d::Rect` | `Rect2` (alias `Rect`) |
+| `cocos2d::ui::Scale9Sprite` | Native `FUISprite` 9-slice |
 | `CREATE_FUNC` macro | `memnew` / Godot memory management |
 | `CC_SAFE_RETAIN` / `CC_SAFE_RELEASE` | Godot `Ref<>` reference counting |
 
-## Build Instructions
+## Build
 
-### Prerequisites
+FairyGUI is compiled as a **built-in Godot module** — no separate build step or godot-cpp required.
 
-- Python 3.x + SCons (`pip install scons`)
-- Godot Engine 4.x
-- godot-cpp (clone into `./godot-cpp/`)
-- MinGW-w64 (for `use_mingw=yes`, optional)
+Build Godot with the fairygui module:
 
-### Build Commands
-
-| Command | Description |
-|---|---|
-| `scons` | Build with default toolchain (auto-detect platform/arch) |
-| `scons use_mingw=yes` | Build with MinGW-w64 (static link, `D:\GNU\mingw64\bin` by default) |
-| `scons vsproj=yes` | Generate VS solution only (no compilation): `build/fairygui_godot.sln` |
-| `scons debug=yes` | MSVC debug build: `/Zi /Od /DEBUG` (generates .pdb) |
-
-The build delegates standard godot-cpp parameters (`p=<platform>`, `arch=<arch>`, `dev_build=yes`, `target=<debug/release>`) to `godot-cpp/SConstruct`.
-
-#### MinGW Custom Path
-
-Set the `MINGW_BIN` environment variable to override the default MinGW path:
-
-```powershell
-$env:MINGW_BIN = "C:\msys64\mingw64\bin"
-scons use_mingw=yes
+```sh
+scons platform=windows target=editor dev_build=yes
 ```
 
-### Output
+The module is auto-detected by Godot's build system via `config.py`.
 
-Built library goes to `build/libfairygui_godot.dll` (Windows) or `build/libfairygui_godot.so` (Linux).
-
-Copy `fairygui_godot.gdextension` + the built library into your Godot project, adjusting paths in `.gdextension` as needed.
-
-#### Godot 4.5+ Compatibility
-
-When upgrading godot-cpp to match newer Godot versions, some source changes may be needed. Known changes:
-
-- `SpineAtlasResource.cpp`: `JSON*` → `Ref<JSON>` API update
-- `GLoader3D.cpp`: `#include "spine_godot/SpineTrackEntry.h"` for `Ref<T>` destructor
-- Package file format changes may require re-exporting `.fui` from FairyGUI Editor
+The `SCsub` adds include paths for:
+- `src/` and all subdirectories (event, display, gears, tween, utils, utils/html, controller_action)
+- `modules/spine_godot/` (Spine wrapper headers)
+- `modules/spine_godot/spine-cpp/include` (Spine C++ runtime headers)
 
 ### Spine Runtime Integration
 
-FairyGUI-Godot supports Spine 2D skeletal animations via GLoader3D. The spine runtime is sourced from [EsotericSoftware/spine-runtimes](https://github.com/EsotericSoftware/spine-runtimes) and compiled as a static library linked into the final GDExtension binary.
+Spine support is handled by the `spine_godot` module (`modules/spine_godot/`).
 
-**Modifications made to the upstream spine-godot source:**
+- `spine-cpp/` contains the upstream Spine C++ runtime from [EsotericSoftware/spine-runtimes](https://github.com/EsotericSoftware/spine-runtimes)
+- The `spine_godot` SCsub compiles both `spine-cpp/src/spine/*.cpp` and its own `*.cpp` files
+- Fairygui's `GLoader3D` includes spine_godot headers directly (no godot-cpp prefix needed)
 
-| File | Change |
-|---|---|
-| `spine-runtimes/spine-godot/SConscript` | **New file** — Receives fairygui's build environment, compiles `spine-cpp` + `spine_godot` as a static library |
-| `spine-runtimes/spine-godot/spine_godot/SpineAtlasResource.cpp` | `JSON*` → `Ref<JSON>` adaptation for newer godot-cpp API |
-
-View the above changes in the `diff/` directory.
-See `spine-godot-SConscript.diff` and `spine-godot-SpineAtlasResource.diff` in the project root for the exact diffs.
+> **Modification:** `modules/spine_godot/SCsub` line 5 & 8 — include path changed from
+> `#../spine_godot/spine-cpp/include` to `#modules/spine_godot/spine-cpp/include`
+> to match the new module directory layout.
 
 ## Usage
 
-### 1. Integrate into Godot Project
-
-Copy the following into your Godot project root:
-
-```
-your_project/
-├── fairygui_godot.gdextension
-└── bin/
-    └── libfairygui_godot.windows.debug.x86_64.dll  (platform-specific)
-```
-
-Ensure paths in `.gdextension` match your actual build output.
-
-### 2. Initialize GRoot and Load UI Packages
+### 1. Initialize GRoot and Load UI Packages
 
 FairyGUI components must be attached to `GRoot`. `GRoot` is a singleton — create it once when your scene is ready:
 
@@ -384,6 +383,5 @@ All classes below are registered in Godot (methods not yet exposed to GDScript):
 | `fairygui.FUIRichText` | `Node2D` | Rich text display |
 | `fairygui.FUISprite` | `Sprite2D` | Sprite display |
 | `fairygui.UIPackage` | `RefCounted` | Package manager |
-| `fairygui.PopupMenu` | `RefCounted` | Popup menu |
-
-> **Not registered:** `Window` (conflicts with `godot::Window`), `ScrollPane`/`Transition` (require custom constructors), `DrawNode` (internal class).
+| `fairygui.GPopupMenu` | `RefCounted` | Popup menu |
+> **Not registered:** `ScrollPane`/`Transition` (require custom constructors), `DrawNode` (internal class).

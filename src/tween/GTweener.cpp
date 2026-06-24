@@ -7,7 +7,7 @@
 NS_FGUI_BEGIN
 GTweener::GTweener() : _target(nullptr),
                        _refTarget(nullptr),
-                       _userData(nullptr),
+                       _userData(),
                        _onStart(nullptr),
                        _onUpdate(nullptr),
                        _onComplete(nullptr),
@@ -280,7 +280,7 @@ void GTweener::_reset()
     // // CC_SAFE_RELEASE removed - _refTarget managed by Godot ref counting;
     _target = nullptr;
     _refTarget = nullptr;
-    _userData = nullptr;
+    _userData = Variant();
     _path = nullptr;
     _onStart = _onUpdate = _onComplete = nullptr;
     _onComplete0 = nullptr;

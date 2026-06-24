@@ -19,9 +19,10 @@ env_fairygui.Append(CPPPATH=[
 ])
 
 # Spine runtime include path (spine_godot module at modules/spine_godot/)
-env_fairygui.Append(CPPPATH=["#modules/spine_godot"])
+env_fairygui.Append(CPPPATH=["#modules/spine_godot", "#modules/spine_godot/spine-cpp/include"])
 
 # Source files
+env_fairygui.add_source_files(env.modules_sources, "*.cpp")
 env_fairygui.add_source_files(env.modules_sources, "src/*.cpp")
 env_fairygui.add_source_files(env.modules_sources, "src/event/*.cpp")
 env_fairygui.add_source_files(env.modules_sources, "src/display/*.cpp")

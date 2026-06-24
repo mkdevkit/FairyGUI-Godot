@@ -45,7 +45,7 @@ public:
     const char* hitTestLink(const Vector2& worldPoint);
 
     static void _bind_methods();
-    virtual void _ready() override;
+    void _ready();
 
 protected:
 

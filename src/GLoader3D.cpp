@@ -15,7 +15,6 @@
 #endif
 
 #include "core/io/file_access.h"
-#include "core/variant/variant_utility.h"
 
 NS_FGUI_BEGIN
 
@@ -289,7 +288,7 @@ void GLoader3D::loadFromPackage()
     }
     else
     {
-        UtilityFunctions::print("FairyGUI: resource not found: ", _icon.c_str());
+        print_line("FairyGUI: resource not found: ", _icon.c_str());
     }
 }
 
@@ -305,19 +304,19 @@ void GLoader3D::loadContent()
         _contentItem = UIPackage::getItemByURL(_url);
         if (_contentItem == nullptr)
         {
-            UtilityFunctions::print("FairyGUI: resource not found: ", _url.c_str());
+            print_line("FairyGUI: resource not found: ", _url.c_str());
             return;
         }
     }
 
     if (_contentItem == nullptr)
     {
-        UtilityFunctions::print("FairyGUI: spine load failed, no content item");
+        print_line("FairyGUI: spine load failed, no content item");
         return;
     }
 
 #ifdef SPINE_GODOT_DISABLED
-    UtilityFunctions::print("FairyGUI: spine support is disabled");
+    print_line("FairyGUI: spine support is disabled");
     return;
 #else
     // Load spine skeleton from package
@@ -337,7 +336,7 @@ void GLoader3D::loadContent()
     Error skelErr = skeletonFileResource->load_from_file(skelFile.c_str());
     if (skelErr != Error::OK)
     {
-        UtilityFunctions::print("FairyGUI: failed to load skeleton file: ", skelFile.c_str());
+        print_line("FairyGUI: failed to load skeleton file: ", skelFile.c_str());
         return;
     }
 
@@ -347,7 +346,7 @@ void GLoader3D::loadContent()
     Error atlasErr = atlasResource->load_from_atlas_file(atlasFile.c_str());
     if (atlasErr != Error::OK)
     {
-        UtilityFunctions::print("FairyGUI: cannot load atlas file: ", atlasFile.c_str());
+        print_line("FairyGUI: cannot load atlas file: ", atlasFile.c_str());
         return;
     }
 

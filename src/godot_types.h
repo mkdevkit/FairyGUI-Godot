@@ -42,16 +42,11 @@
 #include "scene/resources/font.h"
 #include "scene/2d/sprite_2d.h"
 #include "scene/2d/camera_2d.h"
+#include "core/math/vector4.h"
 
-// These types are now directly available in the global namespace from the engine.
-// No type aliases needed.
-
-// Vector4 replacement for Vector4
-struct Vector4 {
-    float x, y, z, w;
-    Vector4() : x(0), y(0), z(0), w(0) {}
-    Vector4(float _x, float _y, float _z, float _w) : x(_x), y(_y), z(_z), w(_w) {}
-};
+// C++ does not typedef `Rect` in the engine, add an alias.
+// Code uses `Rect` as an alias for `Rect2`.
+using Rect = Rect2;
 
 // Empty string constant (replaces EMPTY_STRING)
 const std::string EMPTY_STRING;

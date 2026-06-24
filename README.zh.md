@@ -102,93 +102,92 @@ modules/fairygui/
 │           └── HtmlParser.h/HtmlParser.cpp    # HTML 到富文本解析器
 ```
 
+## 依赖
+
+本模块依赖 **spine_godot** 模块，位于 `modules/spine_godot/`。
+
+### Spine 运行时 (spine_godot)
+
+位于 `modules/spine_godot/`，为 `GLoader3D` 提供 Spine 2D 骨骼动画支持。
+
+```
+modules/spine_godot/
+├── config.py                           # 模块构建配置
+├── SCsub                               # SCons 构建脚本
+├── SpineSprite.h / .cpp                # Spine 精灵节点
+├── SpineSkeleton.h / .cpp              # 骨骼包装
+├── SpineAnimation.h / .cpp             # 动画包装
+├── SpineAnimationState.h / .cpp        # 动画状态包装
+├── SpineAtlasResource.h / .cpp         # Atlas 资源
+├── SpineSkeletonDataResource.h / .cpp  # 骨骼数据资源
+├── SpineSkeletonFileResource.h / .cpp  # 骨骼文件资源
+├── SpineTrackEntry.h / .cpp            # 轨道条目包装
+├── SpineCommon.h                       # 通用 spine 工具
+├── SpineConstant.h                     # Spine 常量
+├── spine-cpp/                          # Spine C++ 运行时 (来自 spine-runtimes)
+│   ├── include/spine/                  # 运行时头文件
+│   │   ├── Animation.h
+│   │   ├── Skeleton.h
+│   │   └── ...
+│   └── src/spine/                      # 运行时源文件
+│       ├── Animation.cpp
+│       └── ...
+└── ...
+```
+
+GLoader3D 通过以下方式引用 spine_godot 头文件：
+```cpp
+#include "SpineSprite.h"
+#include "SpineSkeleton.h"
+// 等等
+```
+
 ## Key Architecture Decisions
 
 | Cocos2dx Original | Godot Port |
 |---|---|
-| `cocos2d::Ref` | `godot::Node` / `godot::Object` |
-| `cocos2d::Sprite` / `cocos2d::DrawNode` | `RenderNode` (godot::Node2D with `_draw()`) |
-| `cocos2d::Vec2` / `cocos2d::Size` | `godot::Vector2` |
-| `cocos2d::Color4F` / `Color3B` | `godot::Color` |
-| `cocos2d::Texture2D*` | `godot::Ref<godot::Texture2D>` |
-| `cocos2d::Rect` | `godot::Rect2` |
-| `cocos2d::ui::Scale9Sprite` | Native `draw_texture_rect_region` in RenderNode |
-| `CREATE_FUNC` macro | `memnew` / Godot memory management |
-| `CC_SAFE_RETAIN` / `CC_SAFE_RELEASE` | Godot `Ref<>` reference counting |
+| `cocos2d::Ref` | `Node` / `Object` |
+| `cocos2d::Sprite` | `Sprite2D` / `FUISprite` |
+| `cocos2d::Vec2` / `cocos2d::Size` | `Vector2` |
+| `cocos2d::Color4F` / `Color3B` | `Color` |
+| `cocos2d::Texture2D*` | `Ref<Texture2D>` |
+| `cocos2d::Rect` | `Rect2` (别名 `Rect`) |
+| `cocos2d::ui::Scale9Sprite` | 原生 `FUISprite` 九宫格 |
+| `CREATE_FUNC` 宏 | `memnew` / Godot 内存管理 |
+| `CC_SAFE_RETAIN` / `CC_SAFE_RELEASE` | Godot `Ref<>` 引用计数 |
 
-## 构建指南
+## 构建
 
-### 前置条件
+FairyGUI 作为 **Godot 内置模块**编译 — 无需独立构建步骤，也无需 godot-cpp。
 
-- Python 3.x + SCons (`pip install scons`)
-- Godot Engine 4.x
-- godot-cpp（克隆到 `./godot-cpp/` 目录）
-- MinGW-w64（可选，用于 `use_mingw=yes`）
+构建含 fairygui 模块的 Godot：
 
-### 构建命令
-
-| 命令 | 说明 |
-|---|---|
-| `scons` | 使用默认工具链构建（自动检测平台/架构） |
-| `scons use_mingw=yes` | 使用 MinGW-w64 构建（静态链接，默认路径 `D:\GNU\mingw64\bin`） |
-| `scons vsproj=yes` | 仅生成 VS 解决方案（不编译）：`build/fairygui_godot.sln` |
-| `scons debug=yes` | MSVC 调试构建：`/Zi /Od /DEBUG`（生成 .pdb） |
-
-标准 godot-cpp 参数（`p=<platform>`、`arch=<arch>`、`dev_build=yes`、`target=<debug/release>`）会透传给 `godot-cpp/SConstruct`。
-
-#### 自定义 MinGW 路径
-
-设置 `MINGW_BIN` 环境变量覆盖默认路径：
-
-```powershell
-$env:MINGW_BIN = "C:\msys64\mingw64\bin"
-scons use_mingw=yes
+```sh
+scons platform=windows target=editor dev_build=yes
 ```
 
-### 构建产物
+Godot 构建系统通过 `config.py` 自动发现模块。
 
-构建输出为 `build/libfairygui_godot.dll`（Windows）或 `build/libfairygui_godot.so`（Linux）。
-
-将 `fairygui_godot.gdextension` + 构建产物复制到你的 Godot 项目中，并按需调整 `.gdextension` 中的路径。
-
-#### Godot 4.5+ 兼容性
-
-升级 godot-cpp 以匹配新版 Godot 时，可能需要修改源码。已知改动：
-
-- `SpineAtlasResource.cpp`：`JSON*` → `Ref<JSON>` API 变更
-- `GLoader3D.cpp`：需添加 `#include "spine_godot/SpineTrackEntry.h"` 以满足 `Ref<T>` 析构
-- 包文件格式变化可能需要在 FairyGUI 编辑器中重新导出 `.fui`
+`SCsub` 添加的包含路径：
+- `src/` 及其所有子目录 (event, display, gears, tween, utils, utils/html, controller_action)
+- `modules/spine_godot/` (Spine 封装头文件)
+- `modules/spine_godot/spine-cpp/include` (Spine C++ 运行时头文件)
 
 ### Spine 运行时集成
 
-FairyGUI-Godot 通过 GLoader3D 支持 Spine 2D 骨骼动画。Spine 运行时源码来自 [EsotericSoftware/spine-runtimes](https://github.com/EsotericSoftware/spine-runtimes)，以静态库形式编译并链接到最终的 GDExtension 中。
+Spine 支持由 `spine_godot` 模块 (`modules/spine_godot/`) 处理。
 
-**对上游 spine-godot 源码的修改：**
+- `spine-cpp/` 包含来自 [EsotericSoftware/spine-runtimes](https://github.com/EsotericSoftware/spine-runtimes) 的上游 Spine C++ 运行时
+- `spine_godot` 的 SCsub 同时编译 `spine-cpp/src/spine/*.cpp` 和自己的 `*.cpp` 文件
+- Fairygui 的 `GLoader3D` 直接包含 spine_godot 头文件（无需 godot-cpp 前缀）
 
-| 文件 | 改动 |
-|---|---|
-| `spine-runtimes/spine-godot/SConscript` | **新建** — 接收 fairygui 的构建环境，将 `spine-cpp` + `spine_godot` 编译为静态库 |
-| `spine-runtimes/spine-godot/spine_godot/SpineAtlasResource.cpp` | `JSON*` → `Ref<JSON>` 适配新版 godot-cpp API |
+> **修改说明：** `modules/spine_godot/SCsub` 第5行和第8行 — include 路径从
+> `#../spine_godot/spine-cpp/include` 改为 `#modules/spine_godot/spine-cpp/include`
+> 以适配新的模块目录布局。
 
-以上修改在 diff 目录中查看。
-详细 diff 文件见项目根目录下的 `spine-godot-SConscript.diff` 和 `spine-godot-SpineAtlasResource.diff`。
+## 使用
 
-## Usage
-
-### 1. 集成到 Godot 项目
-
-将以下文件复制到你的 Godot 项目根目录：
-
-```
-your_project/
-├── fairygui_godot.gdextension
-└── bin/
-    └── libfairygui_godot.windows.debug.x86_64.dll  (按平台选择)
-```
-
-`.gdextension` 文件中的 `entry_symbol` 和 `libraries` 路径需与实际构建产物一致。
-
-### 2. 初始化 GRoot 并加载 UI 包
+### 1. 初始化 GRoot 并加载 UI 包
 
 FairyGUI 组件需要挂载在 `GRoot` 上。`GRoot` 是单例，通常在场景就绪时创建一次：
 
@@ -225,11 +224,10 @@ var btn = UIPackage.createObjectFromURL("ui://YourPackage/MyButton")
 > "Parent node is busy setting up children" 错误。
 > 这种情况请使用 `GRoot.createDeferred(get_tree())`，它会在下一帧自动挂载。
 > 如果是点击按钮、计时器等非初始化时机添加子节点，则直接 `addChild()` 即可。
-> 也可使用 `GRoot.getInstance().add_child.call_deferred(comp)` 手动推迟。
 
 > **注意**：如果从 FairyGUI 编辑器导出包时勾选了**分支**（branch）功能，组件名称会被加上分支 ID 前缀，例如 `7iys1/Menu`。此时 `createObject` 需要传入带前缀的名称。如果不需要分支功能，导出时取消勾选即可。
 
-### 3. 常见 Widget 操作
+### 2. 常见 Widget 操作
 
 ```gdscript
 # 获取/设置位置和大小
@@ -282,7 +280,7 @@ slider.value = 0.5
 slider.max = 1.0
 ```
 
-### 4. 事件监听
+### 3. 事件监听
 
 ```gdscript
 # 点击事件
@@ -318,14 +316,14 @@ if ctrl:
     print(ctrl.previousIndex)        # 上一次的索引
 ```
 
-### 6. 拖拽
+### 5. 拖拽
 
 ```gdscript
 obj.draggable = true
 obj.setDragBounds(Rect2(0, 0, 500, 400))
 ```
 
-### 7. Relation（关联布局）
+### 6. Relation（关联布局）
 
 ```gdscript
 # 使子节点与父节点保持相对布局
@@ -333,7 +331,7 @@ child.addRelation(parent, fairygui.RelationType.Width_Width)
 child.addRelation(parent, fairygui.RelationType.Height_Height)
 ```
 
-### 8. Transition（过渡动画）
+### 7. Transition（过渡动画）
 
 通过 FairyGUI 编辑器设计过渡动画，运行时播放：
 
@@ -344,7 +342,7 @@ comp.getTransition("hide").play(func():
 )
 ```
 
-### 9. 已注册的 Godot 类
+### 8. 已注册的 Godot 类
 
 以下类已在 Godot 中注册（方法尚未暴露到 GDScript）：
 
@@ -382,6 +380,5 @@ comp.getTransition("hide").play(func():
 | `fairygui.FUIRichText` | `Node2D` | 富文本显示 |
 | `fairygui.FUISprite` | `Sprite2D` | 精灵显示 |
 | `fairygui.UIPackage` | `RefCounted` | 包管理器 |
-| `fairygui.PopupMenu` | `RefCounted` | 弹出菜单 |
-
-> **未注册：** `Window`（与 `godot::Window` 冲突）、`ScrollPane`/`Transition`（需要自定义构造函数）、`DrawNode`（内部类）。
+| `fairygui.GPopupMenu` | `RefCounted` | 弹出菜单 |
+> **未注册：** `ScrollPane`/`Transition`（需要自定义构造函数）、`DrawNode`（内部类）。

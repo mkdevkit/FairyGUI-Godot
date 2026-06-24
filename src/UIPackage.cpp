@@ -7,7 +7,6 @@
 #include "core/io/image.h"
 #include "scene/resources/image_texture.h"
 #include "core/io/file_access.h"
-#include "core/variant/variant_utility.h"
 
 NS_FGUI_BEGIN
 
@@ -108,7 +107,7 @@ UIPackage* UIPackage::addPackage(const string& assetPath)
     Ref<FileAccess> file = FileAccess::open(String(fuiPath.c_str()), FileAccess::READ);
     if (file.is_null() || !file->is_open())
     {
-        UtilityFunctions::print("FairyGUI: cannot load package from '", assetPath.c_str(), "'");
+        print_line("FairyGUI: cannot load package from '", assetPath.c_str(), "'");
         return nullptr;
     }
 
@@ -156,7 +155,7 @@ void UIPackage::removePackage(const string& packageIdOrName)
         pkg->unreference(); // matches reference() in addPackage
     }
     else
-        UtilityFunctions::print("FairyGUI: invalid package name or id: ", packageIdOrName.c_str());
+        print_line("FairyGUI: invalid package name or id: ", packageIdOrName.c_str());
 }
 
 void UIPackage::removeAllPackages()
@@ -176,7 +175,7 @@ GObject* UIPackage::createObject(const string& pkgName, const string& resName)
         return pkg->createObject(resName);
     else
     {
-        UtilityFunctions::print("FairyGUI: package not found - ", pkgName.c_str());
+        print_line("FairyGUI: package not found - ", pkgName.c_str());
         return nullptr;
     }
 }
@@ -188,7 +187,7 @@ GObject* UIPackage::createObjectFromURL(const string& url)
         return pi->owner->createObject(pi);
     else
     {
-        UtilityFunctions::print("FairyGUI: resource not found - ", url.c_str());
+        print_line("FairyGUI: resource not found - ", url.c_str());
         return nullptr;
     }
 }
@@ -314,7 +313,7 @@ GObject* UIPackage::createObject(const string& resName)
     PackageItem* pi = getItemByName(resName);
     if (!pi)
     {
-        UtilityFunctions::print("FairyGUI: resource not found - ", resName.c_str(), " in ", _name.c_str());
+        print_line("FairyGUI: resource not found - ", resName.c_str(), " in ", _name.c_str());
         return nullptr;
     }
 
@@ -337,7 +336,7 @@ bool UIPackage::loadPackage(ByteBuffer* buffer)
 {
     if (buffer->readUint() != 0x46475549)
     {
-        UtilityFunctions::print("FairyGUI: old package format found in '", _assetPath.c_str(), "'");
+        print_line("FairyGUI: old package format found in '", _assetPath.c_str(), "'");
         return false;
     }
 
@@ -612,7 +611,7 @@ void UIPackage::loadAtlas(PackageItem* item)
     if (err != Error::OK)
     {
         item->texture = _emptyTexture;
-        UtilityFunctions::print("FairyGUI: texture '", item->file.c_str(), "' not found in ", _name.c_str());
+        print_line("FairyGUI: texture '", item->file.c_str(), "' not found in ", _name.c_str());
         return;
     }
 

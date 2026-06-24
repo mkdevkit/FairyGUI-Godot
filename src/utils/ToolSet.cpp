@@ -66,7 +66,7 @@ int ToolSet::findInStringArray(const std::vector<std::string>& arr, const std::s
 
 bool ToolSet::isFileExist(const std::string& fileName)
 {
-    return FileAccess::file_exists(String(fileName.c_str()));
+    return FileAccess::exists(String(fileName.c_str()));
 }
 
 FastSplitter::FastSplitter() : data(nullptr), dataLength(-1), delimiter('\0')

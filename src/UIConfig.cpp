@@ -30,7 +30,7 @@ void UIConfig::registerFont(const std::string& aliasName, const std::string& rea
 {
     FontNameItem fi;
     fi.name = realName;
-    fi.ttf = FileAccess::file_exists(String(realName.c_str()));
+    fi.ttf = FileAccess::exists(String(realName.c_str()));
     
     _fontNames[aliasName] = fi;
 }

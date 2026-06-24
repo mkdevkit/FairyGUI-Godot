@@ -56,7 +56,7 @@ public:
     void set_content_size(const Vector2& size);
 
     static void _bind_methods();
-    virtual void _draw() override;
+    void _draw();
 
 protected:
     void _notification(int p_what);

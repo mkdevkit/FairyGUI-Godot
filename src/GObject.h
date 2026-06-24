@@ -198,7 +198,7 @@ protected:
 
     virtual void _enter_tree();
     virtual void _exit_tree();
-    virtual void _ready();
+    void _ready();
     virtual void _process(double delta);
 
     virtual void setup_beforeAdd(ByteBuffer* buffer, int beginPos);

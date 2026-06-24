@@ -287,7 +287,7 @@ void FUISprite::drawFillVertical()
 
 void FUISprite::drawFillRadial()
 {
-    float angle = 2.0f * Math_PI * (_fillClockwise ? (1.0f - _fillAmount) : _fillAmount);
+    float angle = 2.0f * Math::PI * (_fillClockwise ? (1.0f - _fillAmount) : _fillAmount);
 
     Vector2 midpoint(0.5f, 0.5f);
     Vector2 topMid(0.5f, 0.0f);
