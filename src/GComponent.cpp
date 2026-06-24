@@ -420,7 +420,8 @@ void GComponent::removeController(GController* c)
     auto it = std::find(_controllers.begin(), _controllers.end(), c);
     if (it == _controllers.end())
         return;
-
+    
+    c->setParent(nullptr);
     applyController(c);
     _controllers.erase(it);
 }
@@ -1190,6 +1191,7 @@ void GComponent::constructFromResource(std::vector<GObject*>* objectPool, int po
         GController* controller = ref.ptr();
         controller->reference();
         _controllers.push_back(controller);
+        controller->setParent(this);
         controller->setup(buffer);
         buffer->setPos(nextPos);
     }
