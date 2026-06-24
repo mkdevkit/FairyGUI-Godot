@@ -464,22 +464,22 @@ void GButton::_bind_methods()
 
     ClassDB::bind_method(D_METHOD("setTitleColor", "color"), &GButton::setTitleColor);
     ClassDB::bind_method(D_METHOD("getTitleColor"), &GButton::getTitleColor);
-    // ADD_PROPERTY(PropertyInfo(Variant::COLOR, "titleColor"), "setTitleColor", "getTitleColor");
+    ADD_PROPERTY(PropertyInfo(Variant::COLOR, "titleColor"), "setTitleColor", "getTitleColor");
 
     ClassDB::bind_method(D_METHOD("setTitleFontSize", "size"), &GButton::setTitleFontSize);
     ClassDB::bind_method(D_METHOD("getTitleFontSize"), &GButton::getTitleFontSize);
-    // ADD_PROPERTY(PropertyInfo(Variant::INT, "titleFontSize"), "setTitleFontSize", "getTitleFontSize");
+    ADD_PROPERTY(PropertyInfo(Variant::INT, "titleFontSize"), "setTitleFontSize", "getTitleFontSize");
 
     ClassDB::bind_method(D_METHOD("setSelected", "value"), &GButton::setSelected);
     ClassDB::bind_method(D_METHOD("isSelected"), &GButton::isSelected);
-    // ADD_PROPERTY(PropertyInfo(Variant::BOOL, "selected"), "setSelected", "isSelected");
+    ADD_PROPERTY(PropertyInfo(Variant::BOOL, "selected"), "setSelected", "isSelected");
 
     ClassDB::bind_method(D_METHOD("getRelatedController"), &GButton::getRelatedController);
     ClassDB::bind_method(D_METHOD("setRelatedController", "controller"), &GButton::setRelatedController);
 
     ClassDB::bind_method(D_METHOD("setChangeStateOnClick", "value"), &GButton::setChangeStateOnClick);
     ClassDB::bind_method(D_METHOD("isChangeStateOnClick"), &GButton::isChangeStateOnClick);
-    // ADD_PROPERTY(PropertyInfo(Variant::BOOL, "changeStateOnClick"), "setChangeStateOnClick", "isChangeStateOnClick");
+    ADD_PROPERTY(PropertyInfo(Variant::BOOL, "changeStateOnClick"), "setChangeStateOnClick", "isChangeStateOnClick");
 }
 
 void GButton::gd_setTitle(const String& value) { setTitle(value.utf8().get_data()); }

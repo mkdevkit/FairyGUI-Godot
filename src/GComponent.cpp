@@ -1398,15 +1398,15 @@ void GComponent::_bind_methods()
 
     ClassDB::bind_method(D_METHOD("setOpaque", "value"), &GComponent::setOpaque);
     ClassDB::bind_method(D_METHOD("getOpaque"), &GComponent::getOpaque);
-    // ADD_PROPERTY(PropertyInfo(Variant::BOOL, "opaque"), "setOpaque", "getOpaque");
+    ADD_PROPERTY(PropertyInfo(Variant::BOOL, "opaque"), "setOpaque", "getOpaque");
 
     ClassDB::bind_method(D_METHOD("setViewWidth", "value"), &GComponent::setViewWidth);
     ClassDB::bind_method(D_METHOD("getViewWidth"), &GComponent::getViewWidth);
-    // ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "viewWidth"), "setViewWidth", "getViewWidth");
+    ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "viewWidth"), "setViewWidth", "getViewWidth");
 
     ClassDB::bind_method(D_METHOD("setViewHeight", "value"), &GComponent::setViewHeight);
     ClassDB::bind_method(D_METHOD("getViewHeight"), &GComponent::getViewHeight);
-    // ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "viewHeight"), "setViewHeight", "getViewHeight");
+    ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "viewHeight"), "setViewHeight", "getViewHeight");
 }
 
 void GComponent::gd_removeChildAt(int index) { removeChildAt(index); }

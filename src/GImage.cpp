@@ -165,27 +165,27 @@ void GImage::_bind_methods()
 {
     ClassDB::bind_method(D_METHOD("setFlip", "flip"), &GImage::gd_setFlip);
     ClassDB::bind_method(D_METHOD("getFlip"), &GImage::gd_getFlip);
-    // ADD_PROPERTY(PropertyInfo(Variant::INT, "flip"), "setFlip", "getFlip");
+    ADD_PROPERTY(PropertyInfo(Variant::INT, "flip"), "setFlip", "getFlip");
 
     ClassDB::bind_method(D_METHOD("setColor", "color"), &GImage::setColor);
     ClassDB::bind_method(D_METHOD("getColor"), &GImage::getColor);
-    // ADD_PROPERTY(PropertyInfo(Variant::COLOR, "imageColor"), "setColor", "getColor");
+    ADD_PROPERTY(PropertyInfo(Variant::COLOR, "imageColor"), "setColor", "getColor");
 
     ClassDB::bind_method(D_METHOD("setFillMethod", "method"), &GImage::gd_setFillMethod);
     ClassDB::bind_method(D_METHOD("getFillMethod"), &GImage::gd_getFillMethod);
-    // ADD_PROPERTY(PropertyInfo(Variant::INT, "fillMethod"), "setFillMethod", "getFillMethod");
+    ADD_PROPERTY(PropertyInfo(Variant::INT, "fillMethod"), "setFillMethod", "getFillMethod");
 
     ClassDB::bind_method(D_METHOD("setFillOrigin", "origin"), &GImage::gd_setFillOrigin);
     ClassDB::bind_method(D_METHOD("getFillOrigin"), &GImage::gd_getFillOrigin);
-    // ADD_PROPERTY(PropertyInfo(Variant::INT, "fillOrigin"), "setFillOrigin", "getFillOrigin");
+    ADD_PROPERTY(PropertyInfo(Variant::INT, "fillOrigin"), "setFillOrigin", "getFillOrigin");
 
     ClassDB::bind_method(D_METHOD("setFillClockwise", "value"), &GImage::setFillClockwise);
     ClassDB::bind_method(D_METHOD("isFillClockwise"), &GImage::isFillClockwise);
-    // ADD_PROPERTY(PropertyInfo(Variant::BOOL, "fillClockwise"), "setFillClockwise", "isFillClockwise");
+    ADD_PROPERTY(PropertyInfo(Variant::BOOL, "fillClockwise"), "setFillClockwise", "isFillClockwise");
 
     ClassDB::bind_method(D_METHOD("setFillAmount", "amount"), &GImage::setFillAmount);
     ClassDB::bind_method(D_METHOD("getFillAmount"), &GImage::getFillAmount);
-    // ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "fillAmount", PROPERTY_HINT_RANGE, "0,1,0.01"), "setFillAmount", "getFillAmount");
+    ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "fillAmount", PROPERTY_HINT_RANGE, "0,1,0.01"), "setFillAmount", "getFillAmount");
 }
 
 void GImage::gd_setFillMethod(int value) { setFillMethod(static_cast<FillMethod>(value)); }

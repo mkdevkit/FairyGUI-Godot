@@ -203,7 +203,7 @@ void GController::_bind_methods()
 {
     ClassDB::bind_method(D_METHOD("setSelectedIndex", "index"), &GController::gd_setSelectedIndex);
     ClassDB::bind_method(D_METHOD("getSelectedIndex"), &GController::getSelectedIndex);
-    // ADD_PROPERTY(PropertyInfo(Variant::INT, "selectedIndex"), "setSelectedIndex", "getSelectedIndex");
+    ADD_PROPERTY(PropertyInfo(Variant::INT, "selectedIndex"), "setSelectedIndex", "getSelectedIndex");
 
     ClassDB::bind_method(D_METHOD("getPageCount"), &GController::getPageCount);
     ClassDB::bind_method(D_METHOD("getPreviousPage"), &GController::gd_getPreviousPage);

@@ -38,23 +38,23 @@ void FUIContainer::_bind_methods()
 {
     ClassDB::bind_method(D_METHOD("setClippingEnabled", "value"), &FUIContainer::setClippingEnabled);
     ClassDB::bind_method(D_METHOD("isClippingEnabled"), &FUIContainer::isClippingEnabled);
-    // ADD_PROPERTY(PropertyInfo(Variant::BOOL, "clippingEnabled"), "setClippingEnabled", "isClippingEnabled");
+    ADD_PROPERTY(PropertyInfo(Variant::BOOL, "clippingEnabled"), "setClippingEnabled", "isClippingEnabled");
 
     ClassDB::bind_method(D_METHOD("setClippingRegion", "region"), &FUIContainer::setClippingRegion);
     ClassDB::bind_method(D_METHOD("getClippingRegion"), &FUIContainer::getClippingRegion);
-    // ADD_PROPERTY(PropertyInfo(Variant::RECT2, "clippingRegion"), "setClippingRegion", "getClippingRegion");
+    ADD_PROPERTY(PropertyInfo(Variant::RECT2, "clippingRegion"), "setClippingRegion", "getClippingRegion");
 
     ClassDB::bind_method(D_METHOD("setStencil", "stencil"), &FUIContainer::setStencil);
     ClassDB::bind_method(D_METHOD("getStencil"), &FUIContainer::getStencil);
-    // ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "stencil", PROPERTY_HINT_NODE_TYPE, "Node"), "setStencil", "getStencil");
+    ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "stencil", PROPERTY_HINT_NODE_TYPE, "Node"), "setStencil", "getStencil");
 
     ClassDB::bind_method(D_METHOD("setAlphaThreshold", "threshold"), &FUIContainer::setAlphaThreshold);
     ClassDB::bind_method(D_METHOD("getAlphaThreshold"), &FUIContainer::getAlphaThreshold);
-    // ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "alphaThreshold"), "setAlphaThreshold", "getAlphaThreshold");
+    ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "alphaThreshold"), "setAlphaThreshold", "getAlphaThreshold");
 
     ClassDB::bind_method(D_METHOD("setInverted", "inverted"), &FUIContainer::setInverted);
     ClassDB::bind_method(D_METHOD("isInverted"), &FUIContainer::isInverted);
-    // ADD_PROPERTY(PropertyInfo(Variant::BOOL, "inverted"), "setInverted", "isInverted");
+    ADD_PROPERTY(PropertyInfo(Variant::BOOL, "inverted"), "setInverted", "isInverted");
 
     ClassDB::bind_method(D_METHOD("_deferred_redraw_all"), &FUIContainer::_deferred_redraw_all);
 }

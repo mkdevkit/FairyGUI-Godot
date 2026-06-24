@@ -290,19 +290,19 @@ void GSlider::_bind_methods()
 {
     ClassDB::bind_method(D_METHOD("setMin", "value"), &GSlider::setMin);
     ClassDB::bind_method(D_METHOD("getMin"), &GSlider::getMin);
-    // ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "min"), "setMin", "getMin");
+    ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "min"), "setMin", "getMin");
 
     ClassDB::bind_method(D_METHOD("setMax", "value"), &GSlider::setMax);
     ClassDB::bind_method(D_METHOD("getMax"), &GSlider::getMax);
-    // ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "max"), "setMax", "getMax");
+    ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "max"), "setMax", "getMax");
 
     ClassDB::bind_method(D_METHOD("set_value", "value"), &GSlider::setValue);
     ClassDB::bind_method(D_METHOD("getValue"), &GSlider::getValue);
-    // ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "value"), "setValue", "getValue");
+    ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "value"), "setValue", "getValue");
 
     ClassDB::bind_method(D_METHOD("setWholeNumbers", "value"), &GSlider::setWholeNumbers);
     ClassDB::bind_method(D_METHOD("getWholeNumbers"), &GSlider::getWholeNumbers);
-    // ADD_PROPERTY(PropertyInfo(Variant::BOOL, "wholeNumbers"), "setWholeNumbers", "getWholeNumbers");
+    ADD_PROPERTY(PropertyInfo(Variant::BOOL, "wholeNumbers"), "setWholeNumbers", "getWholeNumbers");
 }
 
 NS_FGUI_END

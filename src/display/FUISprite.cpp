@@ -47,53 +47,53 @@ void FUISprite::_bind_methods()
 
     ClassDB::bind_method(D_METHOD("setScaleByTile", "value"), &FUISprite::setScaleByTile);
     ClassDB::bind_method(D_METHOD("isScaleByTile"), &FUISprite::isScaleByTile);
-    // ADD_PROPERTY(PropertyInfo(Variant::BOOL, "scaleByTile"), "setScaleByTile", "isScaleByTile");
+    ADD_PROPERTY(PropertyInfo(Variant::BOOL, "scaleByTile"), "setScaleByTile", "isScaleByTile");
 
     ClassDB::bind_method(D_METHOD("setGrayed", "value"), &FUISprite::setGrayed);
     ClassDB::bind_method(D_METHOD("isGrayed"), &FUISprite::isGrayed);
-    // ADD_PROPERTY(PropertyInfo(Variant::BOOL, "grayed"), "setGrayed", "isGrayed");
+    ADD_PROPERTY(PropertyInfo(Variant::BOOL, "grayed"), "setGrayed", "isGrayed");
 
     // Wrapped Sprite2D properties
     ClassDB::bind_method(D_METHOD("setFlippedH", "value"), &FUISprite::setFlippedH);
     ClassDB::bind_method(D_METHOD("isFlippedH"), &FUISprite::isFlippedH);
-    // ADD_PROPERTY(PropertyInfo(Variant::BOOL, "flippedH"), "setFlippedH", "isFlippedH");
+    ADD_PROPERTY(PropertyInfo(Variant::BOOL, "flippedH"), "setFlippedH", "isFlippedH");
 
     ClassDB::bind_method(D_METHOD("setFlippedV", "value"), &FUISprite::setFlippedV);
     ClassDB::bind_method(D_METHOD("isFlippedV"), &FUISprite::isFlippedV);
-    // ADD_PROPERTY(PropertyInfo(Variant::BOOL, "flippedV"), "setFlippedV", "isFlippedV");
+    ADD_PROPERTY(PropertyInfo(Variant::BOOL, "flippedV"), "setFlippedV", "isFlippedV");
 
     ClassDB::bind_method(D_METHOD("setColor", "color"), &FUISprite::setColor);
     ClassDB::bind_method(D_METHOD("getColor"), &FUISprite::getColor);
-    // ADD_PROPERTY(PropertyInfo(Variant::COLOR, "color"), "setColor", "getColor");
+    ADD_PROPERTY(PropertyInfo(Variant::COLOR, "color"), "setColor", "getColor");
 
     ClassDB::bind_method(D_METHOD("setRegion", "rect"), &FUISprite::setRegion);
     ClassDB::bind_method(D_METHOD("getRegion"), &FUISprite::getRegion);
-    // ADD_PROPERTY(PropertyInfo(Variant::RECT2, "region"), "setRegion", "getRegion");
+    ADD_PROPERTY(PropertyInfo(Variant::RECT2, "region"), "setRegion", "getRegion");
 
     ClassDB::bind_method(D_METHOD("setRegionEnabled", "value"), &FUISprite::setRegionEnabled);
     ClassDB::bind_method(D_METHOD("isRegionEnabled"), &FUISprite::isRegionEnabled);
-    // ADD_PROPERTY(PropertyInfo(Variant::BOOL, "regionEnabled"), "setRegionEnabled", "isRegionEnabled");
+    ADD_PROPERTY(PropertyInfo(Variant::BOOL, "regionEnabled"), "setRegionEnabled", "isRegionEnabled");
 
     ClassDB::bind_method(D_METHOD("setTexture", "texture"), &FUISprite::setTexture);
     ClassDB::bind_method(D_METHOD("getTexture"), &FUISprite::getTexture);
-    // ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "texture", PROPERTY_HINT_RESOURCE_TYPE, "Texture2D"), "setTexture", "getTexture");
+    ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "texture", PROPERTY_HINT_RESOURCE_TYPE, "Texture2D"), "setTexture", "getTexture");
 
     // Fill properties
     ClassDB::bind_method(D_METHOD("setFillMethod", "method"), &FUISprite::gd_setFillMethod);
     ClassDB::bind_method(D_METHOD("getFillMethod"), &FUISprite::gd_getFillMethod);
-    // ADD_PROPERTY(PropertyInfo(Variant::INT, "fillMethod"), "setFillMethod", "getFillMethod");
+    ADD_PROPERTY(PropertyInfo(Variant::INT, "fillMethod"), "setFillMethod", "getFillMethod");
 
     ClassDB::bind_method(D_METHOD("setFillOrigin", "origin"), &FUISprite::gd_setFillOrigin);
     ClassDB::bind_method(D_METHOD("getFillOrigin"), &FUISprite::gd_getFillOrigin);
-    // ADD_PROPERTY(PropertyInfo(Variant::INT, "fillOrigin"), "setFillOrigin", "getFillOrigin");
+    ADD_PROPERTY(PropertyInfo(Variant::INT, "fillOrigin"), "setFillOrigin", "getFillOrigin");
 
     ClassDB::bind_method(D_METHOD("setFillClockwise", "value"), &FUISprite::setFillClockwise);
     ClassDB::bind_method(D_METHOD("isFillClockwise"), &FUISprite::isFillClockwise);
-    // ADD_PROPERTY(PropertyInfo(Variant::BOOL, "fillClockwise"), "setFillClockwise", "isFillClockwise");
+    ADD_PROPERTY(PropertyInfo(Variant::BOOL, "fillClockwise"), "setFillClockwise", "isFillClockwise");
 
     ClassDB::bind_method(D_METHOD("setFillAmount", "amount"), &FUISprite::setFillAmount);
     ClassDB::bind_method(D_METHOD("getFillAmount"), &FUISprite::getFillAmount);
-    // ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "fillAmount", PROPERTY_HINT_RANGE, "0,1,0.01"), "setFillAmount", "getFillAmount");
+    ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "fillAmount", PROPERTY_HINT_RANGE, "0,1,0.01"), "setFillAmount", "getFillAmount");
 }
 
 FUISprite* FUISprite::create()

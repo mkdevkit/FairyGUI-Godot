@@ -596,49 +596,49 @@ void GLoader::_bind_methods()
 
     ClassDB::bind_method(D_METHOD("setAlign", "align"), &GLoader::gd_setAlign);
     ClassDB::bind_method(D_METHOD("getAlign"), &GLoader::gd_getAlign);
-    // ADD_PROPERTY(PropertyInfo(Variant::INT, "align"), "setAlign", "getAlign");
+    ADD_PROPERTY(PropertyInfo(Variant::INT, "align"), "setAlign", "getAlign");
 
     ClassDB::bind_method(D_METHOD("setVerticalAlign", "align"), &GLoader::gd_setVerticalAlign);
     ClassDB::bind_method(D_METHOD("getVerticalAlign"), &GLoader::gd_getVerticalAlign);
-    // ADD_PROPERTY(PropertyInfo(Variant::INT, "verticalAlign"), "setVerticalAlign", "getVerticalAlign");
+    ADD_PROPERTY(PropertyInfo(Variant::INT, "verticalAlign"), "setVerticalAlign", "getVerticalAlign");
 
     ClassDB::bind_method(D_METHOD("setAutoSize", "value"), &GLoader::setAutoSize);
     ClassDB::bind_method(D_METHOD("getAutoSize"), &GLoader::getAutoSize);
-    // ADD_PROPERTY(PropertyInfo(Variant::BOOL, "autoSize"), "setAutoSize", "getAutoSize");
+    ADD_PROPERTY(PropertyInfo(Variant::BOOL, "autoSize"), "setAutoSize", "getAutoSize");
 
     ClassDB::bind_method(D_METHOD("setFillType", "fill"), &GLoader::gd_setFillType);
     ClassDB::bind_method(D_METHOD("getFillType"), &GLoader::gd_getFillType);
-    // ADD_PROPERTY(PropertyInfo(Variant::INT, "fill"), "setFillType", "getFillType");
+    ADD_PROPERTY(PropertyInfo(Variant::INT, "fill"), "setFillType", "getFillType");
 
     ClassDB::bind_method(D_METHOD("setShrinkOnly", "value"), &GLoader::setShrinkOnly);
     ClassDB::bind_method(D_METHOD("isShrinkOnly"), &GLoader::isShrinkOnly);
-    // ADD_PROPERTY(PropertyInfo(Variant::BOOL, "shrinkOnly"), "setShrinkOnly", "isShrinkOnly");
+    ADD_PROPERTY(PropertyInfo(Variant::BOOL, "shrinkOnly"), "setShrinkOnly", "isShrinkOnly");
 
     ClassDB::bind_method(D_METHOD("setPlaying", "value"), &GLoader::setPlaying);
     ClassDB::bind_method(D_METHOD("isPlaying"), &GLoader::isPlaying);
-    // ADD_PROPERTY(PropertyInfo(Variant::BOOL, "playing"), "setPlaying", "isPlaying");
+    ADD_PROPERTY(PropertyInfo(Variant::BOOL, "playing"), "setPlaying", "isPlaying");
 
     ClassDB::bind_method(D_METHOD("setFrame", "frame"), &GLoader::setFrame);
     ClassDB::bind_method(D_METHOD("getFrame"), &GLoader::getFrame);
-    // ADD_PROPERTY(PropertyInfo(Variant::INT, "frame"), "setFrame", "getFrame");
+    ADD_PROPERTY(PropertyInfo(Variant::INT, "frame"), "setFrame", "getFrame");
 
     ClassDB::bind_method(D_METHOD("setFillMethod", "method"), &GLoader::gd_setFillMethod);
     ClassDB::bind_method(D_METHOD("getFillMethod"), &GLoader::gd_getFillMethod);
-    // ADD_PROPERTY(PropertyInfo(Variant::INT, "fillMethod"), "setFillMethod", "getFillMethod");
+    ADD_PROPERTY(PropertyInfo(Variant::INT, "fillMethod"), "setFillMethod", "getFillMethod");
 
     ClassDB::bind_method(D_METHOD("setFillOrigin", "origin"), &GLoader::gd_setFillOrigin);
     ClassDB::bind_method(D_METHOD("getFillOrigin"), &GLoader::gd_getFillOrigin);
-    // ADD_PROPERTY(PropertyInfo(Variant::INT, "fillOrigin"), "setFillOrigin", "getFillOrigin");
+    ADD_PROPERTY(PropertyInfo(Variant::INT, "fillOrigin"), "setFillOrigin", "getFillOrigin");
 
     ClassDB::bind_method(D_METHOD("setFillAmount", "amount"), &GLoader::setFillAmount);
     ClassDB::bind_method(D_METHOD("getFillAmount"), &GLoader::getFillAmount);
-    // ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "fillAmount", PROPERTY_HINT_RANGE, "0,1,0.01"), "setFillAmount", "getFillAmount");
+    ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "fillAmount", PROPERTY_HINT_RANGE, "0,1,0.01"), "setFillAmount", "getFillAmount");
 
     ClassDB::bind_method(D_METHOD("getComponent"), &GLoader::getComponent);
 
     ClassDB::bind_method(D_METHOD("setColor", "color"), &GLoader::setColor);
     ClassDB::bind_method(D_METHOD("getColor"), &GLoader::getColor);
-    // ADD_PROPERTY(PropertyInfo(Variant::COLOR, "imageColor"), "setColor", "getColor");
+    ADD_PROPERTY(PropertyInfo(Variant::COLOR, "imageColor"), "setColor", "getColor");
 }
 
 void GLoader::gd_setURL(const String& value) { setURL(value.utf8().get_data()); }

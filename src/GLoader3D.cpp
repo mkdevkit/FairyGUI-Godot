@@ -49,31 +49,31 @@ void GLoader3D::_bind_methods()
 
     ClassDB::bind_method(D_METHOD("setAlign", "align"), &GLoader3D::gd_setAlign);
     ClassDB::bind_method(D_METHOD("getAlign"), &GLoader3D::gd_getAlign);
-    // ADD_PROPERTY(PropertyInfo(Variant::INT, "align"), "setAlign", "getAlign");
+    ADD_PROPERTY(PropertyInfo(Variant::INT, "align"), "setAlign", "getAlign");
 
     ClassDB::bind_method(D_METHOD("setVerticalAlign", "align"), &GLoader3D::gd_setVerticalAlign);
     ClassDB::bind_method(D_METHOD("getVerticalAlign"), &GLoader3D::gd_getVerticalAlign);
-    // ADD_PROPERTY(PropertyInfo(Variant::INT, "verticalAlign"), "setVerticalAlign", "getVerticalAlign");
+    ADD_PROPERTY(PropertyInfo(Variant::INT, "verticalAlign"), "setVerticalAlign", "getVerticalAlign");
 
     ClassDB::bind_method(D_METHOD("setFillMethod", "method"), &GLoader3D::gd_setFillMethod);
     ClassDB::bind_method(D_METHOD("getFillMethod"), &GLoader3D::gd_getFillMethod);
-    // ADD_PROPERTY(PropertyInfo(Variant::INT, "fillMethod"), "setFillMethod", "getFillMethod");
+    ADD_PROPERTY(PropertyInfo(Variant::INT, "fillMethod"), "setFillMethod", "getFillMethod");
 
     ClassDB::bind_method(D_METHOD("setFillOrigin", "origin"), &GLoader3D::setFillOrigin);
     ClassDB::bind_method(D_METHOD("getFillOrigin"), &GLoader3D::getFillOrigin);
-    // ADD_PROPERTY(PropertyInfo(Variant::INT, "fillOrigin"), "setFillOrigin", "getFillOrigin");
+    ADD_PROPERTY(PropertyInfo(Variant::INT, "fillOrigin"), "setFillOrigin", "getFillOrigin");
 
     ClassDB::bind_method(D_METHOD("setFillAmount", "amount"), &GLoader3D::setFillAmount);
     ClassDB::bind_method(D_METHOD("getFillAmount"), &GLoader3D::getFillAmount);
-    // ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "fillAmount", PROPERTY_HINT_RANGE, "0,1,0.01"), "setFillAmount", "getFillAmount");
+    ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "fillAmount", PROPERTY_HINT_RANGE, "0,1,0.01"), "setFillAmount", "getFillAmount");
 
     ClassDB::bind_method(D_METHOD("setFillClockwise", "value"), &GLoader3D::setFillClockwise);
     ClassDB::bind_method(D_METHOD("isFillClockwise"), &GLoader3D::isFillClockwise);
-    // ADD_PROPERTY(PropertyInfo(Variant::BOOL, "fillClockwise"), "setFillClockwise", "isFillClockwise");
+    ADD_PROPERTY(PropertyInfo(Variant::BOOL, "fillClockwise"), "setFillClockwise", "isFillClockwise");
 
     ClassDB::bind_method(D_METHOD("setShrinkOnly", "value"), &GLoader3D::setShrinkOnly);
     ClassDB::bind_method(D_METHOD("isShrinkOnly"), &GLoader3D::isShrinkOnly);
-    // ADD_PROPERTY(PropertyInfo(Variant::BOOL, "shrinkOnly"), "setShrinkOnly", "isShrinkOnly");
+    ADD_PROPERTY(PropertyInfo(Variant::BOOL, "shrinkOnly"), "setShrinkOnly", "isShrinkOnly");
 
     ClassDB::bind_method(D_METHOD("setAnimationName", "name"), &GLoader3D::gd_setAnimationName);
     ClassDB::bind_method(D_METHOD("getPlayingAnimationName"), &GLoader3D::gd_getPlayingAnimationName);

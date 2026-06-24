@@ -94,7 +94,7 @@ void FUIRichText::_bind_methods()
 
     ClassDB::bind_method(D_METHOD("setOverflow", "overflow"), &FUIRichText::setOverflow);
     ClassDB::bind_method(D_METHOD("getOverflow"), &FUIRichText::getOverflow);
-    // ADD_PROPERTY(PropertyInfo(Variant::INT, "overflow"), "setOverflow", "getOverflow");
+    ADD_PROPERTY(PropertyInfo(Variant::INT, "overflow"), "setOverflow", "getOverflow");
 
     ClassDB::bind_method(D_METHOD("applyTextFormat"), &FUIRichText::applyTextFormat);
 

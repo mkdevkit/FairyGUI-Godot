@@ -28,19 +28,19 @@ void FUIInput::_bind_methods()
 
     ClassDB::bind_method(D_METHOD("setMaxLength", "value"), &FUIInput::setMaxLength);
     ClassDB::bind_method(D_METHOD("getMaxLength"), &FUIInput::getMaxLength);
-    // ADD_PROPERTY(PropertyInfo(Variant::INT, "maxLength"), "setMaxLength", "getMaxLength");
+    ADD_PROPERTY(PropertyInfo(Variant::INT, "maxLength"), "setMaxLength", "getMaxLength");
 
     ClassDB::bind_method(D_METHOD("setPassword", "value"), &FUIInput::setPassword);
     ClassDB::bind_method(D_METHOD("isPassword"), &FUIInput::isPassword);
-    // ADD_PROPERTY(PropertyInfo(Variant::BOOL, "password"), "setPassword", "isPassword");
+    ADD_PROPERTY(PropertyInfo(Variant::BOOL, "password"), "setPassword", "isPassword");
 
     ClassDB::bind_method(D_METHOD("setSingleLine", "value"), &FUIInput::setSingleLine);
     ClassDB::bind_method(D_METHOD("isSingleLine"), &FUIInput::isSingleLine);
-    // ADD_PROPERTY(PropertyInfo(Variant::BOOL, "singleLine"), "setSingleLine", "isSingleLine");
+    ADD_PROPERTY(PropertyInfo(Variant::BOOL, "singleLine"), "setSingleLine", "isSingleLine");
 
     ClassDB::bind_method(D_METHOD("setEditable", "value"), &FUIInput::setEditable);
     ClassDB::bind_method(D_METHOD("isEditable"), &FUIInput::isEditable);
-    // ADD_PROPERTY(PropertyInfo(Variant::BOOL, "editable"), "setEditable", "isEditable");
+    ADD_PROPERTY(PropertyInfo(Variant::BOOL, "editable"), "setEditable", "isEditable");
 
     ClassDB::bind_method(D_METHOD("setInputRestrict", "value"), &FUIInput::gd_setInputRestrict);
     ClassDB::bind_method(D_METHOD("getInputRestrict"), &FUIInput::gd_getInputRestrict);

@@ -234,15 +234,15 @@ void GProgressBar::_bind_methods()
 {
     ClassDB::bind_method(D_METHOD("setMin", "value"), &GProgressBar::setMin);
     ClassDB::bind_method(D_METHOD("getMin"), &GProgressBar::getMin);
-    // ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "min"), "setMin", "getMin");
+    ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "min"), "setMin", "getMin");
 
     ClassDB::bind_method(D_METHOD("setMax", "value"), &GProgressBar::setMax);
     ClassDB::bind_method(D_METHOD("getMax"), &GProgressBar::getMax);
-    // ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "max"), "setMax", "getMax");
+    ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "max"), "setMax", "getMax");
 
     ClassDB::bind_method(D_METHOD("setValue", "value"), &GProgressBar::setValue);
     ClassDB::bind_method(D_METHOD("getValue"), &GProgressBar::getValue);
-    // ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "value"), "setValue", "getValue");
+    ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "value"), "setValue", "getValue");
 
     ClassDB::bind_method(D_METHOD("tweenValue", "value", "duration"), &GProgressBar::tweenValue);
 }

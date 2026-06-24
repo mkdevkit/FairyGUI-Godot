@@ -453,11 +453,11 @@ void GComboBox::_bind_methods()
 
     ClassDB::bind_method(D_METHOD("setTitleColor", "color"), &GComboBox::setTitleColor);
     ClassDB::bind_method(D_METHOD("getTitleColor"), &GComboBox::gd_getTitleColor);
-    // ADD_PROPERTY(PropertyInfo(Variant::COLOR, "titleColor"), "setTitleColor", "getTitleColor");
+    ADD_PROPERTY(PropertyInfo(Variant::COLOR, "titleColor"), "setTitleColor", "getTitleColor");
 
     ClassDB::bind_method(D_METHOD("setTitleFontSize", "size"), &GComboBox::setTitleFontSize);
     ClassDB::bind_method(D_METHOD("getTitleFontSize"), &GComboBox::getTitleFontSize);
-    // ADD_PROPERTY(PropertyInfo(Variant::INT, "titleFontSize"), "setTitleFontSize", "getTitleFontSize");
+    ADD_PROPERTY(PropertyInfo(Variant::INT, "titleFontSize"), "setTitleFontSize", "getTitleFontSize");
 
     ClassDB::bind_method(D_METHOD("setIcon", "icon"), &GComboBox::gd_setIcon);
     ClassDB::bind_method(D_METHOD("getIcon"), &GComboBox::gd_getIcon);
@@ -467,7 +467,7 @@ void GComboBox::_bind_methods()
 
     ClassDB::bind_method(D_METHOD("setSelectedIndex", "index"), &GComboBox::setSelectedIndex);
     ClassDB::bind_method(D_METHOD("getSelectedIndex"), &GComboBox::getSelectedIndex);
-    // ADD_PROPERTY(PropertyInfo(Variant::INT, "selectedIndex"), "setSelectedIndex", "getSelectedIndex");
+    ADD_PROPERTY(PropertyInfo(Variant::INT, "selectedIndex"), "setSelectedIndex", "getSelectedIndex");
 
     ClassDB::bind_method(D_METHOD("getDropdown"), &GComboBox::getDropdown);
     ClassDB::bind_method(D_METHOD("refresh"), &GComboBox::refresh);

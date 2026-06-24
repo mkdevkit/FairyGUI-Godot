@@ -40,11 +40,11 @@ void FUILabel::_bind_methods()
 
     ClassDB::bind_method(D_METHOD("setGrayed", "value"), &FUILabel::setGrayed);
     ClassDB::bind_method(D_METHOD("isGrayed"), &FUILabel::isGrayed);
-    // ADD_PROPERTY(PropertyInfo(Variant::BOOL, "grayed"), "setGrayed", "isGrayed");
+    ADD_PROPERTY(PropertyInfo(Variant::BOOL, "grayed"), "setGrayed", "isGrayed");
 
     ClassDB::bind_method(D_METHOD("setWrapEnabled", "value"), &FUILabel::setWrapEnabled);
     ClassDB::bind_method(D_METHOD("isWrapEnabled"), &FUILabel::isWrapEnabled);
-    // ADD_PROPERTY(PropertyInfo(Variant::BOOL, "wrapEnabled"), "setWrapEnabled", "isWrapEnabled");
+    ADD_PROPERTY(PropertyInfo(Variant::BOOL, "wrapEnabled"), "setWrapEnabled", "isWrapEnabled");
 
     ClassDB::bind_method(D_METHOD("getTextSize"), &FUILabel::getTextSize);
 

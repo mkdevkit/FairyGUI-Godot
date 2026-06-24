@@ -389,25 +389,25 @@ void GTextField::_bind_methods()
 
     ClassDB::bind_method(D_METHOD("setColor", "color"), &GTextField::setColor);
     ClassDB::bind_method(D_METHOD("getColor"), &GTextField::getColor);
-    // ADD_PROPERTY(PropertyInfo(Variant::COLOR, "color"), "setColor", "getColor");
+    ADD_PROPERTY(PropertyInfo(Variant::COLOR, "color"), "setColor", "getColor");
 
     ClassDB::bind_method(D_METHOD("setFontSize", "size"), &GTextField::setFontSize);
     ClassDB::bind_method(D_METHOD("getFontSize"), &GTextField::getFontSize);
-    // ADD_PROPERTY(PropertyInfo(Variant::INT, "fontSize"), "setFontSize", "getFontSize");
+    ADD_PROPERTY(PropertyInfo(Variant::INT, "fontSize"), "setFontSize", "getFontSize");
 
     // set_align/get_align/set_vertical_align/get_vertical_align not available on GTextField
 
     ClassDB::bind_method(D_METHOD("setSingleLine", "value"), &GTextField::setSingleLine);
     ClassDB::bind_method(D_METHOD("isSingleLine"), &GTextField::isSingleLine);
-    // ADD_PROPERTY(PropertyInfo(Variant::BOOL, "singleLine"), "setSingleLine", "isSingleLine");
+    ADD_PROPERTY(PropertyInfo(Variant::BOOL, "singleLine"), "setSingleLine", "isSingleLine");
 
     ClassDB::bind_method(D_METHOD("setAutoSize", "value"), &GTextField::gd_setAutoSize);
     ClassDB::bind_method(D_METHOD("getAutoSize"), &GTextField::gd_getAutoSize);
-    // ADD_PROPERTY(PropertyInfo(Variant::INT, "autoSize"), "setAutoSize", "getAutoSize");
+    ADD_PROPERTY(PropertyInfo(Variant::INT, "autoSize"), "setAutoSize", "getAutoSize");
 
     ClassDB::bind_method(D_METHOD("setUBBEnabled", "value"), &GTextField::setUBBEnabled);
     ClassDB::bind_method(D_METHOD("isUBBEnabled"), &GTextField::isUBBEnabled);
-    // ADD_PROPERTY(PropertyInfo(Variant::BOOL, "ubbEnabled"), "setUBBEnabled", "isUBBEnabled");
+    ADD_PROPERTY(PropertyInfo(Variant::BOOL, "ubbEnabled"), "setUBBEnabled", "isUBBEnabled");
 
     ClassDB::bind_method(D_METHOD("setTemplateVars", "vars"), &GTextField::gd_setTemplateVars);
 }

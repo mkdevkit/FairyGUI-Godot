@@ -2563,23 +2563,23 @@ void GList::_bind_methods()
 
     ClassDB::bind_method(D_METHOD("setColumnCount", "value"), &GList::setColumnCount);
     ClassDB::bind_method(D_METHOD("getColumnCount"), &GList::getColumnCount);
-    // ADD_PROPERTY(PropertyInfo(Variant::INT, "columnCount"), "setColumnCount", "getColumnCount");
+    ADD_PROPERTY(PropertyInfo(Variant::INT, "columnCount"), "setColumnCount", "getColumnCount");
 
     ClassDB::bind_method(D_METHOD("setLineCount", "value"), &GList::setLineCount);
     ClassDB::bind_method(D_METHOD("getLineCount"), &GList::getLineCount);
-    // ADD_PROPERTY(PropertyInfo(Variant::INT, "lineCount"), "setLineCount", "getLineCount");
+    ADD_PROPERTY(PropertyInfo(Variant::INT, "lineCount"), "setLineCount", "getLineCount");
 
     ClassDB::bind_method(D_METHOD("setColumnGap", "value"), &GList::setColumnGap);
     ClassDB::bind_method(D_METHOD("getColumnGap"), &GList::getColumnGap);
-    // ADD_PROPERTY(PropertyInfo(Variant::INT, "columnGap"), "setColumnGap", "getColumnGap");
+    ADD_PROPERTY(PropertyInfo(Variant::INT, "columnGap"), "setColumnGap", "getColumnGap");
 
     ClassDB::bind_method(D_METHOD("setLineGap", "value"), &GList::setLineGap);
     ClassDB::bind_method(D_METHOD("getLineGap"), &GList::getLineGap);
-    // ADD_PROPERTY(PropertyInfo(Variant::INT, "lineGap"), "setLineGap", "getLineGap");
+    ADD_PROPERTY(PropertyInfo(Variant::INT, "lineGap"), "setLineGap", "getLineGap");
 
     ClassDB::bind_method(D_METHOD("setAutoResizeItem", "value"), &GList::setAutoResizeItem);
     ClassDB::bind_method(D_METHOD("getAutoResizeItem"), &GList::getAutoResizeItem);
-    // ADD_PROPERTY(PropertyInfo(Variant::BOOL, "autoResizeItem"), "setAutoResizeItem", "getAutoResizeItem");
+    ADD_PROPERTY(PropertyInfo(Variant::BOOL, "autoResizeItem"), "setAutoResizeItem", "getAutoResizeItem");
 
     // removeChild_to_pool takes GObject* which can't be bound directly
     ClassDB::bind_method(D_METHOD("removeChildrenToPool", "begin_index", "end_index"), &GList::gd_removeChildrenToPool, DEFVAL(0), DEFVAL(-1));
@@ -2588,14 +2588,14 @@ void GList::_bind_methods()
 
     ClassDB::bind_method(D_METHOD("setLayout", "layout"), &GList::gd_setLayout);
     ClassDB::bind_method(D_METHOD("getLayout"), &GList::gd_getLayout);
-    // ADD_PROPERTY(PropertyInfo(Variant::INT, "layout"), "setLayout", "getLayout");
+    ADD_PROPERTY(PropertyInfo(Variant::INT, "layout"), "setLayout", "getLayout");
 
     ClassDB::bind_method(D_METHOD("setSelectionController", "controller"), &GList::setSelectionController);
     ClassDB::bind_method(D_METHOD("getSelectionController"), &GList::getSelectionController);
 
     ClassDB::bind_method(D_METHOD("setSelectedIndex", "index"), &GList::setSelectedIndex);
     ClassDB::bind_method(D_METHOD("getSelectedIndex"), &GList::getSelectedIndex);
-    // ADD_PROPERTY(PropertyInfo(Variant::INT, "selectedIndex"), "setSelectedIndex", "getSelectedIndex");
+    ADD_PROPERTY(PropertyInfo(Variant::INT, "selectedIndex"), "setSelectedIndex", "getSelectedIndex");
 
     ClassDB::bind_method(D_METHOD("clearSelection"), &GList::gd_clearSelection, DEFVAL(true));
 }

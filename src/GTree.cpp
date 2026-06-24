@@ -422,11 +422,11 @@ void GTree::_bind_methods()
 
     ClassDB::bind_method(D_METHOD("setIndent", "indent"), &GTree::setIndent);
     ClassDB::bind_method(D_METHOD("getIndent"), &GTree::getIndent);
-    // ADD_PROPERTY(PropertyInfo(Variant::INT, "indent"), "setIndent", "getIndent");
+    ADD_PROPERTY(PropertyInfo(Variant::INT, "indent"), "setIndent", "getIndent");
 
     ClassDB::bind_method(D_METHOD("setClickToExpand", "value"), &GTree::setClickToExpand);
     ClassDB::bind_method(D_METHOD("getClickToExpand"), &GTree::getClickToExpand);
-    // ADD_PROPERTY(PropertyInfo(Variant::INT, "clickToExpand"), "setClickToExpand", "getClickToExpand");
+    ADD_PROPERTY(PropertyInfo(Variant::INT, "clickToExpand"), "setClickToExpand", "getClickToExpand");
 }
 
 NS_FGUI_END

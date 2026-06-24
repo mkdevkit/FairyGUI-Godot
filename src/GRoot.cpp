@@ -125,11 +125,11 @@ void GRoot::_bind_methods()
 
     ClassDB::bind_method(D_METHOD("setSoundEnabled", "value"), &GRoot::setSoundEnabled);
     ClassDB::bind_method(D_METHOD("isSoundEnabled"), &GRoot::isSoundEnabled);
-    // ADD_PROPERTY(PropertyInfo(Variant::BOOL, "soundEnabled"), "setSoundEnabled", "isSoundEnabled");
+    ADD_PROPERTY(PropertyInfo(Variant::BOOL, "soundEnabled"), "setSoundEnabled", "isSoundEnabled");
 
     ClassDB::bind_method(D_METHOD("setSoundVolumeScale", "value"), &GRoot::setSoundVolumeScale);
     ClassDB::bind_method(D_METHOD("getSoundVolumeScale"), &GRoot::getSoundVolumeScale);
-    // ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "soundVolumeScale", PROPERTY_HINT_RANGE, "0,1,0.01"), "setSoundVolumeScale", "getSoundVolumeScale");
+    ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "soundVolumeScale", PROPERTY_HINT_RANGE, "0,1,0.01"), "setSoundVolumeScale", "getSoundVolumeScale");
 }
 
 void GRoot::showWindow(GWindow* win)

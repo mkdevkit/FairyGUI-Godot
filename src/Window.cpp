@@ -41,7 +41,7 @@ void GWindow::_bind_methods()
 
     ClassDB::bind_method(D_METHOD("setModal", "value"), &GWindow::setModal);
     ClassDB::bind_method(D_METHOD("isModal"), &GWindow::isModal);
-    // ADD_PROPERTY(PropertyInfo(Variant::BOOL, "modal"), "setModal", "isModal");
+    ADD_PROPERTY(PropertyInfo(Variant::BOOL, "modal"), "setModal", "isModal");
 
     ClassDB::bind_method(D_METHOD("showModalWait", "requesting_cmd"), &GWindow::gd_showModalWait, DEFVAL(0));
     ClassDB::bind_method(D_METHOD("closeModalWait", "requesting_cmd"), &GWindow::gd_closeModalWait, DEFVAL(0));
@@ -50,25 +50,25 @@ void GWindow::_bind_methods()
 
     ClassDB::bind_method(D_METHOD("setBringToFrontOnClick", "value"), &GWindow::setBringToFrontOnClick);
     ClassDB::bind_method(D_METHOD("isBringToFrontOnClick"), &GWindow::isBringToFrontOnClick);
-    // ADD_PROPERTY(PropertyInfo(Variant::BOOL, "bringToFrontOnClick"), "setBringToFrontOnClick", "isBringToFrontOnClick");
+    ADD_PROPERTY(PropertyInfo(Variant::BOOL, "bringToFrontOnClick"), "setBringToFrontOnClick", "isBringToFrontOnClick");
 
     ClassDB::bind_method(D_METHOD("setContentContentPane", "pane"), &GWindow::setContentPane);
     ClassDB::bind_method(D_METHOD("getContentContentPane"), &GWindow::getContentPane);
-    // ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "contentPane", PROPERTY_HINT_NODE_TYPE, "GComponent"), "setContentContentPane", "getContentContentPane");
+    ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "contentPane", PROPERTY_HINT_NODE_TYPE, "GComponent"), "setContentContentPane", "getContentContentPane");
 
     ClassDB::bind_method(D_METHOD("getFrame"), &GWindow::getFrame);
 
     ClassDB::bind_method(D_METHOD("setCloseButton", "button"), &GWindow::setCloseButton);
     ClassDB::bind_method(D_METHOD("getCloseButton"), &GWindow::getCloseButton);
-    // ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "closeButton", PROPERTY_HINT_NODE_TYPE, "GObject"), "setCloseButton", "getCloseButton");
+    ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "closeButton", PROPERTY_HINT_NODE_TYPE, "GObject"), "setCloseButton", "getCloseButton");
 
     ClassDB::bind_method(D_METHOD("setDragArea", "area"), &GWindow::setDragArea);
     ClassDB::bind_method(D_METHOD("getDragArea"), &GWindow::getDragArea);
-    // ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "dragArea", PROPERTY_HINT_NODE_TYPE, "GObject"), "setDragArea", "getDragArea");
+    ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "dragArea", PROPERTY_HINT_NODE_TYPE, "GObject"), "setDragArea", "getDragArea");
 
     ClassDB::bind_method(D_METHOD("setContentArea", "area"), &GWindow::setContentArea);
     ClassDB::bind_method(D_METHOD("getContentArea"), &GWindow::getContentArea);
-    // ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "contentArea", PROPERTY_HINT_NODE_TYPE, "GObject"), "setContentArea", "getContentArea");
+    ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "contentArea", PROPERTY_HINT_NODE_TYPE, "GObject"), "setContentArea", "getContentArea");
 
     ClassDB::bind_method(D_METHOD("getModalWaitingPane"), &GWindow::getModalWaitingPane);
 }
