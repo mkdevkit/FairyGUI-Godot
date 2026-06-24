@@ -22,8 +22,11 @@ GRoot* GRoot::create(SceneTree* tree, int zOrder)
 {
     Ref<GRoot> ref = memnew(GRoot);
     GRoot* pRet = ref.ptr();
+    
+    Node* root = Object::cast_to<Node>(tree->get_root());
     if (pRet->initWithParent(Object::cast_to<Node>(tree->get_root()), zOrder))
     {
+        pRet->onInitWithParent(root, zOrder);
         pRet->reference(); // keep alive after ref dtor (2→1)
         return pRet;
     }
@@ -35,15 +38,15 @@ GRoot* GRoot::createDeferred(SceneTree* tree, int zOrder)
 {
     Ref<GRoot> ref = memnew(GRoot);
     GRoot* pRet = ref.ptr();
-    if (pRet->initWithParent(nullptr, zOrder, true))
+    
+    Node* root = Object::cast_to<Node>(tree->get_root());
+    if (pRet->initWithParent(root, zOrder))
     {
-        Node* root = Object::cast_to<Node>(tree->get_root());
-        root->call_deferred("add_child", pRet->_displayObject);
-        if (zOrder > 0 && zOrder < root->get_child_count())
-            root->call_deferred("move_child", pRet->_displayObject, zOrder);
+        pRet->onInitWithParent(root, zOrder, true);
         pRet->reference(); // keep alive after ref dtor (2→1)
         return pRet;
     }
+
     // ref dtor cleans up (1→0→freed)
     return nullptr;
 }
@@ -623,7 +626,7 @@ void GRoot::_notification(int p_what)
     }
 }
 
-bool GRoot::initWithParent(Node* parent, int zOrder, bool deferAdd)
+bool GRoot::initWithParent(Node* parent, int zOrder)
 {
     if (!GComponent::init())
         return false;
@@ -636,6 +639,11 @@ bool GRoot::initWithParent(Node* parent, int zOrder, bool deferAdd)
         onTouchEvent(eventType);
     });
 
+    return true;
+}
+
+void GRoot::onInitWithParent(Node* parent, int zOrder, bool deferAdd)
+{
     if (parent)  // skip when deferred - will be called after add_child via _ready
         onWindowSizeChanged();
 
@@ -645,15 +653,12 @@ bool GRoot::initWithParent(Node* parent, int zOrder, bool deferAdd)
             parent->call_deferred("add_child", _displayObject);
             if (zOrder > 0 && zOrder < parent->get_child_count())
                 parent->call_deferred("move_child", _displayObject, zOrder);
-        }
-        else {
+        } else {
             parent->add_child(_displayObject);
             if (zOrder > 0 && zOrder < parent->get_child_count())
                 parent->move_child(_displayObject, zOrder);
         }
     }
-
-    return true;
 }
 
 void GRoot::onWindowSizeChanged()

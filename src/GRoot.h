@@ -92,7 +92,8 @@ protected:
     void _notification(int p_what);
 
 private:
-    bool initWithParent(Node* parent, int zOrder, bool deferAdd = false);
+    bool initWithParent(Node* parent, int zOrder);
+    void onInitWithParent(Node* parent, int zOrder, bool deferAdd = false);
     void onWindowSizeChanged();
     void createModalLayer();
     void adjustModalLayer();
