@@ -28,19 +28,6 @@ GWindow::~GWindow()
     // CC_SAFE_RELEASE removed - _modalWaitPane managed by Godot ref counting;
 }
 
-GWindow* GWindow::create()
-{
-    Ref<GWindow> ref = memnew(GWindow);
-    GWindow* pRet = ref.ptr();
-    if (pRet->init())
-    {
-        pRet->reference(); // keep alive after ref dtor (2→1)
-        return pRet;
-    }
-    // ref dtor cleans up (1→0→freed)
-    return nullptr;
-}
-
 void GWindow::_bind_methods()
 {
     ClassDB::bind_method(D_METHOD("show"), &GWindow::show);

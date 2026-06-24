@@ -230,8 +230,6 @@ void GProgressBar::setup_afterAdd(ByteBuffer* buffer, int beginPos)
     update(_value);
 }
 
-GProgressBar* GProgressBar::create() { Ref<GProgressBar> ref = memnew(GProgressBar); auto* o = ref.ptr(); o->reference(); return o; }
-
 void GProgressBar::_bind_methods()
 {
     ClassDB::bind_method(D_METHOD("setMin", "value"), &GProgressBar::setMin);

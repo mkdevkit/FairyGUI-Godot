@@ -15,7 +15,7 @@ public:
     GTextInput();
     virtual ~GTextInput();
 
-    static GTextInput* create();
+    FAIRYGUI_CREATE(GTextInput)
 
     static void _bind_methods();
 

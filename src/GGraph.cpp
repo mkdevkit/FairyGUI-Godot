@@ -416,8 +416,6 @@ void GGraph::setup_beforeAdd(ByteBuffer* buffer, int beginPos)
     }
 }
 
-GGraph* GGraph::create() { Ref<GGraph> ref = memnew(GGraph); auto* o = ref.ptr(); o->reference(); return o; }
-
 void GGraph::_bind_methods() {}
 
 NS_FGUI_END

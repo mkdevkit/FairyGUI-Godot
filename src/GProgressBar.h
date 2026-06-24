@@ -1,4 +1,4 @@
-﻿#ifndef __GPROGRESSBAR_H__
+#ifndef __GPROGRESSBAR_H__
 #define __GPROGRESSBAR_H__
 
 #include "FairyGUIMacros.h"
@@ -15,7 +15,7 @@ public:
     GProgressBar();
     virtual ~GProgressBar();
 
-    static GProgressBar* create(); // GODOT: implement create()
+    FAIRYGUI_CREATE(GProgressBar)
 
     static void _bind_methods();
 

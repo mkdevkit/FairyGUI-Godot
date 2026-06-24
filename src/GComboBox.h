@@ -18,7 +18,7 @@ public:
     GComboBox();
     virtual ~GComboBox();
 
-    static GComboBox* create(); // GODOT: implement create()
+    FAIRYGUI_CREATE(GComboBox)
 
     static void _bind_methods();
 

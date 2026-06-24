@@ -286,8 +286,6 @@ void GSlider::onGripTouchMove(EventContext* context)
     updateWithPercent(percent, true);
 }
 
-GSlider* GSlider::create() { Ref<GSlider> ref = memnew(GSlider); auto* o = ref.ptr(); o->reference(); return o; }
-
 void GSlider::_bind_methods()
 {
     ClassDB::bind_method(D_METHOD("setMin", "value"), &GSlider::setMin);

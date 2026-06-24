@@ -411,8 +411,6 @@ void GTree::readItems(ByteBuffer* buffer)
     }
 }
 
-GTree* GTree::create() { Ref<GTree> ref = memnew(GTree); auto* o = ref.ptr(); o->reference(); return o; }
-
 void GTree::_bind_methods()
 {
     ClassDB::bind_method(D_METHOD("getRootNode"), &GTree::getRootNode);

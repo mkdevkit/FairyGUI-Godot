@@ -83,7 +83,7 @@ public:
     GBasicTextField();
     virtual ~GBasicTextField();
 
-    static GBasicTextField* create();
+    FAIRYGUI_CREATE(GBasicTextField)
 
     static void _bind_methods();
 

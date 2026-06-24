@@ -17,7 +17,7 @@ public:
     GGraph();
     virtual ~GGraph();
 
-    static GGraph* create(); // GODOT: implement create()
+    FAIRYGUI_CREATE(GGraph)
 
     static void _bind_methods();
 

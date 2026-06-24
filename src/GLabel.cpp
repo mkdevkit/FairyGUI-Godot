@@ -169,8 +169,6 @@ void GLabel::setup_afterAdd(ByteBuffer* buffer, int beginPos)
     }
 }
 
-GLabel* GLabel::create() { Ref<GLabel> ref = memnew(GLabel); auto* o = ref.ptr(); o->reference(); return o; }
-
 void GLabel::_bind_methods()
 {
     ClassDB::bind_method(D_METHOD("setTitle", "title"), &GLabel::gd_setTitle);

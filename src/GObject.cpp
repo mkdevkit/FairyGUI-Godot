@@ -1046,8 +1046,6 @@ void GObject::onTouchEnd(EventContext* context)
     }
 }
 
-GObject* GObject::create() { Ref<GObject> ref = memnew(GObject); auto* o = ref.ptr(); o->reference(); return o; }
-
 void GObject::_bind_methods()
 {
     ClassDB::bind_method(D_METHOD("setX", "value"), &GObject::setX);

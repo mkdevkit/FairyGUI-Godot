@@ -27,7 +27,7 @@ public:
     GObject();
     virtual ~GObject();
 
-    static GObject* create(); // GODOT: implement create()
+    FAIRYGUI_CREATE(GObject)
 
     static void _bind_methods();
 

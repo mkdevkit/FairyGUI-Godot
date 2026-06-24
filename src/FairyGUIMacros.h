@@ -18,4 +18,17 @@
 
 #define CALL_LATER_CANCEL(__TYPE__,__FUNC__)
 
+// FAIRYGUI_CREATE - inline static create() with init() check and Ref counting.
+// Place in class body to replace: static TYPE* create();
+#define FAIRYGUI_CREATE(TYPE) \
+    static TYPE* create() { \
+        Ref<TYPE> ref = memnew(TYPE); \
+        TYPE* pRet = ref.ptr(); \
+        if (pRet->init()) { \
+            pRet->reference(); \
+            return pRet; \
+        } \
+        return nullptr; \
+    }
+
 #endif

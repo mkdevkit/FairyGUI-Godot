@@ -446,8 +446,6 @@ void GComboBox::onPopupWinClosed(EventContext* context)
     setCurrentState();
 }
 
-GComboBox* GComboBox::create() { Ref<GComboBox> ref = memnew(GComboBox); auto* o = ref.ptr(); o->reference(); return o; }
-
 void GComboBox::_bind_methods()
 {
     ClassDB::bind_method(D_METHOD("setTitle", "title"), &GComboBox::gd_setTitle);

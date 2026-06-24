@@ -42,7 +42,7 @@ public:
     GLoader();
     virtual ~GLoader();
 
-    static GLoader* create(); // GODOT: implement create()
+    FAIRYGUI_CREATE(GLoader)
 
     static void _bind_methods();
 

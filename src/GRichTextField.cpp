@@ -125,8 +125,6 @@ GObject* GRichTextField::hitTest(const Vector2& worldPoint, const Camera2D* came
     return GTextField::hitTest(worldPoint, camera);
 }
 
-GRichTextField* GRichTextField::create() { Ref<GRichTextField> ref = memnew(GRichTextField); auto* o = ref.ptr(); o->reference(); return o; }
-
 void GRichTextField::_bind_methods()
 {
     // set_text/get_text inherited from GTextField

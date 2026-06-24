@@ -39,19 +39,6 @@ GLoader3D::~GLoader3D()
 {
 }
 
-GLoader3D* GLoader3D::create()
-{
-    Ref<GLoader3D> ref = memnew(GLoader3D);
-    GLoader3D* pRet = ref.ptr();
-    if (pRet->init())
-    {
-        pRet->reference(); // keep alive after ref dtor (2→1)
-        return pRet;
-    }
-    // ref dtor cleans up (1→0→freed)
-    return nullptr;
-}
-
 void GLoader3D::_bind_methods()
 {
     ClassDB::bind_method(D_METHOD("setURL", "url"), &GLoader3D::gd_setURL);

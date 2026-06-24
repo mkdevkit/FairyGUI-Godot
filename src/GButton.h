@@ -24,7 +24,7 @@ public:
     GButton();
     virtual ~GButton();
 
-    static GButton* create(); // GODOT: implement create()
+    FAIRYGUI_CREATE(GButton)
 
     static void _bind_methods();
 

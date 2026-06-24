@@ -463,8 +463,6 @@ void GGroup::setup_afterAdd(ByteBuffer* buffer, int beginPos)
         handleVisibleChanged();
 }
 
-GGroup* GGroup::create() { Ref<GGroup> ref = memnew(GGroup); auto* o = ref.ptr(); o->reference(); return o; }
-
 void GGroup::_bind_methods()
 {
     ClassDB::bind_method(D_METHOD("setLayout", "layout"), &GGroup::gd_setLayout);

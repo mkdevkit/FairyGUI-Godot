@@ -23,7 +23,7 @@ public:
     GLoader3D();
     virtual ~GLoader3D();
 
-    static GLoader3D* create();
+    FAIRYGUI_CREATE(GLoader3D)
 
     static void _bind_methods();
 

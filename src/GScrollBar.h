@@ -1,4 +1,4 @@
-﻿#ifndef __GSCROLLBAR_H__
+#ifndef __GSCROLLBAR_H__
 #define __GSCROLLBAR_H__
 
 #include "FairyGUIMacros.h"
@@ -15,7 +15,7 @@ public:
     GScrollBar();
     virtual ~GScrollBar();
 
-    static GScrollBar* create(); // GODOT: implement create()
+    FAIRYGUI_CREATE(GScrollBar)
 
     static void _bind_methods();
 

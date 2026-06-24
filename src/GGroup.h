@@ -15,7 +15,7 @@ public:
     GGroup();
     virtual ~GGroup();
 
-    static GGroup* create(); // GODOT: implement create()
+    FAIRYGUI_CREATE(GGroup)
 
     static void _bind_methods();
 

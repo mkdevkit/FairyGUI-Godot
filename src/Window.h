@@ -24,7 +24,7 @@ public:
     GWindow();
     virtual ~GWindow();
 
-    static GWindow* create(); // GODOT: implement create()
+    FAIRYGUI_CREATE(GWindow)
 
     static void _bind_methods();
 

@@ -2556,8 +2556,6 @@ void GList::setup_afterAdd(ByteBuffer* buffer, int beginPos)
         _selectionController = _parent->getControllerAt(i);
 }
 
-GList* GList::create() { Ref<GList> ref = memnew(GList); auto* o = ref.ptr(); o->reference(); return o; }
-
 void GList::_bind_methods()
 {
     ClassDB::bind_method(D_METHOD("setDefaultItem", "url"), &GList::gd_setDefaultItem);

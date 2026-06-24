@@ -36,19 +36,6 @@ GMovieClip::~GMovieClip()
 {
 }
 
-GMovieClip* GMovieClip::create()
-{
-    Ref<GMovieClip> ref = memnew(GMovieClip);
-    GMovieClip* pRet = ref.ptr();
-    if (pRet->init())
-    {
-        pRet->reference(); // keep alive after ref dtor (2→1)
-        return pRet;
-    }
-    // ref dtor cleans up (1→0→freed)
-    return nullptr;
-}
-
 void GMovieClip::_bind_methods()
 {
     ClassDB::bind_method(D_METHOD("setPlaying", "value"), &GMovieClip::setPlaying);

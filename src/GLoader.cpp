@@ -584,8 +584,6 @@ GObject* GLoader::hitTest(const Vector2 & worldPoint, const Camera2D * camera)
         return nullptr;
 }
 
-GLoader* GLoader::create() { Ref<GLoader> ref = memnew(GLoader); auto* o = ref.ptr(); o->reference(); return o; }
-
 void GLoader::_bind_methods()
 {
     ClassDB::bind_method(D_METHOD("setURL", "url"), &GLoader::gd_setURL);

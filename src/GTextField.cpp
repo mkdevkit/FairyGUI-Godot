@@ -370,8 +370,6 @@ void GBasicTextField::handleGrayedChanged()
     _label->setGrayed(_finalGrayed);
 }
 
-GBasicTextField* GBasicTextField::create() { Ref<GBasicTextField> ref = memnew(GBasicTextField); auto* o = ref.ptr(); o->reference(); return o; }
-
 void GBasicTextField::_bind_methods()
 {
     // set_text/get_text inherited from GTextField

@@ -17,7 +17,7 @@ public:
     GMovieClip();
     virtual ~GMovieClip();
 
-    static GMovieClip* create();
+    FAIRYGUI_CREATE(GMovieClip)
 
     static void _bind_methods();
 

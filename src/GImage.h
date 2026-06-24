@@ -1,4 +1,4 @@
-﻿#ifndef __GIMAGE_H__
+#ifndef __GIMAGE_H__
 #define __GIMAGE_H__
 
 #include "FairyGUIMacros.h"
@@ -18,7 +18,7 @@ public:
     GImage();
     virtual ~GImage();
 
-    static GImage* create(); // GODOT: implement create()
+    FAIRYGUI_CREATE(GImage)
 
     static void _bind_methods();
 

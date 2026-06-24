@@ -157,8 +157,6 @@ void GImage::setup_beforeAdd(ByteBuffer* buffer, int beginPos)
     }
 }
 
-GImage* GImage::create() { Ref<GImage> ref = memnew(GImage); auto* o = ref.ptr(); o->reference(); return o; }
-
 void GImage::_bind_methods()
 {
     ClassDB::bind_method(D_METHOD("setFlip", "flip"), &GImage::gd_setFlip);

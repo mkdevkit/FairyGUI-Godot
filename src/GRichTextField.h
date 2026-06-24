@@ -1,4 +1,4 @@
-﻿#ifndef __GRICHTEXTFIELD_H__
+#ifndef __GRICHTEXTFIELD_H__
 #define __GRICHTEXTFIELD_H__
 
 // cocos2d.h removed - see godot_types.h
@@ -16,7 +16,7 @@ public:
     GRichTextField();
     virtual ~GRichTextField();
 
-    static GRichTextField* create(); // GODOT: implement create()
+    FAIRYGUI_CREATE(GRichTextField)
 
     static void _bind_methods();
 

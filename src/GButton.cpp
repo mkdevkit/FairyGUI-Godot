@@ -448,8 +448,6 @@ void GButton::onExit(EventContext* context)
         onRollOut(context);
 }
 
-GButton* GButton::create() { Ref<GButton> ref = memnew(GButton); auto* o = ref.ptr(); o->reference(); return o; }
-
 void GButton::_bind_methods()
 {
     ClassDB::bind_method(D_METHOD("setTitle", "title"), &GButton::gd_setTitle);

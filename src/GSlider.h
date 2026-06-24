@@ -1,4 +1,4 @@
-﻿#ifndef __GSLIDER_H__
+#ifndef __GSLIDER_H__
 #define __GSLIDER_H__
 
 #include "FairyGUIMacros.h"
@@ -15,7 +15,7 @@ public:
     GSlider();
     virtual ~GSlider();
 
-    static GSlider* create(); // GODOT: implement create()
+    FAIRYGUI_CREATE(GSlider)
 
     static void _bind_methods();
 

@@ -135,6 +135,4 @@ void GTextInput::editBoxTextChanged(const std::string& text)
     _text.append(_input->getText());
 }
 
-GTextInput* GTextInput::create() { Ref<GTextInput> ref = memnew(GTextInput); auto* o = ref.ptr(); o->reference(); return o; }
-
 NS_FGUI_END

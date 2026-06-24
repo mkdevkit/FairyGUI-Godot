@@ -19,7 +19,7 @@ public:
     GList();
     virtual ~GList();
 
-    static GList* create(); // GODOT: implement create()
+    FAIRYGUI_CREATE(GList)
 
     static void _bind_methods();
 

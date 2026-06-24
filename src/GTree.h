@@ -1,4 +1,4 @@
-﻿#ifndef __GTREE_H__
+#ifndef __GTREE_H__
 #define __GTREE_H__
 
 #include "FairyGUIMacros.h"
@@ -22,7 +22,7 @@ public:
     GTree();
     virtual ~GTree();
 
-    static GTree* create(); // GODOT: implement create()
+    FAIRYGUI_CREATE(GTree)
 
     static void _bind_methods();
 

@@ -174,8 +174,6 @@ void GScrollBar::onArrowButton2Click(EventContext* context)
         _target->scrollRight();
 }
 
-GScrollBar* GScrollBar::create() { Ref<GScrollBar> ref = memnew(GScrollBar); auto* o = ref.ptr(); o->reference(); return o; }
-
 void GScrollBar::_bind_methods()
 {
     // setScrollPane uses ScrollPane* which is not a GDCLASS-registered type

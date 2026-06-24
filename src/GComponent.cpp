@@ -1369,8 +1369,6 @@ void GComponent::setup_afterAdd(ByteBuffer* buffer, int beginPos)
     }
 }
 
-GComponent* GComponent::create() { Ref<GComponent> ref = memnew(GComponent); auto* o = ref.ptr(); o->reference(); return o; }
-
 void GComponent::_bind_methods()
 {
     ClassDB::bind_method(D_METHOD("getChild", "name"), &GComponent::gd_getChild);

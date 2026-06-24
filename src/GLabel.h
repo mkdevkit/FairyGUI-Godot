@@ -17,7 +17,7 @@ public:
     GLabel();
     virtual ~GLabel();
 
-    static GLabel* create(); // GODOT: implement create()
+    FAIRYGUI_CREATE(GLabel)
 
     static void _bind_methods();
 

@@ -20,7 +20,7 @@ public:
     GComponent();
     virtual ~GComponent();
 
-    static GComponent* create(); // GODOT: implement create()
+    FAIRYGUI_CREATE(GComponent)
 
     static void _bind_methods();
 
