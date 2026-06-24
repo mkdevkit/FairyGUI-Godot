@@ -1,5 +1,7 @@
 #include "FUIContainer.h"
 #include "GComponent.h"
+#include "GRoot.h"
+#include "event/InputProcessor.h"
 #include "servers/rendering_server.h"
 
 NS_FGUI_BEGIN
@@ -20,6 +22,7 @@ FUIContainer::FUIContainer() :
     gOwner(nullptr)
 {
     item_rect_changed(); // enable NOTIFICATION_DRAW for Node2D
+    set_process_unhandled_input(true);
 }
 
 FUIContainer::~FUIContainer()
@@ -83,6 +86,57 @@ void FUIContainer::_deferred_redraw_all()
 
 void FUIContainer::_draw()
 {
+}
+
+void FUIContainer::unhandled_input(const Ref<::InputEvent>& event)
+{
+    if (!gOwner) return;
+    GRoot* root = Object::cast_to<GRoot>(gOwner);
+    if (!root) root = gOwner->getRoot();
+    if (!root) return;
+
+    InputProcessor* ip = root->getInputProcessor();
+    if (!ip) return;
+
+    Ref<InputEventMouseButton> mb = event;
+    if (mb.is_valid()) {
+        int btn = (int)mb->get_button_index();
+        if (mb->is_pressed()) {
+            if (btn == (int)MouseButton::WHEEL_UP) {
+                ip->onMouseScroll(mb->get_position(), 1);
+                return;
+            }
+            if (btn == (int)MouseButton::WHEEL_DOWN) {
+                ip->onMouseScroll(mb->get_position(), -1);
+                return;
+            }
+            if (btn == (int)MouseButton::LEFT) {
+                // Left button uses TouchBegin/TouchEnd for click+drag detection
+                ip->onTouchBegin(mb->get_position(), 0);
+            } else {
+                ip->onMouseDown(mb->get_position(), btn);
+            }
+        } else {
+            if (btn == (int)MouseButton::LEFT) {
+                ip->onTouchEnd(mb->get_position(), 0);
+            } else {
+                ip->onMouseUp(mb->get_position(), btn);
+            }
+        }
+        return;
+    }
+
+    Ref<InputEventMouseMotion> mm = event;
+    if (mm.is_valid()) {
+        // When left button is held, use onTouchMove for drag detection.
+        // Otherwise use onMouseMove for hover/rollover.
+        if (mm->get_button_mask().has_flag(::MouseButtonMask::LEFT)) {
+            ip->onTouchMove(mm->get_position(), 0);
+        } else {
+            ip->onMouseMove(mm->get_position());
+        }
+        return;
+    }
 }
 
 bool FUIContainer::isClippingEnabled() const

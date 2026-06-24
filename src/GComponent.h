@@ -24,13 +24,13 @@ public:
 
     static void _bind_methods();
 
-    GObject* addChild(GObject* child);
+    GObject* addChild(GObject* child) override;
     virtual GObject* addChildAt(GObject* child, int index);
 
     void gd_addChildAt(Object* child, int index);
     void gd_removeChildren(int beginIndex, int endIndex);
 
-    void removeChild(GObject* child);
+    void removeChild(GObject* child) override;
     virtual void removeChildAt(int index);
     void gd_removeChildAt(int index);
     void removeChildren() { removeChildren(0, -1); }

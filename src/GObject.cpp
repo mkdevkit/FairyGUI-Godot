@@ -3,6 +3,7 @@
 #include "GList.h"
 #include "GRoot.h"
 #include "UIConfig.h"
+#include "display/FUIContainer.h"
 #include "UIPackage.h"
 #include "display/FUISprite.h"
 #include "gears/GearDisplay.h"
@@ -757,16 +758,27 @@ void GObject::removeChild(Node* node)
         _displayObject->remove_child(node);
 }
 
+GObject* GObject::addChild(GObject* child)
+{
+    addChild(child->displayObject());
+    return child;
+}
+
+void GObject::removeChild(GObject* child)
+{
+    removeChild(child->displayObject());
+}
+
 void GObject::gd_addChild(Object* node)
 {
     GObject* go = Object::cast_to<GObject>(node);
-    if (go) addChild(go->displayObject());
+    if (go) addChild(go);
 }
 
 void GObject::gd_removeChild(Object* node)
 {
     GObject* go = Object::cast_to<GObject>(node);
-    if (go) removeChild(go->displayObject());
+    if (go) removeChild(go);
 }
 
 void GObject::handlePositionChanged()
@@ -774,7 +786,8 @@ void GObject::handlePositionChanged()
     if (_displayObject)
     {
         Vector2 pt = _position;
-        pt.y = -pt.y;
+        // FairyGUI editor uses top-left origin with Y-down, same as Godot — no Y flip needed.
+        // pt.y = -pt.y;
         if (!_pivotAsAnchor)
         {
             pt.x += _size.width * _pivot.x;
@@ -782,10 +795,20 @@ void GObject::handlePositionChanged()
         }
         if (_alignToBL)
         {
-            if (_displayObject->get_parent())
-                pt.y += 0; // GODOT_ADAPT: getContentSize.height (TODO)
-            else if (_parent != nullptr)
-                pt.y += _parent->getSize().height; // GODOT_ADAPT: getContentSize.height
+            float parentH = 0;
+            if (_parent != nullptr)
+                parentH = _parent->getSize().height;
+            else
+            {
+                // Try parent node's gOwner for size
+                Node* pn = _displayObject->get_parent();
+                if (pn) {
+                    FUIContainer* fc = Object::cast_to<FUIContainer>(pn);
+                    if (fc && fc->gOwner)
+                        parentH = fc->gOwner->getSize().height;
+                }
+            }
+            pt.y = parentH - pt.y;
         }
         if (_pixelSnapping)
         {

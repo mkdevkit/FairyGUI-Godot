@@ -306,17 +306,13 @@ GObject* GRoot::getTouchTarget()
 
 Vector2 GRoot::worldToRoot(const Vector2& pt)
 {
-    Vector2 pos = ((Node2D*)_displayObject)->to_local(pt);
-    pos.y = getHeight() - pos.y;
-    return pos;
+    // FairyGUI coordinate system matches Godot (Y-down), no flip needed.
+    return ((Node2D*)_displayObject)->to_local(pt);
 }
 
 Vector2 GRoot::rootToWorld(const Vector2& pt)
 {
-    Vector2 pos = pt;
-    pos.y = getHeight() - pos.y;
-    pos = ((Node2D*)_displayObject)->to_global(pos);
-    return pos;
+    return ((Node2D*)_displayObject)->to_global(pt);
 }
 
 void GRoot::showPopup(GObject* popup)

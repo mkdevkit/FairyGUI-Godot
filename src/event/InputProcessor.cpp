@@ -456,10 +456,14 @@ bool InputProcessor::onMouseDown(const Vector2& screenPos, int button)
     updateRecentInput(ti, target);
     _activeProcessor = this;
 
-    if (button == 0) /* RIGHT */
+    if (button == (int)MouseButton::RIGHT)
         target->bubbleEvent(UIEventType::RightClick);
-    else if (button == 1) /* MIDDLE */
+    else if (button == (int)MouseButton::MIDDLE)
         target->bubbleEvent(UIEventType::MiddleClick);
+    else if (button == (int)MouseButton::LEFT)
+    {
+        // Nothing extra for left click - handled by TouchBegin
+    }
 
     _activeProcessor = nullptr;
     return true;

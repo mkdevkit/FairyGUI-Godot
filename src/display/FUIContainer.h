@@ -37,6 +37,7 @@ protected:
     void _notification(int p_what);
     void _deferred_redraw_all();
     void _draw();
+    virtual void unhandled_input(const Ref<::InputEvent>& event) override;
 
 private:
     void applyClipping();

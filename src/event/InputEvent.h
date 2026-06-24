@@ -1,4 +1,4 @@
-﻿#ifndef __INPUTEVENT_H__
+#ifndef __INPUTEVENT_H__
 #define __INPUTEVENT_H__
 
 #include "FairyGUIMacros.h"
@@ -11,9 +11,14 @@ class InputProcessor;
 
 enum class MouseButton
 {
+    NONE = 0,
     LEFT = 1,
-    MIDDLE = 2,
-    RIGHT = 3
+    RIGHT = 2,
+    MIDDLE = 3,
+    WHEEL_UP = 4,
+    WHEEL_DOWN = 5,
+    WHEEL_LEFT = 6,
+    WHEEL_RIGHT = 7
 };
 
 enum class KeyCode

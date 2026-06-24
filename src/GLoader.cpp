@@ -350,7 +350,7 @@ void GLoader::updateLayout()
             if (_content2 != nullptr)
             {
                 ((Node2D*)_content2->displayObject())->set_scale(Vector2(1, 1));
-                ((Node2D*)_content2->displayObject())->set_position(Vector2(0, -_size.height));
+                ((Node2D*)_content2->displayObject())->set_position(Vector2(0, _size.height));
             }
             else
             {
