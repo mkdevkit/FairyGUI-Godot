@@ -29,6 +29,7 @@ void GTextInput::handleInit()
     _input = FUIInput::create();
     _displayObject = _input;
 
+
     addEventListener(UIEventType::TouchEnd, [this](EventContext*) {
         _input->openKeyboard();
     });

@@ -18,6 +18,7 @@ void GRichTextField::handleInit()
 {
     _richText = FUIRichText::create();
     _displayObject = _richText;
+
 }
 
 void GRichTextField::applyTextFormat()

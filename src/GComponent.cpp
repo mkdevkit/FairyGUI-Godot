@@ -46,6 +46,7 @@ void GComponent::handleInit()
     FUIContainer* c = FUIContainer::create();
     c->gOwner = this;
     _displayObject = c;
+
     _container = memnew(FUIInnerContainer);
     _displayObject->add_child(_container);
 }

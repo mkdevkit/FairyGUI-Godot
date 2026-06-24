@@ -19,6 +19,7 @@ FUISprite::FUISprite() :
     _grayed(false),
     _scale9Enabled(false)
 {
+    item_rect_changed(); // enable NOTIFICATION_DRAW for Node2D
 }
 
 FUISprite::~FUISprite()
@@ -102,11 +103,18 @@ FUISprite* FUISprite::create()
 
 void FUISprite::_notification(int p_what)
 {
-    if (p_what == NOTIFICATION_ENTER_CANVAS)
+    if (p_what == NOTIFICATION_DRAW) {
+        _draw();
+        return;
+    }
+    if (p_what == NOTIFICATION_ENTER_TREE)
+        queue_redraw();
+    else if (p_what == NOTIFICATION_ENTER_CANVAS)
     {
         if (_fillMethod != FillMethod::None)
             setupFill();
     }
+    Sprite2D::_notification(p_what);
 }
 
 void FUISprite::clearContent()

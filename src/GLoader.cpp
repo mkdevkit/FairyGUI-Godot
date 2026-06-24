@@ -40,6 +40,7 @@ void GLoader::handleInit()
 {
     _content = FUISprite::create();
     _displayObject = _content;
+
 }
 
 void GLoader::setURL(const std::string& value)

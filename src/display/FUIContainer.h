@@ -35,6 +35,8 @@ protected:
     static void _bind_methods();
 
     void _notification(int p_what);
+    void _deferred_redraw_all();
+    void _draw();
 
 private:
     void applyClipping();

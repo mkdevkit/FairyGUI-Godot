@@ -18,6 +18,7 @@ void GImage::handleInit()
 {
     _content = FUISprite::create();
     _displayObject = _content;
+
 }
 
 FlipType GImage::getFlip() const

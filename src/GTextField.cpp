@@ -278,6 +278,7 @@ void GBasicTextField::handleInit()
 {
     _label = FUILabel::create();
     _displayObject = _label;
+
 }
 
 void GBasicTextField::applyTextFormat()

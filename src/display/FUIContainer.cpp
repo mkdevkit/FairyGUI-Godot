@@ -4,6 +4,14 @@
 
 NS_FGUI_BEGIN
 
+static void _queue_redraw_all(Node* node) {
+    CanvasItem* ci = Object::cast_to<CanvasItem>(node);
+    if (ci) ci->queue_redraw();
+    int count = node->get_child_count();
+    for (int i = 0; i < count; i++)
+        _queue_redraw_all(node->get_child(i));
+}
+
 FUIContainer::FUIContainer() :
     _clippingEnabled(false),
     _stencil(nullptr),
@@ -11,6 +19,7 @@ FUIContainer::FUIContainer() :
     _inverted(false),
     gOwner(nullptr)
 {
+    item_rect_changed(); // enable NOTIFICATION_DRAW for Node2D
 }
 
 FUIContainer::~FUIContainer()
@@ -43,6 +52,8 @@ void FUIContainer::_bind_methods()
     ClassDB::bind_method(D_METHOD("setInverted", "inverted"), &FUIContainer::setInverted);
     ClassDB::bind_method(D_METHOD("isInverted"), &FUIContainer::isInverted);
     // ADD_PROPERTY(PropertyInfo(Variant::BOOL, "inverted"), "setInverted", "isInverted");
+
+    ClassDB::bind_method(D_METHOD("_deferred_redraw_all"), &FUIContainer::_deferred_redraw_all);
 }
 
 FUIContainer* FUIContainer::create()
@@ -53,10 +64,25 @@ FUIContainer* FUIContainer::create()
 
 void FUIContainer::_notification(int p_what)
 {
+    if (p_what == NOTIFICATION_DRAW) {
+        _draw();
+        return;
+    }
     if (p_what == NOTIFICATION_ENTER_CANVAS)
     {
         applyClipping();
+        call_deferred("_deferred_redraw_all");
     }
+    Node2D::_notification(p_what);
+}
+
+void FUIContainer::_deferred_redraw_all()
+{
+    _queue_redraw_all(this);
+}
+
+void FUIContainer::_draw()
+{
 }
 
 bool FUIContainer::isClippingEnabled() const

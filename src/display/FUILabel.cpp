@@ -19,6 +19,7 @@ FUILabel::FUILabel() :
     _bmFontSize(0),
     _bmfontScale(1.0f)
 {
+    item_rect_changed(); // enable NOTIFICATION_DRAW for Node2D
 }
 
 FUILabel::~FUILabel()
@@ -184,6 +185,17 @@ float FUILabel::getTextHeight() const
 void FUILabel::updateText()
 {
     queue_redraw();
+}
+
+void FUILabel::_notification(int p_what) {
+    if (p_what == NOTIFICATION_DRAW) {
+        _draw();
+        return;
+    }
+    if (p_what == NOTIFICATION_ENTER_TREE) {
+        queue_redraw();
+    }
+    Node2D::_notification(p_what);
 }
 
 void FUILabel::_draw()

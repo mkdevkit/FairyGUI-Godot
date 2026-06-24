@@ -720,6 +720,7 @@ GObject* GObject::hitTest(const Vector2& worldPoint, const Camera2D* camera)
 void GObject::handleInit()
 {
     _displayObject = memnew(FUISprite);
+
 }
 
 void GObject::_enter_tree()

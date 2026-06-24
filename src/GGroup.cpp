@@ -436,6 +436,8 @@ void GGroup::handleVisibleChanged()
         if (child->_group == this)
             child->handleVisibleChanged();
     }
+
+    GObject::handleVisibleChanged();
 }
 
 void GGroup::setup_beforeAdd(ByteBuffer* buffer, int beginPos)

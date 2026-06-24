@@ -28,7 +28,9 @@ struct Cmd {
 class DrawNode : public Node2D {
     GDCLASS(DrawNode, Node2D)
     public:
-        DrawNode() = default;
+        DrawNode() {
+            item_rect_changed(); // enable NOTIFICATION_DRAW for Node2D
+        }
 
         static DrawNode* create() { return memnew(DrawNode); }
 
@@ -84,15 +86,20 @@ class DrawNode : public Node2D {
         void setLineWidth(float width) { _lineWidth = width; }
 
         static void _bind_methods() {}
+        void _notification(int p_what) {
+            if (p_what == NOTIFICATION_DRAW) {
+                _draw();
+                return;
+            }
+            Node2D::_notification(p_what);
+        }
         void _draw() {
             for (auto& cmd : _cmds) {
                 switch (cmd.type) {
                 case Cmd::RECT:
                     if (cmd.pts.size() == 3) {
-                        // triangle
                         draw_colored_polygon(to_pva(cmd.pts), cmd.color);
                     } else {
-                        // rect
                         if (cmd.pts.size() == 2) {
                             Rect2 r(cmd.pts[0], cmd.pts[1] - cmd.pts[0]);
                             if (cmd.borderWidth > 0) {
@@ -105,9 +112,8 @@ class DrawNode : public Node2D {
                     break;
                 case Cmd::CIRCLE: {
                     Vector2 center = cmd.pts[0];
-                    float scaleY = cmd.borderColor.g; // stashed scaleY
+                    float scaleY = cmd.borderColor.g;
                     float radius = cmd.borderWidth;
-                    // For ellipse, draw a polygon approximation
                     std::vector<Vector2> pts;
                     int segments = 64;
                     for (int i = 0; i <= segments; i++) {
@@ -122,7 +128,6 @@ class DrawNode : public Node2D {
                     break;
                 }
             }
-            // Draw outlines
             for (auto& [pts, color, width] : _outlinePts) {
                 for (size_t i = 1; i < pts.size(); i++) {
                     draw_line(pts[i-1], pts[i], color, width);
@@ -167,6 +172,7 @@ void GGraph::handleInit()
 {
     _shape = DrawNode::create();
     _displayObject = _shape;
+
 }
 
 void GGraph::drawRect(float aWidth, float aHeight, int lineSize, const Color& lineColor, const Color& fillColor)
