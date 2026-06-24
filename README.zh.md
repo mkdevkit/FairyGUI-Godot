@@ -231,7 +231,50 @@ var btn = UIPackage.createObjectFromURL("ui://YourPackage/MyButton")
 
 > **注意**：如果从 FairyGUI 编辑器导出包时勾选了**分支**（branch）功能，组件名称会被加上分支 ID 前缀，例如 `7iys1/Menu`。此时 `createObject` 需要传入带前缀的名称。如果不需要分支功能，导出时取消勾选即可。
 
-### 2. 常见 Widget 操作
+### 2. 字体配置
+
+FairyGUI 支持两种字体类型：**BMFont**（FairyGUI 编辑器导出的位图字体）和 **TTF/系统** 字体。
+
+#### 位图字体（FairyGUI 编辑器导出）
+
+从 FairyGUI 编辑器导出的位图字体（`.fnt` 文件）通过资源包系统自动加载。字体名称遵循 `ui://PackageName/FontName` 的 URL 格式。
+
+无需额外配置。
+
+#### TTF 字体文件
+
+使用前注册 TTF/OTF 字体文件：
+
+```gdscript
+# 按别名注册 TTF 字体文件
+UIPackage.registerFont("myfont", "res://fonts/msyh.ttf")
+UIPackage.setDefaultFont("myfont")
+```
+
+带文件扩展名（`.ttf` / `.otf`）的会通过 `FontFile::load_dynamic_font()` 加载字体文件。
+
+#### 系统字体
+
+按名称注册系统字体（不带文件扩展名）：
+
+```gdscript
+# 按各平台对应的字体名称注册
+UIPackage.registerFont("SimHei", "SimHei")
+UIPackage.registerFont("Arial", "Arial")
+UIPackage.setDefaultFont("SimHei")
+```
+
+不带扩展名的字体名称通过 `SystemFont` 解析，查找系统已安装的字体。
+
+#### 工作原理
+
+在 FairyGUI 编辑器中，为文本对象设置字体名称（如 `"SimHei"` 或 `"myfont"`）。运行时：
+
+1. `UIConfig::getRealFontName()` 将别名解析为实际文件路径或系统字体名
+2. 如果解析后的名称以 `.ttf` / `.otf` 结尾 → `FontFile::load_dynamic_font()` 加载文件
+3. 否则 → `SystemFont` 按名称匹配系统已安装字体
+
+### 3. 常见 Widget 操作
 
 ```gdscript
 # 获取/设置位置和大小
@@ -284,7 +327,7 @@ slider.value = 0.5
 slider.max = 1.0
 ```
 
-### 3. 事件监听
+### 4. 事件监听
 
 ```gdscript
 # 点击事件
@@ -320,14 +363,14 @@ if ctrl:
     print(ctrl.previousIndex)        # 上一次的索引
 ```
 
-### 5. 拖拽
+### 6. 拖拽
 
 ```gdscript
 obj.draggable = true
 obj.setDragBounds(Rect2(0, 0, 500, 400))
 ```
 
-### 6. Relation（关联布局）
+### 7. Relation（关联布局）
 
 ```gdscript
 # 使子节点与父节点保持相对布局
@@ -335,7 +378,7 @@ child.addRelation(parent, fairygui.RelationType.Width_Width)
 child.addRelation(parent, fairygui.RelationType.Height_Height)
 ```
 
-### 7. Transition（过渡动画）
+### 8. Transition（过渡动画）
 
 通过 FairyGUI 编辑器设计过渡动画，运行时播放：
 
@@ -346,7 +389,7 @@ comp.getTransition("hide").play(func():
 )
 ```
 
-### 8. 已注册的 Godot 类
+### 9. 已注册的 Godot 类
 
 以下类已在 Godot 中注册（方法尚未暴露到 GDScript）：
 

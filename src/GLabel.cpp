@@ -185,9 +185,9 @@ void GLabel::_bind_methods()
 }
 
 void GLabel::gd_setTitle(const String& value) { setTitle(value.utf8().get_data()); }
-String GLabel::gd_getTitle() { return String(getTitle().c_str()); }
+String GLabel::gd_getTitle() { return GObject::toGodotStr(getTitle()); }
 void GLabel::gd_setIcon(const String& value) { setIcon(value.utf8().get_data()); }
-String GLabel::gd_getIcon() const { return String(getIcon().c_str()); }
+String GLabel::gd_getIcon() const { return GObject::toGodotStr(getIcon()); }
 
 NS_FGUI_END
 

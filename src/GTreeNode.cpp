@@ -307,8 +307,8 @@ void GTreeNode::_bind_methods()
 }
 
 void GTreeNode::gd_setText(const String& value) { setText(value.utf8().get_data()); }
-String GTreeNode::gd_getText() const { return String(getText().c_str()); }
+String GTreeNode::gd_getText() const { return GObject::toGodotStr(getText()); }
 void GTreeNode::gd_setIcon(const String& value) { setIcon(value.utf8().get_data()); }
-String GTreeNode::gd_getIcon() const { return String(getIcon().c_str()); }
+String GTreeNode::gd_getIcon() const { return GObject::toGodotStr(getIcon()); }
 
 NS_FGUI_END

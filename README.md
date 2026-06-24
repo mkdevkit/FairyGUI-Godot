@@ -234,6 +234,49 @@ var btn = UIPackage.createObjectFromURL("ui://YourPackage/MyButton")
 
 > **Note**: If you enable **branch** export in FairyGUI Editor, component names will be prefixed with the branch ID, e.g. `7iys1/Menu`. In that case, `createObject` needs the full prefixed name. Disable branch in the editor if you don't need it.
 
+### 2. Font Configuration
+
+FairyGUI supports two font types: **BMFont** (bitmap fonts from FairyGUI Editor) and **TTF/System** fonts.
+
+#### BM Font (from FairyGUI Editor)
+
+Bitmaps fonts exported from FairyGUI Editor (`.fnt` files) are loaded automatically through the package system. The font name follows the `ui://PackageName/FontName` URL format.
+
+No additional configuration is required.
+
+#### TTF Font Files
+
+Register TTF/OTF font files before using them:
+
+```gdscript
+# Register a TTF font file by alias
+UIPackage.registerFont("myfont", "res://fonts/msyh.ttf")
+UIPackage.setDefaultFont("myfont")
+```
+
+The file extension (`.ttf` / `.otf`) triggers font file loading via `FontFile::load_dynamic_font()`.
+
+#### System Fonts
+
+Register system fonts by name (no file extension):
+
+```gdscript
+# Register system fonts by their platform-specific name
+UIPackage.registerFont("SimHei", "SimHei")
+UIPackage.registerFont("Arial", "Arial")
+UIPackage.setDefaultFont("SimHei")
+```
+
+Font names without a file extension are resolved via `SystemFont`, which looks up the installed system fonts.
+
+#### How It Works
+
+In FairyGUI Editor, you set a font name on text objects (e.g., `"SimHei"` or `"myfont"`). At runtime:
+
+1. `UIConfig::getRealFontName()` resolves the alias to the actual file path or system font name
+2. If the resolved name ends with `.ttf` / `.otf` → `FontFile::load_dynamic_font()` loads the file
+3. Otherwise → `SystemFont` matches the name against installed system fonts
+
 ### 3. Common Widget Operations
 
 ```gdscript

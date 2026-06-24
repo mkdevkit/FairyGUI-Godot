@@ -122,8 +122,10 @@ public:
     void stopDrag();
 
     std::string getResourceURL() const;
-
     String gd_getResourceURL() const;
+
+    static String toGodotStr(const std::string& raw) { return String::utf8(raw.c_str(), (int)raw.size()); }
+    static std::string toFairyStr(const String& str) { return str.utf8().get_data(); }
 
 
     PackageItem* getPackageItem() const { return _packageItem; }
@@ -213,6 +215,7 @@ protected:
     void gd_addChild(Object* node);
     void gd_removeChild(Object* node);
 
+protected:
     bool init();
 
     void updateGear(int index);

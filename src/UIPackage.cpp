@@ -1,5 +1,6 @@
 #include "UIPackage.h"
 #include "UIObjectFactory.h"
+#include "UIConfig.h"
 #include "display/BitmapFont.h"
 #include "event/HitTest.h"
 #include "utils/ByteBuffer.h"
@@ -936,6 +937,9 @@ void UIPackage::_bind_methods()
     ClassDB::bind_static_method(get_class_static(), D_METHOD("createObject", "pkg_name", "res_name"), &UIPackage::gd_createObject);
     ClassDB::bind_static_method(get_class_static(), D_METHOD("createObjectFromURL", "url"), &UIPackage::gd_createObjectFromURL);
     ClassDB::bind_static_method(get_class_static(), D_METHOD("getItemURL", "pkg_name", "res_name"), &UIPackage::gd_getItemURL);
+
+    ClassDB::bind_static_method(get_class_static(), D_METHOD("registerFont", "alias_name", "real_name"), &UIPackage::gd_registerFont);
+    ClassDB::bind_static_method(get_class_static(), D_METHOD("setDefaultFont", "font_name"), &UIPackage::gd_setDefaultFont);
 }
 
 String UIPackage::gd_getId() const { return String(getId().c_str()); }
@@ -947,5 +951,8 @@ void UIPackage::gd_removePackage(const String& packageIdOrName) { removePackage(
 GObject* UIPackage::gd_createObject(const String& pkgName, const String& resName) { return createObject(pkgName.utf8().get_data(), resName.utf8().get_data()); }
 GObject* UIPackage::gd_createObjectFromURL(const String& url) { return createObjectFromURL(url.utf8().get_data()); }
 String UIPackage::gd_getItemURL(const String& pkgName, const String& resName) { return String(getItemURL(pkgName.utf8().get_data(), resName.utf8().get_data()).c_str()); }
+
+void UIPackage::gd_registerFont(const String& aliasName, const String& realName) { UIConfig::registerFont(aliasName.utf8().get_data(), realName.utf8().get_data()); }
+void UIPackage::gd_setDefaultFont(const String& fontName) { UIConfig::defaultFont = fontName.utf8().get_data(); }
 
 NS_FGUI_END

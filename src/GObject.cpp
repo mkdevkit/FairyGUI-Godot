@@ -1162,9 +1162,9 @@ void GObject::_bind_methods()
 }
 
 void GObject::gd_setText(const String& text) { setText(text.utf8().get_data()); }
-String GObject::gd_getText() const { return String(getText().c_str()); }
+String GObject::gd_getText() const { return toGodotStr(getText()); }
 void GObject::gd_setTooltips(const String& value) { setTooltips(value.utf8().get_data()); }
-String GObject::gd_getTooltips() const { return String(getTooltips().c_str()); }
-String GObject::gd_getResourceURL() const { return String(getResourceURL().c_str()); }
+String GObject::gd_getTooltips() const { return toGodotStr(getTooltips()); }
+String GObject::gd_getResourceURL() const { return toGodotStr(getResourceURL()); }
 
 NS_FGUI_END

@@ -483,13 +483,13 @@ void GButton::_bind_methods()
 }
 
 void GButton::gd_setTitle(const String& value) { setTitle(value.utf8().get_data()); }
-String GButton::gd_getTitle() { return String(getTitle().c_str()); }
+String GButton::gd_getTitle() { return GObject::GObject::toGodotStr(getTitle()); }
 void GButton::gd_setSelectedTitle(const String& value) { setSelectedTitle(value.utf8().get_data()); }
-String GButton::gd_getSelectedTitle() const { return String(getSelectedTitle().c_str()); }
+String GButton::gd_getSelectedTitle() const { return GObject::GObject::toGodotStr(getSelectedTitle()); }
 void GButton::gd_setIcon(const String& value) { setIcon(value.utf8().get_data()); }
-String GButton::gd_getIcon() const { return String(getIcon().c_str()); }
+String GButton::gd_getIcon() const { return GObject::GObject::toGodotStr(getIcon()); }
 void GButton::gd_setSelectedIcon(const String& value) { setSelectedIcon(value.utf8().get_data()); }
-String GButton::gd_getSelectedIcon() const { return String(getSelectedIcon().c_str()); }
+String GButton::gd_getSelectedIcon() const { return GObject::GObject::toGodotStr(getSelectedIcon()); }
 
 NS_FGUI_END
 

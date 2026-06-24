@@ -474,11 +474,11 @@ void GComboBox::_bind_methods()
 }
 
 void GComboBox::gd_setTitle(const String& value) { setTitle(value.utf8().get_data()); }
-String GComboBox::gd_getTitle() const { return String(getTitle().c_str()); }
+String GComboBox::gd_getTitle() const { return GObject::toGodotStr(getTitle()); }
 void GComboBox::gd_setIcon(const String& value) { setIcon(value.utf8().get_data()); }
-String GComboBox::gd_getIcon() const { return String(getIcon().c_str()); }
+String GComboBox::gd_getIcon() const { return GObject::toGodotStr(getIcon()); }
 void GComboBox::gd_setValue(const String& value) { setValue(value.utf8().get_data()); }
-String GComboBox::gd_getValue() const { return String(getValue().c_str()); }
+String GComboBox::gd_getValue() const { return GObject::toGodotStr(getValue()); }
 
 NS_FGUI_END
 

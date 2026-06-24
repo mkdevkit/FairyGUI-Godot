@@ -38,6 +38,10 @@ public:
     static GObject* gd_createObject(const String& pkgName, const String& resName);
     static GObject* gd_createObjectFromURL(const String& url);
     static String gd_getItemURL(const String& pkgName, const String& resName);
+
+    static void gd_registerFont(const String& aliasName, const String& realName);
+    static void gd_setDefaultFont(const String& fontName);
+
     static std::string normalizeURL(const std::string& url);
     static void* getItemAsset(const std::string& pkgName, const std::string& resName, PackageItemType type = PackageItemType::UNKNOWN);
     static void* getItemAssetByURL(const std::string& url, PackageItemType type = PackageItemType::UNKNOWN);

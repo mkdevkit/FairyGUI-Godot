@@ -312,8 +312,7 @@ bool InputProcessor::onTouchBegin(const Vector2& screenPos, int touchId)
 
     TouchInfo* ti = getTouch(touchId);
     ti->pos = pt;
-    ti->button = 0;
-    setBegin(ti, target);
+    ti->button = (int)MouseButton::LEFT;
 
     updateRecentInput(ti, target);
     _activeProcessor = this;
@@ -340,7 +339,7 @@ void InputProcessor::onTouchMove(const Vector2& screenPos, int touchId)
 
     TouchInfo* ti = getTouch(touchId);
     ti->pos = pt;
-    ti->button = 0;
+    ti->button = (int)MouseButton::LEFT;
 
     updateRecentInput(ti, target);
     _activeProcessor = this;
@@ -388,7 +387,7 @@ void InputProcessor::onTouchEnd(const Vector2& screenPos, int touchId)
         target = _owner;
 
     ti->pos = pt;
-    ti->button = 0;
+    ti->button = (int)MouseButton::LEFT;
     setEnd(ti, target);
 
     updateRecentInput(ti, target);

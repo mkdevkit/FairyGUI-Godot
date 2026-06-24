@@ -1,4 +1,5 @@
 #include "FUIInput.h"
+#include "GObject.h"
 
 NS_FGUI_BEGIN
 
@@ -69,15 +70,15 @@ void FUIInput::setText(const std::string& value)
         _text = value;
 }
 
-void FUIInput::_gui_input(const Ref<InputEvent>& event)
+void FUIInput::_gui_input(const Ref<::InputEvent>& event)
 {
     // GODOT_TODO: handle text input events
 }
 
 void FUIInput::gd_setText(const String& text) { setText(text.utf8().get_data()); }
-String FUIInput::gd_getText() const { return String(getText().c_str()); }
+String FUIInput::gd_getText() const { return GObject::toGodotStr(getText()); }
 void FUIInput::gd_setInputRestrict(const String& value) { setInputRestrict(value.utf8().get_data()); }
-String FUIInput::gd_getInputRestrict() const { return String(getInputRestrict().c_str()); }
+String FUIInput::gd_getInputRestrict() const { return GObject::toGodotStr(getInputRestrict()); }
 void FUIInput::gd_setPlaceHolder(const String& value) { setPlaceHolder(value.utf8().get_data()); }
 
 void FUIInput::applyTextFormat()

@@ -2,6 +2,7 @@
 #include "BitmapFont.h"
 #include "UIConfig.h"
 #include "UIPackage.h"
+#include "scene/resources/font.h"
 
 NS_FGUI_BEGIN
 
@@ -87,13 +88,23 @@ void FUILabel::applyTextFormat()
             const std::string& fontName = UIConfig::getRealFontName(_fontName, &ttf);
             if (ttf)
             {
-                // GODOT_TODO: load TTF font file
-                _bmFont.instantiate();
+                // Load TTF/OTF font from file path
+                Ref<FontFile> fontFile;
+                fontFile.instantiate();
+                Error err = fontFile->load_dynamic_font(String(fontName.c_str()));
+                if (err == OK)
+                    _bmFont = fontFile;
+                else
+                    _bmFont.instantiate(); // fallback to empty
             }
             else
             {
-                // Use system font name
-                _bmFont.instantiate();
+                // Use system font by name
+                Ref<SystemFont> sysFont;
+                sysFont.instantiate();
+                Vector<String> names = String(fontName.c_str()).split(",");
+                sysFont->set_font_names(PackedStringArray(names));
+                _bmFont = sysFont;
             }
         }
     }
@@ -163,7 +174,7 @@ float FUILabel::getTextWidth() const
     if (_text.empty()) return 0;
     if (_bmFont.is_valid())
     {
-        Vector2 size = _bmFont->get_string_size(String(_text.c_str()),
+        Vector2 size = _bmFont->get_string_size(GObject::toGodotStr(_text),
             HORIZONTAL_ALIGNMENT_LEFT, -1, (int)_textFormat->fontSize);
         return size.x;
     }
@@ -175,7 +186,7 @@ float FUILabel::getTextHeight() const
     if (_text.empty()) return 0;
     if (_bmFont.is_valid())
     {
-        Vector2 size = _bmFont->get_string_size(String(_text.c_str()),
+        Vector2 size = _bmFont->get_string_size(GObject::toGodotStr(_text),
             HORIZONTAL_ALIGNMENT_LEFT, -1, (int)_textFormat->fontSize);
         return size.y;
     }
@@ -213,25 +224,25 @@ void FUILabel::_draw()
     {
         Color shadowColor = _grayed ? toGrayed(_textFormat->shadowColor) : _textFormat->shadowColor;
         Vector2 shadowPos = _textFormat->shadowOffset;
-        draw_string(font, shadowPos, String(_text.c_str()),
+        draw_string(font, shadowPos, GObject::toGodotStr(_text),
             HORIZONTAL_ALIGNMENT_LEFT, -1, fontSize, shadowColor);
     }
 
     if (_textFormat->hasEffect(TextFormat::OUTLINE) && _textFormat->outlineSize > 0)
     {
         Color outlineColor = _grayed ? toGrayed(_textFormat->outlineColor) : _textFormat->outlineColor;
-        draw_string_outline(font, Vector2(0, 0), String(_text.c_str()),
+        draw_string_outline(font, Vector2(0, 0), GObject::toGodotStr(_text),
             HORIZONTAL_ALIGNMENT_LEFT, -1, fontSize, _textFormat->outlineSize, outlineColor);
     }
     else if (_textFormat->hasEffect(TextFormat::GLOW))
     {
         Color glowColor = _grayed ? toGrayed(_textFormat->glowColor) : _textFormat->glowColor;
-        draw_string(font, Vector2(0, 0), String(_text.c_str()),
+        draw_string(font, Vector2(0, 0), GObject::toGodotStr(_text),
             HORIZONTAL_ALIGNMENT_LEFT, -1, fontSize, glowColor);
     }
 
     // Main text
-    draw_string(font, Vector2(0, 0), String(_text.c_str()),
+    draw_string(font, Vector2(0, 0), GObject::toGodotStr(_text),
         HORIZONTAL_ALIGNMENT_LEFT, -1, fontSize, textColor);
 
     // Underline
@@ -243,6 +254,6 @@ void FUILabel::_draw()
 }
 
 void FUILabel::gd_setText(const String& text) { setText(text.utf8().get_data()); }
-String FUILabel::gd_getText() { return String(getText().c_str()); }
+String FUILabel::gd_getText() { return GObject::toGodotStr(getText()); }
 
 NS_FGUI_END
