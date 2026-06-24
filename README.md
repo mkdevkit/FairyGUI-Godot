@@ -1,6 +1,8 @@
 # FairyGUI-Godot
 
-FairyGUI runtime for Godot Engine, built-in C++ module (no godot-cpp dependency).
+> This is an experimental project under active development, based on the FairyGUI cocos2d-x version and being refactored with AI assistance.
+
+FairyGUI runtime for Godot Engine, built-in C++ module.
 
 > [中文文档](README.zh.md)
 
@@ -160,12 +162,14 @@ GLoader3D requires spine_godot headers via:
 
 ## Build
 
-FairyGUI is compiled as a **built-in Godot module** — no separate build step or godot-cpp required.
+FairyGUI is compiled as a **built-in Godot module** — no separate build step required.
 
 Build Godot with the fairygui module:
 
 ```sh
 scons platform=windows target=editor dev_build=yes
+or for debug
+scons platform=windows vsproj=yes dev_build=yes arch=x86_64 vulkan=no opengl3=yes csharp=no
 ```
 
 The module is auto-detected by Godot's build system via `config.py`.
@@ -181,7 +185,7 @@ Spine support is handled by the `spine_godot` module (`modules/spine_godot/`).
 
 - `spine-cpp/` contains the upstream Spine C++ runtime from [EsotericSoftware/spine-runtimes](https://github.com/EsotericSoftware/spine-runtimes)
 - The `spine_godot` SCsub compiles both `spine-cpp/src/spine/*.cpp` and its own `*.cpp` files
-- Fairygui's `GLoader3D` includes spine_godot headers directly (no godot-cpp prefix needed)
+- Fairygui's `GLoader3D` includes spine_godot headers directly
 
 > **Modification:** `modules/spine_godot/SCsub` line 5 & 8 — include path changed from
 > `#../spine_godot/spine-cpp/include` to `#modules/spine_godot/spine-cpp/include`

@@ -1,6 +1,8 @@
 # FairyGUI-Godot
 
-FairyGUI 的 Godot 引擎运行时，以内置 C++ Module 形式集成（不依赖 godot-cpp）。
+> 当前项目是正在开发中的实验项目，基于FairyGUI的cocos2dx版本，使用AI重构中。
+
+FairyGUI 的 Godot 引擎运行时，以内置 C++ Module 形式集成。
 
 ## Project Structure
 
@@ -14,7 +16,7 @@ modules/fairygui/
 │   ├── FairyGUI.h                      # 总括包含头文件
 │   ├── FairyGUIMacros.h                # 命名空间宏
 │   ├── FieldTypes.h                    # 所有枚举 (ObjectType, FillMethod 等)
-│   ├── godot_types.h                   # Godot 引擎类型映射 (替代 godot-cpp)
+│   ├── godot_types.h                   # Godot 引擎类型映射
 │   ├── Margin.h/Margin.cpp             # Margin 类型
 │   ├── UIConfig.h/UIConfig.cpp         # 全局 UI 配置
 │   ├── PackageItem.h/PackageItem.cpp   # 资源包项目
@@ -158,12 +160,14 @@ GLoader3D 通过以下方式引用 spine_godot 头文件：
 
 ## 构建
 
-FairyGUI 作为 **Godot 内置模块**编译 — 无需独立构建步骤，也无需 godot-cpp。
+FairyGUI 作为 **Godot 内置模块**编译 — 无需独立构建步骤。
 
 构建含 fairygui 模块的 Godot：
 
 ```sh
 scons platform=windows target=editor dev_build=yes
+or for debug
+scons platform=windows vsproj=yes dev_build=yes arch=x86_64 vulkan=no opengl3=yes csharp=no
 ```
 
 Godot 构建系统通过 `config.py` 自动发现模块。
@@ -179,7 +183,7 @@ Spine 支持由 `spine_godot` 模块 (`modules/spine_godot/`) 处理。
 
 - `spine-cpp/` 包含来自 [EsotericSoftware/spine-runtimes](https://github.com/EsotericSoftware/spine-runtimes) 的上游 Spine C++ 运行时
 - `spine_godot` 的 SCsub 同时编译 `spine-cpp/src/spine/*.cpp` 和自己的 `*.cpp` 文件
-- Fairygui 的 `GLoader3D` 直接包含 spine_godot 头文件（无需 godot-cpp 前缀）
+- Fairygui 的 `GLoader3D` 直接包含 spine_godot 头文件
 
 > **修改说明：** `modules/spine_godot/SCsub` 第5行和第8行 — include 路径从
 > `#../spine_godot/spine-cpp/include` 改为 `#modules/spine_godot/spine-cpp/include`
