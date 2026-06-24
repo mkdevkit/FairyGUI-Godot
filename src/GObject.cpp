@@ -756,6 +756,18 @@ void GObject::removeChild(Node* node)
         _displayObject->remove_child(node);
 }
 
+void GObject::gd_addChild(Object* node)
+{
+    GObject* go = Object::cast_to<GObject>(node);
+    if (go) addChild(go->displayObject());
+}
+
+void GObject::gd_removeChild(Object* node)
+{
+    GObject* go = Object::cast_to<GObject>(node);
+    if (go) removeChild(go->displayObject());
+}
+
 void GObject::handlePositionChanged()
 {
     if (_displayObject)
@@ -1121,8 +1133,8 @@ void GObject::_bind_methods()
     ClassDB::bind_method(D_METHOD("localToGlobal", "pt"), &GObject::gd_localToGlobal);
     ClassDB::bind_method(D_METHOD("globalToLocal", "pt"), &GObject::gd_globalToLocal);
 
-    ClassDB::bind_method(D_METHOD("addChild", "node"), &GObject::addChild);
-    ClassDB::bind_method(D_METHOD("removeChild", "node"), &GObject::removeChild);
+    ClassDB::bind_method(D_METHOD("addChild", "node"), &GObject::gd_addChild);
+    ClassDB::bind_method(D_METHOD("removeChild", "node"), &GObject::gd_removeChild);
 }
 
 void GObject::gd_setText(const String& text) { setText(text.utf8().get_data()); }

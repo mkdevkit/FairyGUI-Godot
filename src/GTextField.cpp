@@ -383,8 +383,8 @@ Vector2 GTextField::getTextSize()
 
 void GTextField::_bind_methods()
 {
-    ClassDB::bind_method(D_METHOD("setText", "text"), &GTextField::gd_setText);
-    ClassDB::bind_method(D_METHOD("getText"), &GTextField::gd_getText);
+    // setText/getText inherited from GObject
+    // setSingleLine/isSingleLine registered below
 
     ClassDB::bind_method(D_METHOD("setColor", "color"), &GTextField::setColor);
     ClassDB::bind_method(D_METHOD("getColor"), &GTextField::getColor);
@@ -410,9 +410,6 @@ void GTextField::_bind_methods()
 
     ClassDB::bind_method(D_METHOD("setTemplateVars", "vars"), &GTextField::gd_setTemplateVars);
 }
-
-void GTextField::gd_setText(const String& value) { setText(value.utf8().get_data()); }
-String GTextField::gd_getText() const { return String(getText().c_str()); }
 
 void GTextField::gd_setTemplateVars(const Dictionary& vars) {
     if (_templateVars)

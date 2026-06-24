@@ -27,9 +27,7 @@ public:
     GObject* addChild(GObject* child);
     virtual GObject* addChildAt(GObject* child, int index);
 
-    void gd_addChild(GObject* child);
-    void gd_addChildAt(GObject* child, int index);
-    void gd_removeChild(GObject* child);
+    void gd_addChildAt(Object* child, int index);
     void gd_removeChildren(int beginIndex, int endIndex);
 
     void removeChild(GObject* child);

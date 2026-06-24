@@ -30,9 +30,6 @@ public:
     virtual const std::string& getText() const override;
     virtual void setText(const std::string& value) override;
 
-    void gd_setText(const String& value);
-    String gd_getText() const;
-
     virtual const std::string& getIcon() const override;
     virtual void setIcon(const std::string& value) override;
 

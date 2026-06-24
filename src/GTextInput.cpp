@@ -18,10 +18,6 @@ void GTextInput::_bind_methods()
 {
     // set_text/get_text inherited from GTextField
 
-    ClassDB::bind_method(D_METHOD("setSingleLine", "value"), &GTextInput::setSingleLine);
-    ClassDB::bind_method(D_METHOD("isSingleLine"), &GTextInput::isSingleLine);
-    // ADD_PROPERTY(PropertyInfo(Variant::BOOL, "singleLine"), "setSingleLine", "isSingleLine");
-
     ClassDB::bind_method(D_METHOD("setPrompt", "value"), &GTextInput::gd_setPrompt);
     ClassDB::bind_method(D_METHOD("setPassword", "value"), &GTextInput::setPassword);
     ClassDB::bind_method(D_METHOD("setKeyboardType", "value"), &GTextInput::setKeyboardType);

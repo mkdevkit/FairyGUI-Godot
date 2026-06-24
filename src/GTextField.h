@@ -21,9 +21,6 @@ public:
     virtual const std::string& getText() const override { return _text; }
     virtual void setText(const std::string& value) override;
 
-    void gd_setText(const String& value);
-    String gd_getText() const;
-
     void gd_setTemplateVars(const Dictionary& vars);
 
     bool isUBBEnabled() const { return _ubbEnabled; }

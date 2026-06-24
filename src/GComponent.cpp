@@ -1390,9 +1390,7 @@ void GComponent::_bind_methods()
     ClassDB::bind_method(D_METHOD("applyController", "controller"), &GComponent::applyController);
     ClassDB::bind_method(D_METHOD("applyAllControllers"), &GComponent::applyAllControllers);
 
-    ClassDB::bind_method(D_METHOD("addChild", "child"), &GComponent::gd_addChild);
     ClassDB::bind_method(D_METHOD("addChildAt", "child", "index"), &GComponent::gd_addChildAt);
-    ClassDB::bind_method(D_METHOD("removeChild", "child"), &GComponent::gd_removeChild);
     ClassDB::bind_method(D_METHOD("removeChildAt", "index"), &GComponent::gd_removeChildAt);
     ClassDB::bind_method(D_METHOD("removeChildren", "begin_index", "end_index"), &GComponent::gd_removeChildren, DEFVAL(0), DEFVAL(-1));
 
@@ -1411,9 +1409,10 @@ void GComponent::_bind_methods()
 }
 
 void GComponent::gd_removeChildAt(int index) { removeChildAt(index); }
-void GComponent::gd_addChild(GObject* child) { addChild(child); }
-void GComponent::gd_removeChild(GObject* child) { removeChild(child); }
-void GComponent::gd_addChildAt(GObject* child, int index) { addChildAt(child, index); }
+void GComponent::gd_addChildAt(Object* child, int index) {
+    GObject* go = Object::cast_to<GObject>(child);
+    if (go) addChildAt(go, index);
+}
 void GComponent::gd_removeChildren(int beginIndex, int endIndex) { removeChildren(beginIndex, endIndex); }
 
 GObject* GComponent::gd_getChild(const String& name) const { return getChild(name.utf8().get_data()); }

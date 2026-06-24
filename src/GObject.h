@@ -208,6 +208,8 @@ protected:
 
     void addChild(Node* node);
     void removeChild(Node* node);
+    void gd_addChild(Object* node);
+    void gd_removeChild(Object* node);
 
     bool init();
 

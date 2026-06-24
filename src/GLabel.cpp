@@ -174,9 +174,6 @@ void GLabel::_bind_methods()
     ClassDB::bind_method(D_METHOD("setTitle", "title"), &GLabel::gd_setTitle);
     ClassDB::bind_method(D_METHOD("getTitle"), &GLabel::gd_getTitle);
 
-    ClassDB::bind_method(D_METHOD("setText", "text"), &GLabel::gd_setText);
-    ClassDB::bind_method(D_METHOD("getText"), &GLabel::gd_getText);
-
     ClassDB::bind_method(D_METHOD("setIcon", "icon"), &GLabel::gd_setIcon);
     ClassDB::bind_method(D_METHOD("getIcon"), &GLabel::gd_getIcon);
 
@@ -189,8 +186,6 @@ void GLabel::_bind_methods()
 
 void GLabel::gd_setTitle(const String& value) { setTitle(value.utf8().get_data()); }
 String GLabel::gd_getTitle() { return String(getTitle().c_str()); }
-void GLabel::gd_setText(const String& value) { setText(value.utf8().get_data()); }
-String GLabel::gd_getText() const { return String(getText().c_str()); }
 void GLabel::gd_setIcon(const String& value) { setIcon(value.utf8().get_data()); }
 String GLabel::gd_getIcon() const { return String(getIcon().c_str()); }
 
