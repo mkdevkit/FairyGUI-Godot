@@ -39,13 +39,13 @@ public:
 
     virtual Vector2 getTextSize();
 
-    Color getColor() const { return getTextFormat()->color; }
+    Color getColor() const { TextFormat* tf = getTextFormat(); return tf ? tf->color : Color(1,1,1,1); }
     void setColor(const Color& value);
 
-    float getFontSize() const { return getTextFormat()->fontSize; }
+    float getFontSize() const { TextFormat* tf = getTextFormat(); return tf ? tf->fontSize : 0.0f; }
     void setFontSize(float value);
 
-    Color getOutlineColor() const { return getTextFormat()->outlineColor; }
+    Color getOutlineColor() const { TextFormat* tf = getTextFormat(); return tf ? tf->outlineColor : Color(1,1,1,1); }
     void setOutlineColor(const Color& value);
 
     std::unordered_map<std::string, Variant>* getTemplateVars() { return _templateVars; }
@@ -86,10 +86,10 @@ public:
 
     virtual void setAutoSize(AutoSizeType value) override;
 
-    virtual bool isSingleLine() const override { return _label->isWrapEnabled(); }
+    virtual bool isSingleLine() const override { return _label ? _label->isWrapEnabled() : false; }
     virtual void setSingleLine(bool value) override;
 
-    virtual TextFormat* getTextFormat() const override { return _label->getTextFormat(); }
+    virtual TextFormat* getTextFormat() const override { return _label ? _label->getTextFormat() : nullptr; }
     virtual void applyTextFormat() override;
 
 protected:

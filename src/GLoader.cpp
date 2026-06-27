@@ -108,6 +108,7 @@ Vector2 GLoader::getContentSize()
 
 Color GLoader::getColor() const
 {
+    if (!_content) return Color(1, 1, 1, 1);
     return _content->getColor();
 }
 

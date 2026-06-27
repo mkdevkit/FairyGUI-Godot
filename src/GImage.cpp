@@ -23,6 +23,7 @@ void GImage::handleInit()
 
 FlipType GImage::getFlip() const
 {
+    if (!_content) return FlipType::NONE;
     if (_content->isFlippedH() && _content->isFlippedV())
         return FlipType::BOTH;
     else if (_content->isFlippedH())
@@ -48,6 +49,7 @@ void GImage::handleGrayedChanged()
 
 Color GImage::getColor() const
 {
+    if (!_content) return Color(1, 1, 1, 1);
     return _content->getColor();
 }
 
@@ -58,6 +60,7 @@ void GImage::setColor(const Color& value)
 
 FillMethod GImage::getFillMethod() const
 {
+    if (!_content) return FillMethod::None;
     return _content->getFillMethod();
 }
 
@@ -68,6 +71,7 @@ void GImage::setFillMethod(FillMethod value)
 
 FillOrigin GImage::getFillOrigin() const
 {
+    if (!_content) return FillOrigin::Left;
     return _content->getFillOrigin();
 }
 
@@ -78,6 +82,7 @@ void GImage::setFillOrigin(FillOrigin value)
 
 bool GImage::isFillClockwise() const
 {
+    if (!_content) return false;
     return _content->isFillClockwise();
 }
 
@@ -88,6 +93,7 @@ void GImage::setFillClockwise(bool value)
 
 float GImage::getFillAmount() const
 {
+    if (!_content) return 0;
     return _content->getFillAmount();
 }
 
