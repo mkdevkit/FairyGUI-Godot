@@ -794,29 +794,38 @@ void GRoot::applyContentScale()
     float designH = _designResolution.y;
 
     float scaleX, scaleY;
+    float newW, newH;
     switch (_screenMatchMode)
     {
     case ScreenMatchMode::MatchWidth:
         scaleX = scaleY = screenW / designW;
+        newW = designW;
+        newH = screenH / scaleX;
         break;
     case ScreenMatchMode::MatchHeight:
         scaleX = scaleY = screenH / designH;
+        newW = screenW / scaleX;
+        newH = designH;
         break;
     case ScreenMatchMode::MatchFill:
         scaleX = screenW / designW;
         scaleY = screenH / designH;
+        newW = screenW / scaleX;
+        newH = screenH / scaleY;
         break;
     case ScreenMatchMode::MatchWidthOrHeight:
     default:
         scaleX = scaleY = std::min(screenW / designW, screenH / designH);
+        newW = designW;
+        newH = designH;
         break;
     }
 
-    setSize(designW, designH);
+    setSize(newW, newH);
     node->set_scale(Vector2(scaleX, scaleY));
 
-    float offsetX = (screenW - designW * scaleX) * 0.5f;
-    float offsetY = (screenH - designH * scaleY) * 0.5f;
+    float offsetX = (screenW - newW * scaleX) * 0.5f;
+    float offsetY = (screenH - newH * scaleY) * 0.5f;
     node->set_position(Vector2(offsetX, offsetY));
 }
 

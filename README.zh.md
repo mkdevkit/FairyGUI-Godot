@@ -363,7 +363,67 @@ if ctrl:
     print(ctrl.previousIndex)        # 上一次的索引
 ```
 
-### 6. 拖拽
+### 6. 屏幕适配
+
+```gdscript
+# 在创建 GRoot 之后，设置设计分辨率和缩放模式
+var root = GRoot.create(get_tree())
+
+# 设置内容缩放（设计分辨率 1136x640，等比缩放）
+root.setContentScaleFactor(1136, 640, GRoot.ScreenMatchMode.MATCH_WIDTH_OR_HEIGHT)
+
+# 窗口大小变化时，需要调用此方法让 FairyGUI 重新计算缩放和布局
+root.onWindowSizeChanged()
+```
+
+#### ScreenMatchMode 说明
+
+| 模式 | scale 计算 | GRoot 尺寸 | 效果 |
+|------|-----------|-----------|------|
+| `MATCH_WIDTH_OR_HEIGHT` | `min(screenW/designW, screenH/designH)` | `(designW, designH)` | 等比缩放，黑边居中，内容始终可见 |
+| `MATCH_WIDTH` | `screenW / designW` | `(designW, screenH/scale)` | 宽度固定，高度动态（屏幕越高内容越多） |
+| `MATCH_HEIGHT` | `screenH / designH` | `(screenW/scale, designH)` | 高度固定，宽度动态（屏幕越宽内容越多） |
+| `MATCH_FILL` | `scaleX=screenW/designW`<br>`scaleY=screenH/designH` | `(designW, designH)` | 非等比拉伸撑满屏幕，无黑边 |
+
+#### GDScript 中监听窗口 resize
+
+```gdscript
+# 需要拿到 displayObject 才能监听窗口 resize 事件：
+# （FairyGUI 内部 displayObject 的父节点链最终指向 Viewport/Window）
+
+func _ready():
+    var root = GRoot.create(get_tree())
+    root.setContentScaleFactor(1136, 640, GRoot.ScreenMatchMode.MATCH_WIDTH_OR_HEIGHT)
+    
+    # 首次适配
+    root.onWindowSizeChanged()
+    
+    # 监听窗口 resize——拿到 GRoot 的 displayObject，
+    # 向上找到 Window 节点，连接 size_changed 信号
+    var display_node = root.getDisplayObject()
+    if display_node and display_node.is_inside_tree():
+        var viewport = display_node.get_viewport()
+        if viewport is Window:
+            viewport.size_changed.connect(root.onWindowSizeChanged)
+```
+
+#### makeFullScreen 的注意事项
+
+`makeFullScreen()` 内部会读取 `GRoot` 的尺寸来设置自身大小。如果在 `_ready()` 中直接调用，此时 `GRoot` 可能还未完成初始化或尺寸尚未设置。
+
+```gdscript
+# 初始化流程
+var root = GRoot.create(get_tree())
+root.setContentScaleFactor(1136, 640, GRoot.ScreenMatchMode.MATCH_WIDTH_OR_HEIGHT)
+
+# 创建组件后延迟调用 makeFullScreen
+var comp = UIPackage.createObject("UI", "MainPanel")
+comp.center()
+comp.makeFullScreen.call_deferred()  # 等 GRoot 初始化完成后再设置
+root.addChild(comp)
+```
+
+### 7. 拖拽
 
 ```gdscript
 obj.draggable = true
