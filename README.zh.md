@@ -421,6 +421,11 @@ var comp = UIPackage.createObject("UI", "MainPanel")
 comp.center()
 comp.makeFullScreen.call_deferred()  # 等 GRoot 初始化完成后再设置
 root.addChild(comp)
+
+# 窗口 resize 时，需要同时刷新 GRoot 适配和全屏组件
+func _on_window_size_change() -> void:
+    GRoot.getInstance().onWindowSizeChanged()
+    main_panel.makeFullScreen()
 ```
 
 ### 7. 拖拽
