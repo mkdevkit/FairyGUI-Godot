@@ -296,7 +296,7 @@ void GSlider::_bind_methods()
     ClassDB::bind_method(D_METHOD("getMax"), &GSlider::getMax);
     ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "max"), "setMax", "getMax");
 
-    ClassDB::bind_method(D_METHOD("set_value", "value"), &GSlider::setValue);
+    ClassDB::bind_method(D_METHOD("setValue", "value"), &GSlider::setValue);
     ClassDB::bind_method(D_METHOD("getValue"), &GSlider::getValue);
     ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "value"), "setValue", "getValue");
 

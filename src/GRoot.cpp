@@ -11,6 +11,8 @@
 #include "scene/main/window.h"
 #include "servers/display_server.h"
 
+#include <algorithm>
+
 NS_FGUI_BEGIN
 
 GRoot* GRoot::_inst = nullptr;
@@ -56,7 +58,8 @@ GRoot::GRoot()
       _modalLayer(nullptr),
       _modalWaitPane(nullptr),
       _tooltipWin(nullptr),
-      _defaultTooltipWin(nullptr)
+      _defaultTooltipWin(nullptr),
+      _hasDesignResolution(false)
 {
 }
 
@@ -88,6 +91,10 @@ GRoot::~GRoot()
 
 void GRoot::_bind_methods()
 {
+    ClassDB::bind_integer_constant(get_class_static(), "ScreenMatchMode", "MATCH_WIDTH_OR_HEIGHT", static_cast<GDExtensionInt>(ScreenMatchMode::MatchWidthOrHeight));
+    ClassDB::bind_integer_constant(get_class_static(), "ScreenMatchMode", "MATCH_WIDTH", static_cast<GDExtensionInt>(ScreenMatchMode::MatchWidth));
+    ClassDB::bind_integer_constant(get_class_static(), "ScreenMatchMode", "MATCH_HEIGHT", static_cast<GDExtensionInt>(ScreenMatchMode::MatchHeight));
+
     ClassDB::bind_static_method(get_class_static(), D_METHOD("create", "tree", "z_order"), &GRoot::create, DEFVAL(1000));
     ClassDB::bind_static_method(get_class_static(), D_METHOD("createDeferred", "tree", "z_order"), &GRoot::createDeferred, DEFVAL(1000));
     ClassDB::bind_static_method(get_class_static(), D_METHOD("getInstance"), &GRoot::getInstance);
@@ -122,6 +129,10 @@ void GRoot::_bind_methods()
     ClassDB::bind_method(D_METHOD("hideTooltips"), &GRoot::hideTooltips);
 
     ClassDB::bind_method(D_METHOD("playSound", "url", "volume_scale"), &GRoot::gd_playSound, DEFVAL(1.0f));
+
+    ClassDB::bind_method(D_METHOD("setContentScaleFactor", "designWidth", "designHeight", "matchMode"), &GRoot::setContentScaleFactor);
+    ClassDB::bind_method(D_METHOD("onWindowSizeChanged"), &GRoot::onWindowSizeChanged);
+    ClassDB::bind_method(D_METHOD("getDisplayObject"), &GRoot::gd_getDisplayObject);
 
     ClassDB::bind_method(D_METHOD("setSoundEnabled", "value"), &GRoot::setSoundEnabled);
     ClassDB::bind_method(D_METHOD("isSoundEnabled"), &GRoot::isSoundEnabled);
@@ -596,7 +607,19 @@ void GRoot::onTouchEvent(int eventType)
 
 void GRoot::handlePositionChanged()
 {
-    setPosition(0, _size.height);
+    // Position is managed by applyContentScale / onWindowSizeChanged
+}
+
+void GRoot::handleSizeChanged()
+{
+    // Scale is managed by applyContentScale — do NOT let base reset it.
+    // Only run GComponent's layout bookkeeping (container position, clipping, etc.).
+    // ScrollPane and mask are inaccessible / not needed for GRoot.
+    if (_container)
+        _container->set_position(Vector2(_margin.left, _margin.top));
+
+    if (((FUIContainer*)_displayObject)->isClippingEnabled())
+        ((FUIContainer*)_displayObject)->setClippingRegion(Rect(_margin.left, _margin.top, _size.width - _margin.left - _margin.right, _size.height - _margin.top - _margin.bottom));
 }
 
 void GRoot::_enter_tree()
@@ -610,16 +633,6 @@ void GRoot::_exit_tree()
     GComponent::_exit_tree();
     if (_inst == this)
         _inst = nullptr;
-}
-
-void GRoot::_notification(int p_what)
-{
-    GComponent::_notification(p_what);
-
-    if (p_what == Node::NOTIFICATION_WM_SIZE_CHANGED)
-    {
-        onWindowSizeChanged();
-    }
 }
 
 bool GRoot::initWithParent(Node* parent, int zOrder)
@@ -640,9 +653,6 @@ bool GRoot::initWithParent(Node* parent, int zOrder)
 
 void GRoot::onInitWithParent(Node* parent, int zOrder, bool deferAdd)
 {
-    if (parent)  // skip when deferred - will be called after add_child via _ready
-        onWindowSizeChanged();
-
     if (parent)
     {
         if (deferAdd) {
@@ -662,33 +672,139 @@ void GRoot::onWindowSizeChanged()
     if (!_displayObject || !_displayObject->is_inside_tree())
         return;
 
-    Viewport* viewport = _displayObject->get_viewport();
-    if (viewport)
+    if (_hasDesignResolution)
     {
-        Rect2 visibleRect = viewport->get_visible_rect();
-        setSize(visibleRect.size.x, visibleRect.size.y);
+        applyContentScale();
+    }
+    else
+    {
+        Viewport* viewport = _displayObject->get_viewport();
+        if (viewport)
+        {
+            Rect2 visibleRect = viewport->get_visible_rect();
+            setSize(visibleRect.size.x, visibleRect.size.y);
+        }
     }
 
     updateContentScaleLevel();
 }
 
+Node* GRoot::gd_getDisplayObject()
+{
+    return _displayObject;
+}
+
 void GRoot::updateContentScaleLevel()
 {
-    float ss = 1.0f;
-    Viewport* viewport = _displayObject->get_viewport();
-    if (viewport)
+    if (!_hasDesignResolution)
     {
-        ss = 1.0f; // GODOT_ADAPT: viewport->get_content_scale_factor() not available
+        contentScaleLevel = 0;
+        return;
     }
 
-    if (ss >= 3.5f)
+    Viewport* viewport = _displayObject->get_viewport();
+    if (!viewport)
+    {
+        contentScaleLevel = 0;
+        return;
+    }
+
+    Rect2 visibleRect = viewport->get_visible_rect();
+    float screenW = visibleRect.size.x;
+    float screenH = visibleRect.size.y;
+    if (screenW <= 0 || screenH <= 0)
+    {
+        contentScaleLevel = 0;
+        return;
+    }
+
+    float designW = _designResolution.x;
+    float designH = _designResolution.y;
+
+    float scale;
+    switch (_screenMatchMode)
+    {
+    case ScreenMatchMode::MatchWidth:
+        scale = screenW / designW;
+        break;
+    case ScreenMatchMode::MatchHeight:
+        scale = screenH / designH;
+        break;
+    case ScreenMatchMode::MatchWidthOrHeight:
+    default:
+        scale = std::min(screenW / designW, screenH / designH);
+        break;
+    }
+
+    ((Node2D*)_displayObject)->set_scale(Vector2(scale, scale));
+
+    if (scale >= 3.5f)
         contentScaleLevel = 3; //x4
-    else if (ss >= 2.5f)
+    else if (scale >= 2.5f)
         contentScaleLevel = 2; //x3
-    else if (ss >= 1.5f)
+    else if (scale >= 1.5f)
         contentScaleLevel = 1; //x2
     else
         contentScaleLevel = 0;
+}
+
+void GRoot::setContentScaleFactor(int designWidth, int designHeight, int matchMode)
+{
+    _designResolution = Vector2((float)designWidth, (float)designHeight);
+    _screenMatchMode = static_cast<ScreenMatchMode>(matchMode);
+    _hasDesignResolution = true;
+    applyContentScale();
+    updateContentScaleLevel();
+}
+
+void GRoot::applyContentScale()
+{
+    if (!_hasDesignResolution || !_displayObject)
+        return;
+
+    Node2D* node = (Node2D*)_displayObject;
+
+    if (!node->is_inside_tree())
+    {
+        // Not in tree yet — connect one-shot to retry when it enters
+        node->connect("tree_entered", callable_mp(this, &GRoot::applyContentScale), Object::CONNECT_ONE_SHOT);
+        return;
+    }
+
+    Viewport* viewport = node->get_viewport();
+    if (!viewport)
+        return;
+
+    Rect2 visibleRect = viewport->get_visible_rect();
+    float screenW = visibleRect.size.x;
+    float screenH = visibleRect.size.y;
+    if (screenW <= 0 || screenH <= 0)
+        return;
+
+    float designW = _designResolution.x;
+    float designH = _designResolution.y;
+
+    float scale;
+    switch (_screenMatchMode)
+    {
+    case ScreenMatchMode::MatchWidth:
+        scale = screenW / designW;
+        break;
+    case ScreenMatchMode::MatchHeight:
+        scale = screenH / designH;
+        break;
+    case ScreenMatchMode::MatchWidthOrHeight:
+    default:
+        scale = std::min(screenW / designW, screenH / designH);
+        break;
+    }
+
+    setSize(designW, designH);
+    node->set_scale(Vector2(scale, scale));
+    // Center the UI when there are black bars
+    float offsetX = (screenW - designW * scale) * 0.5f;
+    float offsetY = (screenH - designH * scale) * 0.5f;
+    node->set_position(Vector2(offsetX, offsetY));
 }
 
 void GRoot::gd_showTooltips(const String& msg) { showTooltips(msg.utf8().get_data()); }

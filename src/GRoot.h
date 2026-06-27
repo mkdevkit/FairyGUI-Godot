@@ -85,22 +85,30 @@ public:
 
     static int contentScaleLevel;
 
+    void setContentScaleFactor(int designWidth, int designHeight, int matchMode);
+    const Vector2& getDesignResolution() const { return _designResolution; }
+    ScreenMatchMode getScreenMatchMode() const { return _screenMatchMode; }
+
+    void onWindowSizeChanged();
+    Node* getDisplayObject() const { return _displayObject; }
+
 protected:
     virtual void handlePositionChanged() override;
+    virtual void handleSizeChanged() override;
     virtual void _enter_tree() override;
     virtual void _exit_tree() override;
-    void _notification(int p_what);
 
 private:
     bool initWithParent(Node* parent, int zOrder);
     void onInitWithParent(Node* parent, int zOrder, bool deferAdd = false);
-    void onWindowSizeChanged();
     void createModalLayer();
     void adjustModalLayer();
     void closePopup(GObject* target);
     void checkPopups();
     void onTouchEvent(int eventType);
     void updateContentScaleLevel();
+    void applyContentScale();
+    Node* gd_getDisplayObject();
 
     CALL_LATER_FUNC(GRoot, doShowTooltipsWin);
 
@@ -115,6 +123,10 @@ private:
 
     static bool _soundEnabled;
     static float _soundVolumeScale;
+
+    Vector2 _designResolution;
+    ScreenMatchMode _screenMatchMode;
+    bool _hasDesignResolution;
 
     static GRoot* _inst;
 };

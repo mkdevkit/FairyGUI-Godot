@@ -210,6 +210,13 @@ enum class ObjectPropID {
     Selected
 };
 
+enum class ScreenMatchMode
+{
+    MatchWidthOrHeight,
+    MatchWidth,
+    MatchHeight
+};
+
 NS_FGUI_END
 
 #endif
