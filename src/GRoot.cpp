@@ -94,6 +94,7 @@ void GRoot::_bind_methods()
     ClassDB::bind_integer_constant(get_class_static(), "ScreenMatchMode", "MATCH_WIDTH_OR_HEIGHT", static_cast<GDExtensionInt>(ScreenMatchMode::MatchWidthOrHeight));
     ClassDB::bind_integer_constant(get_class_static(), "ScreenMatchMode", "MATCH_WIDTH", static_cast<GDExtensionInt>(ScreenMatchMode::MatchWidth));
     ClassDB::bind_integer_constant(get_class_static(), "ScreenMatchMode", "MATCH_HEIGHT", static_cast<GDExtensionInt>(ScreenMatchMode::MatchHeight));
+    ClassDB::bind_integer_constant(get_class_static(), "ScreenMatchMode", "MATCH_FILL", static_cast<GDExtensionInt>(ScreenMatchMode::MatchFill));
 
     ClassDB::bind_static_method(get_class_static(), D_METHOD("create", "tree", "z_order"), &GRoot::create, DEFVAL(1000));
     ClassDB::bind_static_method(get_class_static(), D_METHOD("createDeferred", "tree", "z_order"), &GRoot::createDeferred, DEFVAL(1000));
@@ -721,28 +722,36 @@ void GRoot::updateContentScaleLevel()
     float designW = _designResolution.x;
     float designH = _designResolution.y;
 
-    float scale;
+    float scaleX, scaleY;
     switch (_screenMatchMode)
     {
     case ScreenMatchMode::MatchWidth:
-        scale = screenW / designW;
+        scaleX = scaleY = screenW / designW;
         break;
     case ScreenMatchMode::MatchHeight:
-        scale = screenH / designH;
+        scaleX = scaleY = screenH / designH;
+        break;
+    case ScreenMatchMode::MatchFill:
+        scaleX = screenW / designW;
+        scaleY = screenH / designH;
         break;
     case ScreenMatchMode::MatchWidthOrHeight:
     default:
-        scale = std::min(screenW / designW, screenH / designH);
+        scaleX = scaleY = std::min(screenW / designW, screenH / designH);
         break;
     }
 
-    ((Node2D*)_displayObject)->set_scale(Vector2(scale, scale));
+    // Use the larger of the two scales to decide atlas resolution level
+    float atlasScale = std::max(scaleX, scaleY);
 
-    if (scale >= 3.5f)
+    if (_displayObject)
+        ((Node2D*)_displayObject)->set_scale(Vector2(scaleX, scaleY));
+
+    if (atlasScale >= 3.5f)
         contentScaleLevel = 3; //x4
-    else if (scale >= 2.5f)
+    else if (atlasScale >= 2.5f)
         contentScaleLevel = 2; //x3
-    else if (scale >= 1.5f)
+    else if (atlasScale >= 1.5f)
         contentScaleLevel = 1; //x2
     else
         contentScaleLevel = 0;
@@ -784,26 +793,30 @@ void GRoot::applyContentScale()
     float designW = _designResolution.x;
     float designH = _designResolution.y;
 
-    float scale;
+    float scaleX, scaleY;
     switch (_screenMatchMode)
     {
     case ScreenMatchMode::MatchWidth:
-        scale = screenW / designW;
+        scaleX = scaleY = screenW / designW;
         break;
     case ScreenMatchMode::MatchHeight:
-        scale = screenH / designH;
+        scaleX = scaleY = screenH / designH;
+        break;
+    case ScreenMatchMode::MatchFill:
+        scaleX = screenW / designW;
+        scaleY = screenH / designH;
         break;
     case ScreenMatchMode::MatchWidthOrHeight:
     default:
-        scale = std::min(screenW / designW, screenH / designH);
+        scaleX = scaleY = std::min(screenW / designW, screenH / designH);
         break;
     }
 
     setSize(designW, designH);
-    node->set_scale(Vector2(scale, scale));
-    // Center the UI when there are black bars
-    float offsetX = (screenW - designW * scale) * 0.5f;
-    float offsetY = (screenH - designH * scale) * 0.5f;
+    node->set_scale(Vector2(scaleX, scaleY));
+
+    float offsetX = (screenW - designW * scaleX) * 0.5f;
+    float offsetY = (screenH - designH * scaleY) * 0.5f;
     node->set_position(Vector2(offsetX, offsetY));
 }
 

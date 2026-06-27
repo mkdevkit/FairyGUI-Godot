@@ -214,7 +214,8 @@ enum class ScreenMatchMode
 {
     MatchWidthOrHeight,
     MatchWidth,
-    MatchHeight
+    MatchHeight,
+    MatchFill
 };
 
 NS_FGUI_END

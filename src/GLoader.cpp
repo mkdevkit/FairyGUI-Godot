@@ -7,6 +7,7 @@
 #include "display/FUISprite.h"
 #include "utils/ByteBuffer.h"
 #include "utils/ToolSet.h"
+#include "core/io/resource_loader.h"
 
 #include "core/io/image.h"
 #include "core/io/image_loader.h"
@@ -270,17 +271,13 @@ void GLoader::loadFromPackage()
 
 void GLoader::loadExternal()
 {
-    Ref<Image> img;
-    img.instantiate();
     String path = ResourceUID::ensure_path(GObject::toGodotStr(_url));
-    if (ImageLoader::load_image(path, img) == OK)
+    Ref<Texture2D> tex2d = ResourceLoader::load(path);
+    if (tex2d.is_valid())
     {
-        Ref<ImageTexture> tex;
-        tex.instantiate();
-        tex->set_image(img);
         ImageFrame* sf = new ImageFrame();
-        sf->texture = tex;
-        sf->region = Rect2(Vector2(), tex->get_size());
+        sf->texture = tex2d;
+        sf->region = Rect2(Vector2(), tex2d->get_size());
         onExternalLoadSuccess(sf);
     }
     else
