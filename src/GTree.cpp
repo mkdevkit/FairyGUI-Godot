@@ -427,6 +427,15 @@ void GTree::_bind_methods()
     ClassDB::bind_method(D_METHOD("setClickToExpand", "value"), &GTree::setClickToExpand);
     ClassDB::bind_method(D_METHOD("getClickToExpand"), &GTree::getClickToExpand);
     ADD_PROPERTY(PropertyInfo(Variant::INT, "clickToExpand"), "setClickToExpand", "getClickToExpand");
+
+    ClassDB::bind_method(D_METHOD("setTreeNodeRender", "callable"), &GTree::gd_setTreeNodeRender);
+}
+
+void GTree::gd_setTreeNodeRender(const Callable& callable)
+{
+    treeNodeRender = [callable](GTreeNode* node, GComponent* obj) {
+        callable.call(node, obj);
+    };
 }
 
 NS_FGUI_END

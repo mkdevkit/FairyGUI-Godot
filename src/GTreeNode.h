@@ -34,6 +34,7 @@ public:
 
     void gd_setText(const String& value);
     String gd_getText() const;
+    void gd_init(bool is_folder, const String& res_url);
 
     const std::string& getIcon() const;
     void setIcon(const std::string& value);

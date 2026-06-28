@@ -96,6 +96,10 @@ void GRoot::_bind_methods()
     ClassDB::bind_integer_constant(get_class_static(), "ScreenMatchMode", "MATCH_HEIGHT", static_cast<GDExtensionInt>(ScreenMatchMode::MatchHeight));
     ClassDB::bind_integer_constant(get_class_static(), "ScreenMatchMode", "MATCH_FILL", static_cast<GDExtensionInt>(ScreenMatchMode::MatchFill));
 
+    ClassDB::bind_integer_constant(get_class_static(), "PopupDirection", "AUTO", static_cast<GDExtensionInt>(PopupDirection::AUTO));
+    ClassDB::bind_integer_constant(get_class_static(), "PopupDirection", "UP", static_cast<GDExtensionInt>(PopupDirection::UP));
+    ClassDB::bind_integer_constant(get_class_static(), "PopupDirection", "DOWN", static_cast<GDExtensionInt>(PopupDirection::DOWN));
+
     ClassDB::bind_static_method(get_class_static(), D_METHOD("create", "tree", "z_order"), &GRoot::create, DEFVAL(1000));
     ClassDB::bind_static_method(get_class_static(), D_METHOD("createDeferred", "tree", "z_order"), &GRoot::createDeferred, DEFVAL(1000));
     ClassDB::bind_static_method(get_class_static(), D_METHOD("getInstance"), &GRoot::getInstance);
@@ -142,6 +146,9 @@ void GRoot::_bind_methods()
     ClassDB::bind_method(D_METHOD("setSoundVolumeScale", "value"), &GRoot::setSoundVolumeScale);
     ClassDB::bind_method(D_METHOD("getSoundVolumeScale"), &GRoot::getSoundVolumeScale);
     ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "soundVolumeScale", PROPERTY_HINT_RANGE, "0,1,0.01"), "setSoundVolumeScale", "getSoundVolumeScale");
+
+    ClassDB::bind_method(D_METHOD("showPopup", "popup", "target", "dir"), &GRoot::gd_showPopup);
+    ClassDB::bind_method(D_METHOD("showPopupSimple", "popup"), &GRoot::gd_showPopupSimple);
 }
 
 void GRoot::showWindow(GWindow* win)

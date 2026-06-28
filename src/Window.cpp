@@ -52,9 +52,9 @@ void GWindow::_bind_methods()
     ClassDB::bind_method(D_METHOD("isBringToFrontOnClick"), &GWindow::isBringToFrontOnClick);
     ADD_PROPERTY(PropertyInfo(Variant::BOOL, "bringToFrontOnClick"), "setBringToFrontOnClick", "isBringToFrontOnClick");
 
-    ClassDB::bind_method(D_METHOD("setContentContentPane", "pane"), &GWindow::setContentPane);
-    ClassDB::bind_method(D_METHOD("getContentContentPane"), &GWindow::getContentPane);
-    ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "contentPane", PROPERTY_HINT_NODE_TYPE, "GComponent"), "setContentContentPane", "getContentContentPane");
+    ClassDB::bind_method(D_METHOD("setContentPane", "pane"), &GWindow::setContentPane);
+    ClassDB::bind_method(D_METHOD("getContentPane"), &GWindow::getContentPane);
+    ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "contentPane", PROPERTY_HINT_NODE_TYPE, "GComponent"), "setContentPane", "getContentPane");
 
     ClassDB::bind_method(D_METHOD("getFrame"), &GWindow::getFrame);
 
@@ -71,6 +71,27 @@ void GWindow::_bind_methods()
     ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "contentArea", PROPERTY_HINT_NODE_TYPE, "GObject"), "setContentArea", "getContentArea");
 
     ClassDB::bind_method(D_METHOD("getModalWaitingPane"), &GWindow::getModalWaitingPane);
+
+    // GDScript virtual method hooks
+    ClassDB::bind_method(D_METHOD("setOnInitCallback", "callback"), &GWindow::setOnInitCallback);
+    ClassDB::bind_method(D_METHOD("getOnInitCallback"), &GWindow::getOnInitCallback);
+    ADD_PROPERTY(PropertyInfo(Variant::CALLABLE, "onInitCallback"), "setOnInitCallback", "getOnInitCallback");
+
+    ClassDB::bind_method(D_METHOD("setOnShownCallback", "callback"), &GWindow::setOnShownCallback);
+    ClassDB::bind_method(D_METHOD("getOnShownCallback"), &GWindow::getOnShownCallback);
+    ADD_PROPERTY(PropertyInfo(Variant::CALLABLE, "onShownCallback"), "setOnShownCallback", "getOnShownCallback");
+
+    ClassDB::bind_method(D_METHOD("setOnHideCallback", "callback"), &GWindow::setOnHideCallback);
+    ClassDB::bind_method(D_METHOD("getOnHideCallback"), &GWindow::getOnHideCallback);
+    ADD_PROPERTY(PropertyInfo(Variant::CALLABLE, "onHideCallback"), "setOnHideCallback", "getOnHideCallback");
+
+    ClassDB::bind_method(D_METHOD("setDoShowAnimationCallback", "callback"), &GWindow::setDoShowAnimationCallback);
+    ClassDB::bind_method(D_METHOD("getDoShowAnimationCallback"), &GWindow::getDoShowAnimationCallback);
+    ADD_PROPERTY(PropertyInfo(Variant::CALLABLE, "doShowAnimationCallback"), "setDoShowAnimationCallback", "getDoShowAnimationCallback");
+
+    ClassDB::bind_method(D_METHOD("setDoHideAnimationCallback", "callback"), &GWindow::setDoHideAnimationCallback);
+    ClassDB::bind_method(D_METHOD("getDoHideAnimationCallback"), &GWindow::getDoHideAnimationCallback);
+    ADD_PROPERTY(PropertyInfo(Variant::CALLABLE, "doHideAnimationCallback"), "setDoHideAnimationCallback", "getDoHideAnimationCallback");
 }
 
 void GWindow::handleInit()
@@ -93,7 +114,7 @@ void GWindow::setContentPane(GComponent* value)
         _contentPane = value;
         if (_contentPane != nullptr)
         {
-            _contentPane->addChild(_contentPane);
+            addChild(_contentPane);
             setSize(_contentPane->getWidth(), _contentPane->getHeight());
             _contentPane->addRelation(this, RelationType::Size);
             _frame = dynamic_cast<GComponent*>(_contentPane->getChild("frame"));
@@ -253,6 +274,8 @@ void GWindow::initWindow()
 void GWindow::_initWindow()
 {
     _inited = true;
+    if (_onInitCallback.is_valid())
+        _onInitCallback.call();
     onInit();
 
     if (isShowing())
@@ -266,12 +289,20 @@ void GWindow::addUISource(IUISource * uiSource)
 
 void GWindow::doShowAnimation()
 {
-    onShown();
+    if (_doShowAnimationCallback.is_valid())
+        _doShowAnimationCallback.call();
+    else
+        onShown();
+    if (_onShownCallback.is_valid())
+        _onShownCallback.call();
 }
 
 void GWindow::doHideAnimation()
 {
-    hideImmediately();
+    if (_doHideAnimationCallback.is_valid())
+        _doHideAnimationCallback.call();
+    else
+        hideImmediately();
 }
 
 void GWindow::closeEventHandler(EventContext * context)
@@ -308,6 +339,8 @@ void GWindow::_exit_tree()
     GComponent::_exit_tree();
 
     closeModalWait();
+    if (_onHideCallback.is_valid())
+        _onHideCallback.call();
     onHide();
 }
 

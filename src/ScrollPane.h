@@ -1,4 +1,4 @@
-﻿#ifndef __SCROLLPANE_H__
+#ifndef __SCROLLPANE_H__
 #define __SCROLLPANE_H__
 
 #include "FairyGUIMacros.h"
@@ -19,8 +19,10 @@ class GTweener;
 
 class ScrollPane : public RefCounted
 {
+    GDCLASS(ScrollPane, RefCounted)
 public:
-    ScrollPane(GComponent* owner);
+    ScrollPane();
+    explicit ScrollPane(GComponent* owner);
     virtual ~ScrollPane();
 
     void setup(ByteBuffer* buffer);
@@ -30,6 +32,17 @@ public:
     GComponent* getFooter() const { return _footer; }
     GScrollBar* getVtScrollBar() const { return _vtScrollBar; }
     GScrollBar* getHzScrollBar() const { return _hzScrollBar; }
+
+    static void _bind_methods();
+
+    // GDScript wrapper for getPosX/setPosX returning Variant
+    float gd_getPosX() const { return getPosX(); }
+    void gd_setPosX(float value, bool ani) { setPosX(value, ani); }
+    float gd_getPosY() const { return getPosY(); }
+    void gd_setPosY(float value, bool ani) { setPosY(value, ani); }
+    void gd_scrollTop(bool ani) { scrollTop(ani); }
+    void gd_scrollBottom(bool ani) { scrollBottom(ani); }
+    bool gd_isBottomMost() const { return isBottomMost(); }
 
     bool isBouncebackEffect() const { return _bouncebackEffect; }
     void setBouncebackEffect(bool value) { _bouncebackEffect = value; }

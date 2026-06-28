@@ -422,7 +422,15 @@ void GGraph::setup_beforeAdd(ByteBuffer* buffer, int beginPos)
     }
 }
 
-void GGraph::_bind_methods() {}
+void GGraph::_bind_methods()
+{
+    ClassDB::bind_method(D_METHOD("drawRect", "width", "height", "line_size", "line_color", "fill_color"), &GGraph::drawRect);
+    ClassDB::bind_method(D_METHOD("drawEllipse", "width", "height", "line_size", "line_color", "fill_color"), &GGraph::drawEllipse);
+    ClassDB::bind_method(D_METHOD("isEmpty"), &GGraph::isEmpty);
+    ClassDB::bind_method(D_METHOD("setColor", "color"), &GGraph::setColor);
+    ClassDB::bind_method(D_METHOD("getColor"), &GGraph::getColor);
+    ADD_PROPERTY(PropertyInfo(Variant::COLOR, "color"), "setColor", "getColor");
+}
 
 NS_FGUI_END
 

@@ -407,6 +407,7 @@ void GTextField::_bind_methods()
     ClassDB::bind_method(D_METHOD("isUBBEnabled"), &GTextField::isUBBEnabled);
 
     ClassDB::bind_method(D_METHOD("setTemplateVars", "vars"), &GTextField::gd_setTemplateVars);
+    ClassDB::bind_method(D_METHOD("getTextSize"), &GTextField::getTextSize);
 }
 
 void GTextField::gd_setTemplateVars(const Dictionary& vars) {

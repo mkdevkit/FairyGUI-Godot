@@ -281,20 +281,55 @@ void UIEventDispatcher::doBubble(int eventType, EventContext* context)
         p->doBubble(eventType, context);
 }
 
+void UIEventDispatcher::gd_addEventListener(int eventType, const Callable& callable)
+{
+    addEventListener(eventType, [callable](EventContext* ctx) {
+        callable.call();
+    });
+}
+
+void UIEventDispatcher::gd_removeEventListener(int eventType)
+{
+    removeEventListener(eventType, EventTag::None);
+}
+
 void UIEventDispatcher::_bind_methods()
 {
     // EventCallback and EventTag types can't be bound via ClassDB
-    BIND_ENUM_CONSTANT(UIEventType::Click);
-    BIND_ENUM_CONSTANT(UIEventType::TouchBegin);
-    BIND_ENUM_CONSTANT(UIEventType::TouchMove);
-    BIND_ENUM_CONSTANT(UIEventType::TouchEnd);
-    BIND_ENUM_CONSTANT(UIEventType::RollOver);
-    BIND_ENUM_CONSTANT(UIEventType::RollOut);
-    BIND_ENUM_CONSTANT(UIEventType::MouseWheel);
-    BIND_ENUM_CONSTANT(UIEventType::RightClick);
-    BIND_ENUM_CONSTANT(UIEventType::MiddleClick);
-    BIND_ENUM_CONSTANT(UIEventType::KeyDown);
-    BIND_ENUM_CONSTANT(UIEventType::KeyUp);
+    ClassDB::bind_integer_constant(get_class_static(), "", "ENTER", static_cast<int64_t>(UIEventType::Enter));
+    ClassDB::bind_integer_constant(get_class_static(), "", "EXIT", static_cast<int64_t>(UIEventType::Exit));
+    ClassDB::bind_integer_constant(get_class_static(), "", "CHANGED", static_cast<int64_t>(UIEventType::Changed));
+    ClassDB::bind_integer_constant(get_class_static(), "", "SUBMIT", static_cast<int64_t>(UIEventType::Submit));
+    ClassDB::bind_integer_constant(get_class_static(), "", "CLICK", static_cast<int64_t>(UIEventType::Click));
+    ClassDB::bind_integer_constant(get_class_static(), "", "TOUCHBEGIN", static_cast<int64_t>(UIEventType::TouchBegin));
+    ClassDB::bind_integer_constant(get_class_static(), "", "TOUCHMOVE", static_cast<int64_t>(UIEventType::TouchMove));
+    ClassDB::bind_integer_constant(get_class_static(), "", "TOUCHEND", static_cast<int64_t>(UIEventType::TouchEnd));
+    ClassDB::bind_integer_constant(get_class_static(), "", "ROLLOVER", static_cast<int64_t>(UIEventType::RollOver));
+    ClassDB::bind_integer_constant(get_class_static(), "", "ROLLOUT", static_cast<int64_t>(UIEventType::RollOut));
+    ClassDB::bind_integer_constant(get_class_static(), "", "MOUSEWHEEL", static_cast<int64_t>(UIEventType::MouseWheel));
+    ClassDB::bind_integer_constant(get_class_static(), "", "RIGHTCLICK", static_cast<int64_t>(UIEventType::RightClick));
+    ClassDB::bind_integer_constant(get_class_static(), "", "MIDDLECLICK", static_cast<int64_t>(UIEventType::MiddleClick));
+    ClassDB::bind_integer_constant(get_class_static(), "", "KEYDOWN", static_cast<int64_t>(UIEventType::KeyDown));
+    ClassDB::bind_integer_constant(get_class_static(), "", "KEYUP", static_cast<int64_t>(UIEventType::KeyUp));
+    ClassDB::bind_integer_constant(get_class_static(), "", "SCROLL", static_cast<int64_t>(UIEventType::Scroll));
+    ClassDB::bind_integer_constant(get_class_static(), "", "SCROLLEND", static_cast<int64_t>(UIEventType::ScrollEnd));
+    ClassDB::bind_integer_constant(get_class_static(), "", "PULLDOWNRELEASE", static_cast<int64_t>(UIEventType::PullDownRelease));
+    ClassDB::bind_integer_constant(get_class_static(), "", "PULLUPRELEASE", static_cast<int64_t>(UIEventType::PullUpRelease));
+    ClassDB::bind_integer_constant(get_class_static(), "", "POSITIONCHANGE", static_cast<int64_t>(UIEventType::PositionChange));
+    ClassDB::bind_integer_constant(get_class_static(), "", "SIZECHANGE", static_cast<int64_t>(UIEventType::SizeChange));
+    ClassDB::bind_integer_constant(get_class_static(), "", "CLICKITEM", static_cast<int64_t>(UIEventType::ClickItem));
+    ClassDB::bind_integer_constant(get_class_static(), "", "CLICKLINK", static_cast<int64_t>(UIEventType::ClickLink));
+    ClassDB::bind_integer_constant(get_class_static(), "", "CLICKMENU", static_cast<int64_t>(UIEventType::ClickMenu));
+    ClassDB::bind_integer_constant(get_class_static(), "", "RIGHTCLICKITEM", static_cast<int64_t>(UIEventType::RightClickItem));
+    ClassDB::bind_integer_constant(get_class_static(), "", "DRAGSTART", static_cast<int64_t>(UIEventType::DragStart));
+    ClassDB::bind_integer_constant(get_class_static(), "", "DRAGMOVE", static_cast<int64_t>(UIEventType::DragMove));
+    ClassDB::bind_integer_constant(get_class_static(), "", "DRAGEND", static_cast<int64_t>(UIEventType::DragEnd));
+    ClassDB::bind_integer_constant(get_class_static(), "", "DROP", static_cast<int64_t>(UIEventType::Drop));
+    ClassDB::bind_integer_constant(get_class_static(), "", "GEARSTOP", static_cast<int64_t>(UIEventType::GearStop));
+
+    // Callable-based event listener for GDScript
+    ClassDB::bind_method(D_METHOD("addEventListener", "type", "callable"), &UIEventDispatcher::gd_addEventListener);
+    ClassDB::bind_method(D_METHOD("removeEventListener", "type"), &UIEventDispatcher::gd_removeEventListener);
 }
 
 NS_FGUI_END

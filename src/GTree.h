@@ -70,6 +70,9 @@ private:
     bool _expandedStatusInEvt;
 
     friend class GTreeNode;
+
+    // GDScript extension
+    void gd_setTreeNodeRender(const Callable& callable);
 };
 
 NS_FGUI_END

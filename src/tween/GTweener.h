@@ -13,6 +13,7 @@ class GPath;
 
 class GTweener : public RefCounted
 {
+    GDCLASS(GTweener, RefCounted)
 public:
     typedef std::function<void(GTweener* tweener)> GTweenCallback;
     typedef std::function<void()> GTweenCallback0;
@@ -54,6 +55,16 @@ public:
     TweenValue endValue;
     TweenValue value;
     TweenValue deltaValue;
+
+    // GDScript bindings
+    static void _bind_methods();
+
+    // GDScript callback setters (Callable wrappers)
+    GTweener* gd_onUpdate(const Callable& callable);
+    GTweener* gd_onStart(const Callable& callable);
+    GTweener* gd_onComplete(const Callable& callable);
+    GTweener* gd_setEase(int value);
+    GTweener* gd_setTarget(Object* target, int prop_type);
 
 private:
     GTweener* _to(float start, float end, float duration);

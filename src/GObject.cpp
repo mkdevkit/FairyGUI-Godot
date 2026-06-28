@@ -1082,8 +1082,84 @@ void GObject::onTouchEnd(EventContext* context)
     }
 }
 
+void GObject::gd_addClickListener(const Callable& callable)
+{
+    addEventListener(UIEventType::Click, [callable](EventContext* ctx) {
+        callable.call();
+    });
+}
+
+void GObject::gd_removeClickListener()
+{
+    removeEventListener(UIEventType::Click, EventTag::None);
+}
+
+void GObject::gd_setIcon(const String& icon)
+{
+    setIcon(icon.utf8().get_data());
+}
+
+String GObject::gd_getIcon() const
+{
+    return toGodotStr(getIcon());
+}
+
+void GObject::gd_setPivot(float xv, float yv, bool asAnchor)
+{
+    setPivot(xv, yv, asAnchor);
+}
+
+Vector2 GObject::gd_getPivot() const
+{
+    return getPivot();
+}
+
+Rect2 GObject::gd_transformRect(const Rect2& rect, GObject* target_space)
+{
+    return transformRect(rect, target_space);
+}
+
+void GObject::gd_setDragBounds(const Rect2& bounds)
+{
+    setDragBounds(bounds);
+}
+
+Object* GObject::gd_getParent() const
+{
+    return _parent;
+}
+
+Object* GObject::gd_getTreeNode() const
+{
+    return (Object*)treeNode();
+}
+
+void GObject::gd_addRelation(Object* target, int relation_type, bool use_percent)
+{
+    GObject* go = Object::cast_to<GObject>(target);
+    if (go)
+        addRelation(go, (RelationType)relation_type, use_percent);
+}
+
 void GObject::_bind_methods()
 {
+    ClassDB::bind_integer_constant(get_class_static(), "RelationType", "LEFT_LEFT", static_cast<int64_t>(RelationType::Left_Left));
+    ClassDB::bind_integer_constant(get_class_static(), "RelationType", "LEFT_CENTER", static_cast<int64_t>(RelationType::Left_Center));
+    ClassDB::bind_integer_constant(get_class_static(), "RelationType", "LEFT_RIGHT", static_cast<int64_t>(RelationType::Left_Right));
+    ClassDB::bind_integer_constant(get_class_static(), "RelationType", "CENTER_CENTER", static_cast<int64_t>(RelationType::Center_Center));
+    ClassDB::bind_integer_constant(get_class_static(), "RelationType", "RIGHT_LEFT", static_cast<int64_t>(RelationType::Right_Left));
+    ClassDB::bind_integer_constant(get_class_static(), "RelationType", "RIGHT_CENTER", static_cast<int64_t>(RelationType::Right_Center));
+    ClassDB::bind_integer_constant(get_class_static(), "RelationType", "RIGHT_RIGHT", static_cast<int64_t>(RelationType::Right_Right));
+    ClassDB::bind_integer_constant(get_class_static(), "RelationType", "TOP_TOP", static_cast<int64_t>(RelationType::Top_Top));
+    ClassDB::bind_integer_constant(get_class_static(), "RelationType", "TOP_MIDDLE", static_cast<int64_t>(RelationType::Top_Middle));
+    ClassDB::bind_integer_constant(get_class_static(), "RelationType", "TOP_BOTTOM", static_cast<int64_t>(RelationType::Top_Bottom));
+    ClassDB::bind_integer_constant(get_class_static(), "RelationType", "MIDDLE_MIDDLE", static_cast<int64_t>(RelationType::Middle_Middle));
+    ClassDB::bind_integer_constant(get_class_static(), "RelationType", "BOTTOM_TOP", static_cast<int64_t>(RelationType::Bottom_Top));
+    ClassDB::bind_integer_constant(get_class_static(), "RelationType", "BOTTOM_MIDDLE", static_cast<int64_t>(RelationType::Bottom_Middle));
+    ClassDB::bind_integer_constant(get_class_static(), "RelationType", "BOTTOM_BOTTOM", static_cast<int64_t>(RelationType::Bottom_Bottom));
+    ClassDB::bind_integer_constant(get_class_static(), "RelationType", "WIDTH", static_cast<int64_t>(RelationType::Width));
+    ClassDB::bind_integer_constant(get_class_static(), "RelationType", "HEIGHT", static_cast<int64_t>(RelationType::Height));
+
     ClassDB::bind_method(D_METHOD("setX", "value"), &GObject::setX);
     ClassDB::bind_method(D_METHOD("getX"), &GObject::getX);
 
@@ -1159,6 +1235,26 @@ void GObject::_bind_methods()
 
     ClassDB::bind_method(D_METHOD("addChild", "node"), &GObject::gd_addChild);
     ClassDB::bind_method(D_METHOD("removeChild", "node"), &GObject::gd_removeChild);
+
+    // GDScript extensions
+    ClassDB::bind_method(D_METHOD("addClickListener", "callable"), &GObject::gd_addClickListener);
+    ClassDB::bind_method(D_METHOD("removeClickListener"), &GObject::gd_removeClickListener);
+    ClassDB::bind_method(D_METHOD("setIcon", "icon"), &GObject::gd_setIcon);
+    ClassDB::bind_method(D_METHOD("getIcon"), &GObject::gd_getIcon);
+    ADD_PROPERTY(PropertyInfo(Variant::STRING, "icon"), "setIcon", "getIcon");
+    ClassDB::bind_method(D_METHOD("setPivot", "x", "y", "as_anchor"), &GObject::gd_setPivot, DEFVAL(false));
+    ClassDB::bind_method(D_METHOD("getPivot"), &GObject::gd_getPivot);
+    ClassDB::bind_method(D_METHOD("transformRect", "rect", "target_space"), &GObject::gd_transformRect);
+    ClassDB::bind_method(D_METHOD("setDragBounds", "bounds"), &GObject::gd_setDragBounds);
+    ClassDB::bind_method(D_METHOD("getParent"), &GObject::gd_getParent);
+
+    ClassDB::bind_method(D_METHOD("setGroup", "group"), &GObject::setGroup);
+    ClassDB::bind_method(D_METHOD("getGroup"), &GObject::getGroup);
+    ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "group", PROPERTY_HINT_RESOURCE_TYPE, "GGroup"), "setGroup", "getGroup");
+
+    ClassDB::bind_method(D_METHOD("getInitSize"), &GObject::getSize);
+    ClassDB::bind_method(D_METHOD("addRelation", "target", "relation_type", "use_percent"), &GObject::gd_addRelation, DEFVAL(false));
+    ClassDB::bind_method(D_METHOD("getTreeNode"), &GObject::gd_getTreeNode);
 }
 
 void GObject::gd_setText(const String& text) { setText(text.utf8().get_data()); }

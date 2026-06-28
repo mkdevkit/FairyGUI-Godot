@@ -10,7 +10,7 @@
 #include "core/io/image_loader.h"
 #include "core/io/resource_uid.h"
 #include "scene/resources/image_texture.h"
-#include "core/io/file_access.h"
+#include "core/io/resource_loader.h"
 
 NS_FGUI_BEGIN
 
@@ -609,13 +609,20 @@ void* UIPackage::getItemAsset(PackageItem* item)
 
 void UIPackage::loadAtlas(PackageItem* item)
 {
-    Ref<Image> image;
-    image.instantiate();
-    Error err = image->load(GObject::toGodotStr(item->file));
-    if (err != Error::OK)
+    // 通过 Godot 导入系统加载为 Texture2D，再提取 Image
+    Ref<Texture2D> tex2d = ResourceLoader::load(GObject::toGodotStr(item->file), "Texture2D");
+    if (tex2d.is_null())
     {
         item->texture = _emptyTexture;
         print_line("FairyGUI: texture '", item->file.c_str(), "' not found in ", _name.c_str());
+        return;
+    }
+
+    Ref<Image> image = tex2d->get_image();
+    if (image.is_null())
+    {
+        item->texture = _emptyTexture;
+        print_line("FairyGUI: texture '", item->file.c_str(), "' has no image data in ", _name.c_str());
         return;
     }
 
@@ -635,10 +642,12 @@ void UIPackage::loadAtlas(PackageItem* item)
 
     if (ToolSet::isFileExist(alphaFilePath))
     {
-        Ref<Image> alphaImg;
-        alphaImg.instantiate();
-        if (ImageLoader::load_image(GObject::toGodotStr(alphaFilePath), alphaImg) == Error::OK)
+        Ref<Texture2D> alphaTex2d = ResourceLoader::load(GObject::toGodotStr(alphaFilePath), "Texture2D");
+        if (alphaTex2d.is_valid())
         {
+            Ref<Image> alphaImg = alphaTex2d->get_image();
+            if (alphaImg.is_valid())
+            {
             // Combine RGB from main image, alpha from alpha image
             // Get pixel data from both images
             int width = image->get_width();
@@ -666,8 +675,9 @@ void UIPackage::loadAtlas(PackageItem* item)
             }
 
             image->set_data(width, height, false, Image::FORMAT_RGBA8, mainData);
-        }
-    }
+            }  // if alphaImg
+        }  // if alphaTex2d
+    }  // if isFileExist
 
     Ref<ImageTexture> tex;
     tex.instantiate();

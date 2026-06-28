@@ -2581,7 +2581,6 @@ void GList::_bind_methods()
     ClassDB::bind_method(D_METHOD("getAutoResizeItem"), &GList::getAutoResizeItem);
     ADD_PROPERTY(PropertyInfo(Variant::BOOL, "autoResizeItem"), "setAutoResizeItem", "getAutoResizeItem");
 
-    // removeChild_to_pool takes GObject* which can't be bound directly
     ClassDB::bind_method(D_METHOD("removeChildrenToPool", "begin_index", "end_index"), &GList::gd_removeChildrenToPool, DEFVAL(0), DEFVAL(-1));
 
     ClassDB::bind_method(D_METHOD("scrollToView", "index", "ani", "set_first"), &GList::scrollToView, DEFVAL(false), DEFVAL(false));
@@ -2598,12 +2597,46 @@ void GList::_bind_methods()
     ADD_PROPERTY(PropertyInfo(Variant::INT, "selectedIndex"), "setSelectedIndex", "getSelectedIndex");
 
     ClassDB::bind_method(D_METHOD("clearSelection"), &GList::gd_clearSelection, DEFVAL(true));
+
+    // GDScript extensions
+    ClassDB::bind_method(D_METHOD("setItemRenderer", "callable"), &GList::gd_setItemRenderer);
+    ClassDB::bind_method(D_METHOD("setItemProvider", "callable"), &GList::gd_setItemProvider);
+    ClassDB::bind_method(D_METHOD("addItemFromPool"), &GList::gd_addItemFromPool);
+    ClassDB::bind_method(D_METHOD("setVirtual"), &GList::gd_setVirtual);
+    ClassDB::bind_method(D_METHOD("setVirtualAndLoop"), &GList::gd_setVirtualAndLoop);
+    ClassDB::bind_method(D_METHOD("setNumItems", "value"), &GList::gd_setNumItems);
+    ClassDB::bind_method(D_METHOD("getNumItems"), &GList::gd_getNumItems);
+    ClassDB::bind_method(D_METHOD("getFirstChildInView"), &GList::gd_getFirstChildInView);
+    ClassDB::bind_method(D_METHOD("addSelection", "index", "scroll_to_view"), &GList::gd_addSelection, DEFVAL(false));
 }
 
 void GList::gd_clearSelection(bool triggerEvent) { clearSelection(); }
 void GList::gd_setDefaultItem(const String& url) { setDefaultItem(url.utf8().get_data()); }
 String GList::gd_getDefaultItem() const { return String(getDefaultItem().c_str()); }
 void GList::gd_removeChildrenToPool(int beginIndex, int endIndex) { removeChildrenToPool(beginIndex, endIndex); }
+
+void GList::gd_setItemRenderer(const Callable& callable)
+{
+    itemRenderer = [callable](int index, GObject* obj) {
+        callable.call(index, obj);
+    };
+}
+
+void GList::gd_setItemProvider(const Callable& callable)
+{
+    itemProvider = [callable](int index) -> std::string {
+        String result = callable.call(index);
+        return result.utf8().get_data();
+    };
+}
+
+GObject* GList::gd_addItemFromPool() { return addItemFromPool(); }
+void GList::gd_setVirtual() { setVirtual(); }
+void GList::gd_setVirtualAndLoop() { setVirtualAndLoop(); }
+void GList::gd_setNumItems(int value) { setNumItems(value); }
+int GList::gd_getNumItems() { return getNumItems(); }
+int GList::gd_getFirstChildInView() { return getFirstChildInView(); }
+void GList::gd_addSelection(int index, bool scroll_it_to_view) { addSelection(index, scroll_it_to_view); }
 
 NS_FGUI_END
 

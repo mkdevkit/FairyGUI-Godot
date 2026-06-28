@@ -461,4 +461,80 @@ void GTweener::callCompleteCallback()
         _onComplete0();
 }
 
+GTweener* GTweener::gd_onUpdate(const Callable& callable)
+{
+    return onUpdate([callable](GTweener* tweener) {
+        callable.call(tweener);
+    });
+}
+
+GTweener* GTweener::gd_onStart(const Callable& callable)
+{
+    return onStart([callable](GTweener* tweener) {
+        callable.call(tweener);
+    });
+}
+
+GTweener* GTweener::gd_onComplete(const Callable& callable)
+{
+    return onComplete([callable]() {
+        callable.call();
+    });
+}
+
+GTweener* GTweener::gd_setEase(int value)
+{
+    return setEase((EaseType)value);
+}
+
+GTweener* GTweener::gd_setTarget(Object* target, int prop_type)
+{
+    RefCounted* ref = Object::cast_to<RefCounted>(target);
+    if (ref)
+        return setTarget(ref, (TweenPropType)prop_type);
+    return this;
+}
+
+void GTweener::_bind_methods()
+{
+    ClassDB::bind_integer_constant(get_class_static(), "TweenPropType", "NONE", static_cast<int64_t>(TweenPropType::None));
+    ClassDB::bind_integer_constant(get_class_static(), "TweenPropType", "X", static_cast<int64_t>(TweenPropType::X));
+    ClassDB::bind_integer_constant(get_class_static(), "TweenPropType", "Y", static_cast<int64_t>(TweenPropType::Y));
+    ClassDB::bind_integer_constant(get_class_static(), "TweenPropType", "POSITION", static_cast<int64_t>(TweenPropType::Position));
+    ClassDB::bind_integer_constant(get_class_static(), "TweenPropType", "WIDTH", static_cast<int64_t>(TweenPropType::Width));
+    ClassDB::bind_integer_constant(get_class_static(), "TweenPropType", "HEIGHT", static_cast<int64_t>(TweenPropType::Height));
+    ClassDB::bind_integer_constant(get_class_static(), "TweenPropType", "SIZE", static_cast<int64_t>(TweenPropType::Size));
+    ClassDB::bind_integer_constant(get_class_static(), "TweenPropType", "SCALE_X", static_cast<int64_t>(TweenPropType::ScaleX));
+    ClassDB::bind_integer_constant(get_class_static(), "TweenPropType", "SCALE_Y", static_cast<int64_t>(TweenPropType::ScaleY));
+    ClassDB::bind_integer_constant(get_class_static(), "TweenPropType", "SCALE", static_cast<int64_t>(TweenPropType::Scale));
+    ClassDB::bind_integer_constant(get_class_static(), "TweenPropType", "ROTATION", static_cast<int64_t>(TweenPropType::Rotation));
+    ClassDB::bind_integer_constant(get_class_static(), "TweenPropType", "ALPHA", static_cast<int64_t>(TweenPropType::Alpha));
+    ClassDB::bind_integer_constant(get_class_static(), "TweenPropType", "PROGRESS", static_cast<int64_t>(TweenPropType::Progress));
+
+    ClassDB::bind_method(D_METHOD("setDelay", "value"), &GTweener::setDelay);
+    ClassDB::bind_method(D_METHOD("getDelay"), &GTweener::getDelay);
+    ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "delay"), "setDelay", "getDelay");
+
+    ClassDB::bind_method(D_METHOD("setDuration", "value"), &GTweener::setDuration);
+    ClassDB::bind_method(D_METHOD("getDuration"), &GTweener::getDuration);
+    ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "duration"), "setDuration", "getDuration");
+
+    ClassDB::bind_method(D_METHOD("setEase", "value"), &GTweener::gd_setEase);
+    ClassDB::bind_method(D_METHOD("setRepeat", "repeat", "yoyo"), &GTweener::setRepeat, DEFVAL(false));
+    ClassDB::bind_method(D_METHOD("getRepeat"), &GTweener::getRepeat);
+    ClassDB::bind_method(D_METHOD("setTimeScale", "value"), &GTweener::setTimeScale);
+    ClassDB::bind_method(D_METHOD("setSnapping", "value"), &GTweener::setSnapping);
+    ClassDB::bind_method(D_METHOD("setTarget", "target", "prop_type"), &GTweener::gd_setTarget, DEFVAL((int)TweenPropType::None));
+    ClassDB::bind_method(D_METHOD("setPaused", "value"), &GTweener::setPaused);
+    ClassDB::bind_method(D_METHOD("seek", "time"), &GTweener::seek);
+    ClassDB::bind_method(D_METHOD("kill", "complete"), &GTweener::kill, DEFVAL(false));
+    ClassDB::bind_method(D_METHOD("getNormalizedTime"), &GTweener::getNormalizedTime);
+    ClassDB::bind_method(D_METHOD("isCompleted"), &GTweener::isCompleted);
+    ClassDB::bind_method(D_METHOD("allCompleted"), &GTweener::allCompleted);
+
+    ClassDB::bind_method(D_METHOD("onUpdate", "callable"), &GTweener::gd_onUpdate);
+    ClassDB::bind_method(D_METHOD("onStart", "callable"), &GTweener::gd_onStart);
+    ClassDB::bind_method(D_METHOD("onComplete", "callable"), &GTweener::gd_onComplete);
+}
+
 NS_FGUI_END

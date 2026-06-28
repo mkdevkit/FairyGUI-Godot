@@ -53,7 +53,10 @@ public:
     void gd_hidePopup() { hidePopup(); }
     GObject* gd_getModalWaitingPane() { return getModalWaitingPane(); }
     GObject* gd_getTouchTarget() { return getTouchTarget(); }
+    Vector2 gd_getTouchPosition() { return getTouchPosition(0); }
     void gd_showTooltipsWin(GObject* tooltipWin) { showTooltipsWin(tooltipWin); }
+    void gd_showPopup(GObject* popup, GObject* target, int dir) { showPopup(popup, target, (PopupDirection)dir); }
+    void gd_showPopupSimple(GObject* popup) { showPopup(popup, nullptr, PopupDirection::AUTO); }
 
     InputProcessor* getInputProcessor() const { return _inputProcessor; }
     Vector2 getTouchPosition(int touchId);

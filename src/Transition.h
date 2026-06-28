@@ -1,4 +1,4 @@
-﻿#ifndef __TRANSITION_H__
+#ifndef __TRANSITION_H__
 #define __TRANSITION_H__
 
 #include "FairyGUIMacros.h"
@@ -14,15 +14,22 @@ class ByteBuffer;
 
 class Transition : public RefCounted
 {
+    GDCLASS(Transition, RefCounted)
 public:
     typedef std::function<void()> PlayCompleteCallback;
     typedef std::function<void()> TransitionHook;
 
-    Transition(GComponent* owner);
+    Transition();
+    explicit Transition(GComponent* owner);
     virtual ~Transition();
 
     GComponent* getOwner() const { return _owner; }
     bool isPlaying() const { return _playing; }
+
+    static void _bind_methods();
+
+    void gd_play(int times, float delay, const Callable& callback);
+    void gd_stop();
 
     void play(PlayCompleteCallback callback = nullptr);
     void play(int times, float delay, PlayCompleteCallback callback = nullptr);

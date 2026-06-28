@@ -65,6 +65,18 @@ public:
 
     GObject* getModalWaitingPane() const { return _modalWaitPane; }
 
+    // GDScript virtual method hooks (Callable)
+    void setOnInitCallback(const Callable& cb) { _onInitCallback = cb; }
+    Callable getOnInitCallback() const { return _onInitCallback; }
+    void setOnShownCallback(const Callable& cb) { _onShownCallback = cb; }
+    Callable getOnShownCallback() const { return _onShownCallback; }
+    void setOnHideCallback(const Callable& cb) { _onHideCallback = cb; }
+    Callable getOnHideCallback() const { return _onHideCallback; }
+    void setDoShowAnimationCallback(const Callable& cb) { _doShowAnimationCallback = cb; }
+    Callable getDoShowAnimationCallback() const { return _doShowAnimationCallback; }
+    void setDoHideAnimationCallback(const Callable& cb) { _doHideAnimationCallback = cb; }
+    Callable getDoHideAnimationCallback() const { return _doHideAnimationCallback; }
+
 protected:
     virtual void handleInit() override;
     virtual void onInit() {};
@@ -99,6 +111,12 @@ private:
     std::vector<IUISource*> _uiSources;
     bool _inited;
     bool _loading;
+    // GDScript virtual hook callables
+    Callable _onInitCallback;
+    Callable _onShownCallback;
+    Callable _onHideCallback;
+    Callable _doShowAnimationCallback;
+    Callable _doHideAnimationCallback;
 };
 
 NS_FGUI_END

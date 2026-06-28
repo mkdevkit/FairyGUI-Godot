@@ -231,6 +231,24 @@ var btn = UIPackage.createObjectFromURL("ui://YourPackage/MyButton")
 
 > **注意**：如果从 FairyGUI 编辑器导出包时勾选了**分支**（branch）功能，组件名称会被加上分支 ID 前缀，例如 `7iys1/Menu`。此时 `createObject` 需要传入带前缀的名称。如果不需要分支功能，导出时取消勾选即可。
 
+### 场景根节点类型与鼠标输入
+
+FairyGUI 通过 `FUIContainer` 的 `_unhandled_input()` 管线接收输入事件。这要求场景根节点**不能是 `Control` 类型**。
+
+`Control` 节点的默认 `mouse_filter = MOUSE_FILTER_STOP` 会拦截鼠标事件，阻止它到达 `_unhandled_input`。结果 FairyGUI 的 `InputProcessor → hitTest → bubbleEvent(Click)` 链路永不会触发，所有按钮点击会被静默吞噬。
+
+**修复：** 场景根节点使用 `type="Node"`（或任何不拦截输入的 `CanvasItem`）：
+
+```gdscript
+# ❌ Control 根节点 - 按钮点击无响应
+[node name="MainMenu" type="Control"]
+
+# ✅ Node 根节点 - 鼠标事件正常流到 FUIContainer
+[node name="MainMenu" type="Node"]
+```
+
+所有承载 FairyGUI 内容的场景都应遵循此规则。本项目中的所有示例场景均使用 `type="Node"` 作为根节点。
+
 ### 2. 字体配置
 
 FairyGUI 支持两种字体类型：**BMFont**（FairyGUI 编辑器导出的位图字体）和 **TTF/系统** 字体。

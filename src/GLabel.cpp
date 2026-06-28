@@ -174,8 +174,7 @@ void GLabel::_bind_methods()
     ClassDB::bind_method(D_METHOD("setTitle", "title"), &GLabel::gd_setTitle);
     ClassDB::bind_method(D_METHOD("getTitle"), &GLabel::gd_getTitle);
 
-    ClassDB::bind_method(D_METHOD("setIcon", "icon"), &GLabel::gd_setIcon);
-    ClassDB::bind_method(D_METHOD("getIcon"), &GLabel::gd_getIcon);
+    // Icon is bound in GObject
 
     ClassDB::bind_method(D_METHOD("setTitleColor", "color"), &GLabel::setTitleColor);
     ClassDB::bind_method(D_METHOD("getTitleColor"), &GLabel::getTitleColor);

@@ -234,6 +234,24 @@ var btn = UIPackage.createObjectFromURL("ui://YourPackage/MyButton")
 
 > **Note**: If you enable **branch** export in FairyGUI Editor, component names will be prefixed with the branch ID, e.g. `7iys1/Menu`. In that case, `createObject` needs the full prefixed name. Disable branch in the editor if you don't need it.
 
+### Scene Root Node Type & Mouse Input
+
+FairyGUI receives input events through `FUIContainer`'s `_unhandled_input()` pipeline. For this to work, the scene's root node **must not** be a `Control` type.
+
+`Control` nodes have `mouse_filter = MOUSE_FILTER_STOP` by default, which intercepts mouse events and prevents them from reaching `_unhandled_input`. As a result, FairyGUI's `InputProcessor → hitTest → bubbleEvent(Click)` chain will never trigger, and all button clicks will be silently swallowed.
+
+**Fix:** Use `type="Node"` for the scene root node (or any `CanvasItem` that doesn't stop input):
+
+```gdscript
+# ❌ Control root - buttons won't respond to clicks
+[node name="MainMenu" type="Control"]
+
+# ✅ Node root - mouse events flow to FUIContainer normally
+[node name="MainMenu" type="Node"]
+```
+
+This applies to all scenes that host FairyGUI content. All example scenes in this project use `type="Node"` for the root.
+
 ### 2. Font Configuration
 
 FairyGUI supports two font types: **BMFont** (bitmap fonts from FairyGUI Editor) and **TTF/System** fonts.

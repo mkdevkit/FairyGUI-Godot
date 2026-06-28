@@ -275,6 +275,11 @@ Transition::Transition(GComponent* owner)
 {
 }
 
+Transition::Transition()
+    : Transition(nullptr)
+{
+}
+
 Transition::~Transition()
 {
     if (_playing)
@@ -1539,6 +1544,33 @@ void Transition::decodeValue(TransitionItem* item, ByteBuffer* buffer, void* val
     default:
         break;
     }
+}
+
+void Transition::gd_play(int times, float delay, const Callable& callback)
+{
+    PlayCompleteCallback cb;
+    if (callback.is_valid())
+    {
+        cb = [callback]() {
+            callback.call();
+        };
+    }
+    else
+        cb = nullptr;
+    play(times, delay, cb);
+}
+
+void Transition::gd_stop()
+{
+    stop();
+}
+
+void Transition::_bind_methods()
+{
+    ClassDB::bind_method(D_METHOD("play", "times", "delay", "callback"), &Transition::gd_play, DEFVAL(1), DEFVAL(0.0f), DEFVAL(Callable()));
+    ClassDB::bind_method(D_METHOD("stop"), &Transition::gd_stop);
+    ClassDB::bind_method(D_METHOD("isPlaying"), &Transition::isPlaying);
+    ClassDB::bind_method(D_METHOD("getOwner"), &Transition::getOwner);
 }
 
 NS_FGUI_END

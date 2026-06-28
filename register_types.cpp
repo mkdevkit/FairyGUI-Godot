@@ -34,6 +34,19 @@
 #include "src/GScrollBar.h"
 #include "src/Window.h"
 
+// Tween
+#include "src/tween/GTweener.h"
+#include "src/tween/GTweenHelper.h"
+
+// Config / Helpers
+#include "src/UIConfigHelper.h"
+#include "src/UIObjectFactoryHelper.h"
+#include "src/DragDropManagerHelper.h"
+
+// Window / Transition / ScrollPane
+#include "src/Transition.h"
+#include "src/ScrollPane.h"
+
 // Display
 #include "src/display/FUIContainer.h"
 #include "src/display/FUIInput.h"
@@ -43,9 +56,8 @@
 
 // Utilities
 #include "src/UIPackage.h"
-#include "src/ScrollPane.h"
-#include "src/Transition.h"
 #include "src/GPopupMenu.h"
+#include "src/FGUIHelper.h"
 
 void initialize_fairygui_module(ModuleInitializationLevel p_level)
 {
@@ -94,9 +106,15 @@ void initialize_fairygui_module(ModuleInitializationLevel p_level)
 
         // Utilities
         GDREGISTER_CLASS(fairygui::UIPackage);
-        // ScrollPane(GComponent*) has no default constructor
-        // Transition(GComponent*) has no default constructor
+        GDREGISTER_CLASS(fairygui::Transition);
+        GDREGISTER_CLASS(fairygui::ScrollPane);
         GDREGISTER_CLASS(fairygui::GPopupMenu);
+        GDREGISTER_CLASS(fairygui::GTweener);
+        GDREGISTER_CLASS(fairygui::GTweenHelper);
+        GDREGISTER_CLASS(fairygui::UIConfigHelper);
+        GDREGISTER_CLASS(fairygui::UIObjectFactoryHelper);
+        GDREGISTER_CLASS(fairygui::DragDropManagerHelper);
+        GDREGISTER_CLASS(fairygui::FGUIHelper);
     }
 }
 

@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://gd/Scripts/CooldownScene.gd" id="1_klmno"]
+
+[node name="CooldownScene" type="Node"]
+script = ExtResource("1_klmno")

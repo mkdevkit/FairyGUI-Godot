@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://gd/Scripts/ScrollPaneScene.gd" id="1_qlmno"]
+
+[node name="ScrollPaneScene" type="Node"]
+script = ExtResource("1_qlmno")

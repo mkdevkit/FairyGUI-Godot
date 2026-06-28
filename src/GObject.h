@@ -215,6 +215,19 @@ protected:
     void gd_addChild(Object* node);
     void gd_removeChild(Object* node);
 
+    // GDScript extensions
+    void gd_addClickListener(const Callable& callable);
+    void gd_removeClickListener();
+    void gd_setIcon(const String& icon);
+    String gd_getIcon() const;
+    void gd_setPivot(float xv, float yv, bool asAnchor);
+    Vector2 gd_getPivot() const;
+    Rect2 gd_transformRect(const Rect2& rect, GObject* target_space);
+    void gd_setDragBounds(const Rect2& bounds);
+    Object* gd_getParent() const;
+    Object* gd_getTreeNode() const;
+    void gd_addRelation(Object* target, int relation_type, bool use_percent);
+
 protected:
     bool init();
 

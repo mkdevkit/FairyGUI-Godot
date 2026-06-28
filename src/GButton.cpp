@@ -456,8 +456,7 @@ void GButton::_bind_methods()
     ClassDB::bind_method(D_METHOD("setSelectedTitle", "title"), &GButton::gd_setSelectedTitle);
     ClassDB::bind_method(D_METHOD("getSelectedTitle"), &GButton::gd_getSelectedTitle);
 
-    ClassDB::bind_method(D_METHOD("setIcon", "icon"), &GButton::gd_setIcon);
-    ClassDB::bind_method(D_METHOD("getIcon"), &GButton::gd_getIcon);
+    // Icon is bound in GObject
 
     ClassDB::bind_method(D_METHOD("setSelectedIcon", "icon"), &GButton::gd_setSelectedIcon);
     ClassDB::bind_method(D_METHOD("getSelectedIcon"), &GButton::gd_getSelectedIcon);

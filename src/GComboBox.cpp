@@ -459,8 +459,7 @@ void GComboBox::_bind_methods()
     ClassDB::bind_method(D_METHOD("getTitleFontSize"), &GComboBox::getTitleFontSize);
     ADD_PROPERTY(PropertyInfo(Variant::INT, "titleFontSize"), "setTitleFontSize", "getTitleFontSize");
 
-    ClassDB::bind_method(D_METHOD("setIcon", "icon"), &GComboBox::gd_setIcon);
-    ClassDB::bind_method(D_METHOD("getIcon"), &GComboBox::gd_getIcon);
+    // Icon is bound in GObject
 
     ClassDB::bind_method(D_METHOD("setValue", "value"), &GComboBox::gd_setValue);
     ClassDB::bind_method(D_METHOD("getValue"), &GComboBox::gd_getValue);

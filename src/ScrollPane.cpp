@@ -38,6 +38,40 @@ static inline float sp_EaseFunc(float t, float d)
     return t * t * t + 1; //cubicOut
 }
 
+ScrollPane::ScrollPane()
+    : _vtScrollBar(nullptr),
+    _hzScrollBar(nullptr),
+    _header(nullptr),
+    _footer(nullptr),
+    _pageController(nullptr),
+    _needRefresh(false),
+    _refreshBarAxis(0),
+    _aniFlag(0),
+    _loop(0),
+    _headerLockedSize(0),
+    _footerLockedSize(0),
+    _vScrollNone(false),
+    _hScrollNone(false),
+    _tweening(0),
+    _xPos(0),
+    _yPos(0),
+    _floating(false),
+    _dontClipMargin(false),
+    _mouseWheelEnabled(true),
+    _hover(false),
+    _dragged(false),
+    _owner(nullptr),
+    _maskContainer(nullptr),
+    _container(nullptr)
+{
+    _scrollStep = UIConfig::defaultScrollStep;
+    _mouseWheelStep = _scrollStep * 2;
+    _decelerationRate = UIConfig::defaultScrollDecelerationRate;
+    _touchEffect = UIConfig::defaultScrollTouchEffect;
+    _bouncebackEffect = UIConfig::defaultScrollBounceEffect;
+    _pageSize = Vector2(1, 1);
+}
+
 ScrollPane::ScrollPane(GComponent* owner)
     : _vtScrollBar(nullptr),
     _hzScrollBar(nullptr),
@@ -1787,6 +1821,22 @@ void ScrollPane::onRollOut(EventContext* context)
 {
     _hover = false;
     updateScrollBarVisible();
+}
+
+void ScrollPane::_bind_methods()
+{
+    ClassDB::bind_method(D_METHOD("getPosX"), &ScrollPane::gd_getPosX);
+    ClassDB::bind_method(D_METHOD("setPosX", "value", "ani"), &ScrollPane::gd_setPosX, DEFVAL(false));
+    ClassDB::bind_method(D_METHOD("getPosY"), &ScrollPane::gd_getPosY);
+    ClassDB::bind_method(D_METHOD("setPosY", "value", "ani"), &ScrollPane::gd_setPosY, DEFVAL(false));
+    ClassDB::bind_method(D_METHOD("scrollTop", "ani"), &ScrollPane::gd_scrollTop, DEFVAL(false));
+    ClassDB::bind_method(D_METHOD("scrollBottom", "ani"), &ScrollPane::gd_scrollBottom, DEFVAL(false));
+    ClassDB::bind_method(D_METHOD("isBottomMost"), &ScrollPane::gd_isBottomMost);
+    ClassDB::bind_method(D_METHOD("getHeader"), &ScrollPane::getHeader);
+    ClassDB::bind_method(D_METHOD("getFooter"), &ScrollPane::getFooter);
+    ClassDB::bind_method(D_METHOD("lockHeader", "size"), &ScrollPane::lockHeader);
+    ClassDB::bind_method(D_METHOD("lockFooter", "size"), &ScrollPane::lockFooter);
+    ClassDB::bind_method(D_METHOD("cancelDragging"), &ScrollPane::cancelDragging);
 }
 
 NS_FGUI_END

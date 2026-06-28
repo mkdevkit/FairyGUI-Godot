@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://gd/Scripts/VirtualListScene.gd" id="1_rstuv"]
+
+[node name="VirtualListScene" type="Node"]
+script = ExtResource("1_rstuv")

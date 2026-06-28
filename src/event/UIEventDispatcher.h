@@ -63,6 +63,10 @@ public:
 
     bool isDispatchingEvent(int eventType);
 
+    // Callable-based event handling for GDScript
+    void gd_addEventListener(int eventType, const Callable& callable);
+    void gd_removeEventListener(int eventType);
+
 private:
     void doDispatch(int eventType, EventContext* context);
     void doBubble(int eventType, EventContext* context);

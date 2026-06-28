@@ -1407,6 +1407,14 @@ void GComponent::_bind_methods()
     ClassDB::bind_method(D_METHOD("setViewHeight", "value"), &GComponent::setViewHeight);
     ClassDB::bind_method(D_METHOD("getViewHeight"), &GComponent::getViewHeight);
     ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "viewHeight"), "setViewHeight", "getViewHeight");
+
+    // GDScript extensions
+    ClassDB::bind_method(D_METHOD("getChildAt", "index"), &GComponent::getChildAt);
+    ClassDB::bind_method(D_METHOD("getTransition", "name"), &GComponent::gd_getTransition);
+    ClassDB::bind_method(D_METHOD("getScrollPane"), &GComponent::getScrollPane);
+    ClassDB::bind_method(D_METHOD("ensureBoundsCorrect"), &GComponent::ensureBoundsCorrect);
+    ClassDB::bind_method(D_METHOD("isChildInView", "child"), &GComponent::isChildInView);
+    ClassDB::bind_method(D_METHOD("isAncestorOf", "obj"), &GComponent::isAncestorOf);
 }
 
 void GComponent::gd_removeChildAt(int index) { removeChildAt(index); }

@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://gd/Scripts/TreeViewScene.gd" id="1_tuvwx"]
+
+[node name="TreeViewScene" type="Node"]
+script = ExtResource("1_tuvwx")

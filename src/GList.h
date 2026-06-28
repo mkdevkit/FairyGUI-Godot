@@ -75,6 +75,17 @@ public:
     void removeChildrenToPool(int beginIndex, int endIndex);
     void gd_removeChildrenToPool(int beginIndex, int endIndex);
 
+    // GDScript extensions
+    void gd_setItemRenderer(const Callable& callable);
+    void gd_setItemProvider(const Callable& callable);
+    GObject* gd_addItemFromPool();
+    void gd_setVirtual();
+    void gd_setVirtualAndLoop();
+    void gd_setNumItems(int value);
+    int gd_getNumItems();
+    int gd_getFirstChildInView();
+    void gd_addSelection(int index, bool scroll_it_to_view);
+
     int getSelectedIndex() const;
     void setSelectedIndex(int value);
 

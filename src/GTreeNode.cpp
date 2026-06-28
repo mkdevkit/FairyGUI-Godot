@@ -304,6 +304,13 @@ void GTreeNode::_bind_methods()
     ClassDB::bind_method(D_METHOD("setData", "value"), &GTreeNode::setData);
     ClassDB::bind_method(D_METHOD("getChildAt", "index"), &GTreeNode::getChildAt);
     ClassDB::bind_method(D_METHOD("numChildren"), &GTreeNode::numChildren);
+    ClassDB::bind_method(D_METHOD("addChild", "child"), &GTreeNode::addChild);
+    ClassDB::bind_method(D_METHOD("init", "is_folder", "res_url"), &GTreeNode::gd_init, DEFVAL(""));
+}
+
+void GTreeNode::gd_init(bool is_folder, const String& res_url)
+{
+    init(is_folder, res_url.utf8().get_data());
 }
 
 void GTreeNode::gd_setText(const String& value) { setText(value.utf8().get_data()); }

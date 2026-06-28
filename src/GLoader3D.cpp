@@ -44,8 +44,7 @@ void GLoader3D::_bind_methods()
     ClassDB::bind_method(D_METHOD("setURL", "url"), &GLoader3D::gd_setURL);
     ClassDB::bind_method(D_METHOD("getURL"), &GLoader3D::gd_getURL);
 
-    ClassDB::bind_method(D_METHOD("setIcon", "icon"), &GLoader3D::gd_setIcon);
-    ClassDB::bind_method(D_METHOD("getIcon"), &GLoader3D::gd_getIcon);
+    // Icon is bound in GObject
 
     ClassDB::bind_method(D_METHOD("setAlign", "align"), &GLoader3D::gd_setAlign);
     ClassDB::bind_method(D_METHOD("getAlign"), &GLoader3D::gd_getAlign);
