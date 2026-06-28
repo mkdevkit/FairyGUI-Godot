@@ -471,6 +471,9 @@ void FUISprite::drawScale9()
     if (texRect.size.x == 0)
         texRect.size = tex->get_size();
 
+    float srcX = texRect.position.x;
+    float srcY = texRect.position.y;
+
     float l = _scale9Grid.position.x;
     float t = _scale9Grid.position.y;
     float r = _scale9Grid.position.x + _scale9Grid.size.x;
@@ -496,23 +499,23 @@ void FUISprite::drawScale9()
     // 9 regions
     struct { Rect2 src; Rect2 dst; } regions[9];
     // Top-left
-    regions[0] = { Rect2(0, 0, l, t), Rect2(0, 0, marginLeft, marginTop) };
+    regions[0] = { Rect2(srcX, srcY, l, t), Rect2(0, 0, marginLeft, marginTop) };
     // Top-mid
-    regions[1] = { Rect2(l, 0, midW, t), Rect2(marginLeft, 0, destMidW, marginTop) };
+    regions[1] = { Rect2(srcX + l, srcY, midW, t), Rect2(marginLeft, 0, destMidW, marginTop) };
     // Top-right
-    regions[2] = { Rect2(r, 0, marginRight, t), Rect2(marginLeft + destMidW, 0, marginRight, marginTop) };
+    regions[2] = { Rect2(srcX + r, srcY, marginRight, t), Rect2(marginLeft + destMidW, 0, marginRight, marginTop) };
     // Mid-left
-    regions[3] = { Rect2(0, t, l, midH), Rect2(0, marginTop, marginLeft, destMidH) };
+    regions[3] = { Rect2(srcX, srcY + t, l, midH), Rect2(0, marginTop, marginLeft, destMidH) };
     // Mid-mid
-    regions[4] = { Rect2(l, t, midW, midH), Rect2(marginLeft, marginTop, destMidW, destMidH) };
+    regions[4] = { Rect2(srcX + l, srcY + t, midW, midH), Rect2(marginLeft, marginTop, destMidW, destMidH) };
     // Mid-right
-    regions[5] = { Rect2(r, t, marginRight, midH), Rect2(marginLeft + destMidW, marginTop, marginRight, destMidH) };
+    regions[5] = { Rect2(srcX + r, srcY + t, marginRight, midH), Rect2(marginLeft + destMidW, marginTop, marginRight, destMidH) };
     // Bottom-left
-    regions[6] = { Rect2(0, b, l, marginBottom), Rect2(0, marginTop + destMidH, marginLeft, marginBottom) };
+    regions[6] = { Rect2(srcX, srcY + b, l, marginBottom), Rect2(0, marginTop + destMidH, marginLeft, marginBottom) };
     // Bottom-mid
-    regions[7] = { Rect2(l, b, midW, marginBottom), Rect2(marginLeft, marginTop + destMidH, destMidW, marginBottom) };
+    regions[7] = { Rect2(srcX + l, srcY + b, midW, marginBottom), Rect2(marginLeft, marginTop + destMidH, destMidW, marginBottom) };
     // Bottom-right
-    regions[8] = { Rect2(r, b, marginRight, marginBottom), Rect2(marginLeft + destMidW, marginTop + destMidH, marginRight, marginBottom) };
+    regions[8] = { Rect2(srcX + r, srcY + b, marginRight, marginBottom), Rect2(marginLeft + destMidW, marginTop + destMidH, marginRight, marginBottom) };
 
     for (int i = 0; i < 9; i++)
     {
