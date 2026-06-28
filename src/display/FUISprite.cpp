@@ -135,11 +135,10 @@ void FUISprite::setScale9Grid(const Rect2& value)
     }
 
     _scale9Enabled = true;
-    _scale9Grid = value;
-
     // GODOT_TODO: convert Scale9Grid insets from untrimmed space to trimmed space
     // (cocos does this with _originalContentSize / _rect / _unflippedOffsetPositionFromCenter)
     _scale9Grid = value;
+
     queue_redraw();
 }
 

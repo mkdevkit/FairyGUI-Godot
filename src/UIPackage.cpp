@@ -419,12 +419,11 @@ bool UIPackage::loadPackage(ByteBuffer* buffer)
             int scaleOption = buffer->readByte();
             if (scaleOption == 1)
             {
-                pi->scale9Grid = Rect2(
-                    (float)buffer->readInt(),
-                    (float)buffer->readInt(),
-                    (float)buffer->readInt(),
-                    (float)buffer->readInt()
-                );
+                float gx = (float)buffer->readInt();
+                float gy = (float)buffer->readInt();
+                float gw = (float)buffer->readInt();
+                float gh = (float)buffer->readInt();
+                pi->scale9Grid = Rect2(gx, gy, gw, gh);
                 pi->tileGridIndice = buffer->readInt();
                 pi->hasScale9Grid = true;
             }
@@ -474,7 +473,9 @@ bool UIPackage::loadPackage(ByteBuffer* buffer)
         case PackageItemType::DRAGONBONES:
         {
             pi->file = shortPath + pi->file;
-            pi->skeletonAnchor = Vector2(buffer->readFloat(), buffer->readFloat());
+            float sax = buffer->readFloat();
+            float say = buffer->readFloat();
+            pi->skeletonAnchor = Vector2(sax, say);
             pi->hasSkeletonAnchor = true;
             break;
         }
@@ -530,17 +531,23 @@ bool UIPackage::loadPackage(ByteBuffer* buffer)
 
         AtlasSprite* sprite = new AtlasSprite();
         sprite->atlas = pi;
+        
+        float x = (float)buffer->readInt(),
+            y = (float)buffer->readInt(),
+            width = (float)buffer->readInt(),
+            height = (float)buffer->readInt();
         sprite->rect = Rect2(
-            (float)buffer->readInt(),
-            (float)buffer->readInt(),
-            (float)buffer->readInt(),
-            (float)buffer->readInt()
+            x, y, width, height
         );
         sprite->rotated = buffer->readBool();
         if (ver2 && buffer->readBool())
         {
-            sprite->offset = Vector2((float)buffer->readInt(), (float)buffer->readInt());
-            sprite->originalSize = Vector2((float)buffer->readInt(), (float)buffer->readInt());
+            float offX = (float)buffer->readInt();
+            float offY = (float)buffer->readInt();
+            float origW = (float)buffer->readInt();
+            float origH = (float)buffer->readInt();
+            sprite->offset = Vector2(offX, offY);
+            sprite->originalSize = Vector2(origW, origH);
         }
         else
         {
