@@ -550,12 +550,6 @@ void FUISprite::drawScale9()
 
     if (_rotated)
     {
-        print_line(vformat("rotated scale9: contentSize=%s origW=%f origH=%f grid=[%f,%f,%f,%f] texRect=%s",
-            contentSize, origW, origH,
-            _scale9Grid.position.x, _scale9Grid.position.y,
-            _scale9Grid.size.x, _scale9Grid.size.y,
-            texRect));
-
         // ... keep existing rotated code
         Vector2 center(contentSize.x * 0.5f, contentSize.y * 0.5f);
         draw_set_transform(center, Math::deg_to_rad(-90.0f), Vector2(1, 1));
@@ -566,9 +560,9 @@ void FUISprite::drawScale9()
             float ow = origRects[i][2], oh = origRects[i][3];
             if (ow <= 0 || oh <= 0) continue;
 
-            Rect2 src(srcX + oy,
-                      srcY + origW - ox - ow,
-                      oh, ow);
+            Rect2 src(srcX + oy + 0.5f,
+                      srcY + origW - ox - ow + 0.5f,
+                      oh - 1.0f, ow - 1.0f);
 
             float dx = destRects[i][0], dy = destRects[i][1];
             float dw = destRects[i][2], dh = destRects[i][3];
@@ -589,7 +583,7 @@ void FUISprite::drawScale9()
         float ow = origRects[i][2], oh = origRects[i][3];
         if (ow <= 0 || oh <= 0) continue;
 
-        Rect2 src(srcX + ox, srcY + oy, ow, oh);
+        Rect2 src(srcX + ox + 0.5f, srcY + oy + 0.5f, ow - 1.0f, oh - 1.0f);
 
         Rect2 dst(destRects[i][0], destRects[i][1],
                   destRects[i][2], destRects[i][3]);
