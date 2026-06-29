@@ -74,8 +74,7 @@ GObject* UIObjectFactory::newObject(ObjectType type)
         return GRichTextField::create();
 
     case ObjectType::INPUTTEXT:
-        // GODOT_ADAPT: GTextInput not yet ported
-        return nullptr;
+        return GTextInput::create();
 
     case ObjectType::GROUP:
         return GGroup::create();
@@ -114,8 +113,7 @@ GObject* UIObjectFactory::newObject(ObjectType type)
         return GTree::create();
 
     case ObjectType::LOADER3D:
-        // GODOT_ADAPT: GLoader3D not yet ported
-        return nullptr;
+        return GLoader3D::create();
 
     default:
         return nullptr;

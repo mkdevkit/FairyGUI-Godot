@@ -1230,10 +1230,14 @@ void GComponent::constructFromResource(std::vector<GObject*>* objectPool, int po
             if (pi != nullptr)
             {
                 child = UIObjectFactory::newObject(pi);
-                child->constructFromResource();
+                if (child)					
+                    child->constructFromResource();
             }
             else
                 child = UIObjectFactory::newObject(type);
+
+            if (!child)
+                continue;
         }
 
         child->_underConstruct = true;
