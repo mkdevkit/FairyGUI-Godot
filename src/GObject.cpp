@@ -84,9 +84,8 @@ bool GObject::init()
 
     if (_displayObject != nullptr)
     {
-        ((Node2D*)_displayObject)->set_position(_size * Vector2(0, -1)); // GODOT_ADAPT: anchor->offset
+        handlePositionChanged(); // Godot Y-down: no cocos anchor offset needed
         // _displayObject->setOnEnterCallback([this]() { GObject::onEnter(); });
-        // _displayObject->setOnExitCallback([this]() { GObject::onExit(); });
     }
     return true;
 }
@@ -261,7 +260,7 @@ void GObject::setPivot(float xv, float yv, bool asAnchor)
         _pivot = Vector2(xv, yv);
         _pivotAsAnchor = asAnchor;
         if (_displayObject != nullptr)
-            ((Node2D*)_displayObject)->set_position(Vector2(_pivot.x, 1 - _pivot.y) * _size * Vector2(1,-1)); // GODOT_ADAPT: anchor->offset
+            ((Node2D*)_displayObject)->set_position(_size * _pivot); // Godot Y-down: anchor offset = pivot * size
         handlePositionChanged(); 
     }
 }
@@ -461,7 +460,7 @@ Vector2 GObject::localToGlobal(const Vector2& pt)
         pt2.x += _size.width * _pivot.x;
         pt2.y += _size.height * _pivot.y;
     }
-    pt2.y = _size.height - pt2.y;
+    // FairyGUI + Godot both Y-down: no Y flip needed (cocos had: pt2.y = _size.height - pt2.y)
     pt2 = ((Node2D*)_displayObject)->to_global(pt2);
     return GRoot::getInstance()->worldToRoot(pt2);
 }
@@ -482,7 +481,7 @@ Vector2 GObject::globalToLocal(const Vector2& pt)
 {
     Vector2 pt2 = GRoot::getInstance()->rootToWorld(pt);
     pt2 = ((Node2D*)_displayObject)->to_local(pt2);
-    pt2.y = _size.height - pt2.y;
+    // FairyGUI + Godot both Y-down: no Y flip needed (cocos had: pt2.y = _size.height - pt2.y)
     if (_pivotAsAnchor)
     {
         pt2.x -= _size.width * _pivot.x;
@@ -786,12 +785,12 @@ void GObject::handlePositionChanged()
     if (_displayObject)
     {
         Vector2 pt = _position;
-        // FairyGUI editor uses top-left origin with Y-down, same as Godot — no Y flip needed.
+        // FairyGUI editor uses top-left Y-down, same as Godot Node2D. No Y flip needed.
         // pt.y = -pt.y;
         if (!_pivotAsAnchor)
         {
             pt.x += _size.width * _pivot.x;
-            pt.y -= _size.height * _pivot.y;
+            pt.y += _size.height * _pivot.y; // Y-down: add pivot offset
         }
         if (_alignToBL)
         {

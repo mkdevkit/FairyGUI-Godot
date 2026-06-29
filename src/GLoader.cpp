@@ -448,12 +448,13 @@ void GLoader::updateLayout()
 
     if (_content2 != nullptr)
     {
+        // Godot Y-down: content position directly maps to Node2D position (no handlePositionChanged Y-flip)
         if (_verticalAlign == VertAlignType::CENTER)
-            ny = floor(-contentSize.height - (_size.height - contentSize.height) / 2);
+            ny = floor((_size.height - contentSize.height) / 2);
         else if (_verticalAlign == VertAlignType::BOTTOM)
-            ny = -contentSize.height;
+            ny = _size.height - contentSize.height;
         else
-            ny = -_size.height;
+            ny = 0;
 
         ((Node2D*)_content2->displayObject())->set_position(Vector2(nx, ny));
     }

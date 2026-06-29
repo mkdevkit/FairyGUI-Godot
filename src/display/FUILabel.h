@@ -35,6 +35,8 @@ public:
     void setWrapEnabled(bool value) { _wrapEnabled = value; }
     bool isWrapEnabled() const { return _wrapEnabled; }
     Vector2 getTextSize() const { return Vector2(getTextWidth(), getTextHeight()); }
+    void setContentSize(const Vector2& size) { _contentSize = size; }
+    Vector2 _contentSize;
     void setUnderlineColor(const Color& value);
 
     float getTextWidth() const;

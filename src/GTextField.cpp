@@ -352,6 +352,9 @@ void GBasicTextField::handleSizeChanged()
     if (_updatingSize)
         return;
 
+    _label->_contentSize = Vector2(_size.width, _size.height);
+    _label->queue_redraw();
+
     if (_autoSize != AutoSizeType::BOTH)
     {
         // GODOT_ADAPT: set_size not available on FUILabel

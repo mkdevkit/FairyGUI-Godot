@@ -393,9 +393,26 @@ void InputProcessor::onTouchEnd(const Vector2& screenPos, int touchId)
     if (_captureCallback)
         _captureCallback(UIEventType::TouchEnd);
 
-    WeakPtr wptr(target);
-    target->bubbleEvent(UIEventType::TouchEnd);
-    target = wptr.ptr();
+    bool done = false;
+    size_t cnt = ti->touchMonitors.size();
+    if (cnt > 0)
+    {
+        for (size_t i = 0; i < cnt; i++)
+        {
+            GObject* mm = ti->touchMonitors[i].ptr();
+            if (!mm)
+                continue;
+
+            WeakPtr wptr(mm);
+            mm->dispatchEvent(UIEventType::TouchEnd);
+            if (!(wptr == mm)) done = true;
+        }
+    }
+    if (!done)
+    {
+        WeakPtr wptr(target);
+        target->bubbleEvent(UIEventType::TouchEnd);
+    }
 
     handleRollOver(ti, nullptr);
 

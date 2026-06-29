@@ -18,7 +18,8 @@ FUILabel::FUILabel() :
     _textFormat(new TextFormat()),
     _grayed(false),
     _bmFontSize(0),
-    _bmfontScale(1.0f)
+    _bmfontScale(1.0f),
+    _contentSize(0, 0)
 {
     item_rect_changed(); // enable NOTIFICATION_DRAW for Node2D
 }
@@ -219,11 +220,26 @@ void FUILabel::_draw()
     Color textColor = _grayed ? toGrayed(_textFormat->color) : _textFormat->color;
     int fontSize = (int)(_fontSize > 0 ? _fontSize : _textFormat->fontSize);
 
+    // Compute alignment offset within content rect
+    Vector2 offset;
+    if (_contentSize.x > 0 || _contentSize.y > 0)
+    {
+        float textW = getTextWidth();
+        float textH = getTextHeight();
+        // Godot draw_string uses baseline for Y, not top. Add font ascent to position top of text.
+        float fontAscent = _bmFont.is_valid() ? _bmFont->get_ascent((int)_textFormat->fontSize) : _textFormat->fontSize * 0.8f;
+        if (_textFormat->align == 1)      offset.x = (_contentSize.x - textW) * 0.5f;
+        else if (_textFormat->align == 2) offset.x = _contentSize.x - textW;
+        if (_textFormat->verticalAlign == 1)      offset.y = (_contentSize.y - textH) * 0.5f + fontAscent;
+        else if (_textFormat->verticalAlign == 2) offset.y = _contentSize.y - textH + fontAscent;
+        else                                      offset.y = fontAscent; // top: baseline offset
+    }
+
     // Effects
     if (_textFormat->hasEffect(TextFormat::SHADOW))
     {
         Color shadowColor = _grayed ? toGrayed(_textFormat->shadowColor) : _textFormat->shadowColor;
-        Vector2 shadowPos = _textFormat->shadowOffset;
+        Vector2 shadowPos = offset + _textFormat->shadowOffset;
         draw_string(font, shadowPos, GObject::toGodotStr(_text),
             HORIZONTAL_ALIGNMENT_LEFT, -1, fontSize, shadowColor);
     }
@@ -231,25 +247,25 @@ void FUILabel::_draw()
     if (_textFormat->hasEffect(TextFormat::OUTLINE) && _textFormat->outlineSize > 0)
     {
         Color outlineColor = _grayed ? toGrayed(_textFormat->outlineColor) : _textFormat->outlineColor;
-        draw_string_outline(font, Vector2(0, 0), GObject::toGodotStr(_text),
+        draw_string_outline(font, offset, GObject::toGodotStr(_text),
             HORIZONTAL_ALIGNMENT_LEFT, -1, fontSize, _textFormat->outlineSize, outlineColor);
     }
     else if (_textFormat->hasEffect(TextFormat::GLOW))
     {
         Color glowColor = _grayed ? toGrayed(_textFormat->glowColor) : _textFormat->glowColor;
-        draw_string(font, Vector2(0, 0), GObject::toGodotStr(_text),
+        draw_string(font, offset, GObject::toGodotStr(_text),
             HORIZONTAL_ALIGNMENT_LEFT, -1, fontSize, glowColor);
     }
 
     // Main text
-    draw_string(font, Vector2(0, 0), GObject::toGodotStr(_text),
+    draw_string(font, offset, GObject::toGodotStr(_text),
         HORIZONTAL_ALIGNMENT_LEFT, -1, fontSize, textColor);
 
     // Underline
     if (_textFormat->underline)
     {
         float textWidth = getTextWidth();
-        draw_line(Vector2(0, fontSize + 1), Vector2(textWidth, fontSize + 1), textColor);
+        draw_line(offset + Vector2(0, fontSize + 1), offset + Vector2(textWidth, fontSize + 1), textColor);
     }
 }
 
