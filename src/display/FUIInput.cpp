@@ -12,13 +12,14 @@ FUIInput::FUIInput() :
     _placeholderFontSize(0),
     _keyboardType(0),
     _focused(false),
-    _textFormat(nullptr)
+    _textFormat(new TextFormat())
 {
     set_focus_mode(FOCUS_ALL);
 }
 
 FUIInput::~FUIInput()
 {
+    delete _textFormat;
 }
 
 void FUIInput::_bind_methods()
