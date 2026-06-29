@@ -560,9 +560,9 @@ void FUISprite::drawScale9()
             float ow = origRects[i][2], oh = origRects[i][3];
             if (ow <= 0 || oh <= 0) continue;
 
-            Rect2 src(srcX + oy + 0.5f,
-                      srcY + origW - ox - ow + 0.5f,
-                      oh - 1.0f, ow - 1.0f);
+            Rect2 src(srcX + oy - 0.5f,
+                      srcY + origW - ox - ow - 0.5f,
+                      oh + 1.0f, ow + 1.0f);
 
             float dx = destRects[i][0], dy = destRects[i][1];
             float dw = destRects[i][2], dh = destRects[i][3];
@@ -583,7 +583,7 @@ void FUISprite::drawScale9()
         float ow = origRects[i][2], oh = origRects[i][3];
         if (ow <= 0 || oh <= 0) continue;
 
-        Rect2 src(srcX + ox + 0.5f, srcY + oy + 0.5f, ow - 1.0f, oh - 1.0f);
+        Rect2 src(srcX + ox - 0.5f, srcY + oy - 0.5f, ow + 1.0f, oh + 1.0f);
 
         Rect2 dst(destRects[i][0], destRects[i][1],
                   destRects[i][2], destRects[i][3]);
