@@ -56,6 +56,7 @@ public:
 
 protected:
     virtual void handleInit() override;
+    virtual void handleSizeChanged() override;
     virtual void handleGrayedChanged() override;
     virtual void setup_beforeAdd(ByteBuffer* buffer, int beginPos) override;
 

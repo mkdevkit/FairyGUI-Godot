@@ -136,9 +136,10 @@ void GImage::constructFromResource()
     contentItem = contentItem->getHighResolution();
     contentItem->load();
 
+    _content->set_region_rect(contentItem->imageFrame.region);
+    ((FUISprite*)_content)->setRotated(contentItem->imageFrame.rotated);
+    _content->set_content_size(Vector2(getWidth(), getHeight()));
     _content->setTexture(contentItem->texture);
-    if (!contentItem->imageFrame.region.size.is_zero_approx())
-        _content->set_region_rect(contentItem->imageFrame.region);
 
     if (contentItem->hasScale9Grid)
         ((FUISprite*)_content)->setScale9Grid(contentItem->scale9Grid);
@@ -146,6 +147,12 @@ void GImage::constructFromResource()
         ((FUISprite*)_content)->setScaleByTile(true);
 
     setSize(sourceSize.width, sourceSize.height);
+}
+
+void GImage::handleSizeChanged()
+{
+    GObject::handleSizeChanged();
+    _content->setContentSize(Vector2(getWidth(), getHeight()));
 }
 
 void GImage::setup_beforeAdd(ByteBuffer* buffer, int beginPos)

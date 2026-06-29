@@ -244,8 +244,8 @@ void GMovieClip::drawFrame()
 
     MovieClipFrameData& frameData = _movieclipData->frames[_frame];
 
-    _content->setTexture(frameData.imageData.texture);
     _content->setRegion(frameData.imageData.region);
+    _content->setTexture(frameData.imageData.texture);
     _content->setRegionEnabled(true);
 }
 

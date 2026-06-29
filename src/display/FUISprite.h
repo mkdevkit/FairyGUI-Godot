@@ -33,8 +33,9 @@ public:
     Rect2 getRegion() const { return get_region_rect(); }
     void setRegionEnabled(bool v) { set_region_enabled(v); }
     bool isRegionEnabled() const { return is_region_enabled(); }
-    void setTexture(const Ref<Texture2D>& t) { set_texture(t); }
+    void setTexture(const Ref<Texture2D>& t);
     Ref<Texture2D> getTexture() const { return get_texture(); }
+    Ref<Texture2D> getRealTexture() const { return _realTexture; }
 
     FillMethod getFillMethod() const { return _fillMethod; }
     void setFillMethod(FillMethod value);
@@ -54,6 +55,10 @@ public:
 
     // Override Godot methods
     void set_content_size(const Vector2& size);
+    void setContentSize(const Vector2& size) { _contentSize = size; }
+    const Vector2& getContentSize() const { return _contentSize; }
+    void setRotated(bool v) { _rotated = v; }
+    bool isRotated() const { return _rotated; }
 
     static void _bind_methods();
     void _draw();
@@ -76,11 +81,16 @@ private:
     bool _fillClockwise;
     bool _scaleByTile;
     bool _grayed;
+    bool _rotated;
+
+    // Store real texture while keeping Sprite2D::texture null to suppress auto-render
+    Ref<Texture2D> _realTexture;
 
     // 9-slice data
     bool _scale9Enabled;
     Rect2 _scale9Grid;
     Vector2 _originalContentSize;
+    Vector2 _contentSize;
 
     // Fill mode vertex data (for radial)
     std::vector<Vector2> _fillVertices;

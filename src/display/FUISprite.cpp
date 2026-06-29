@@ -17,6 +17,7 @@ FUISprite::FUISprite() :
     _fillClockwise(false),
     _scaleByTile(false),
     _grayed(false),
+    _rotated(false),
     _scale9Enabled(false)
 {
     set_centered(false); // FairyGUI uses top-left origin, NOT center origin
@@ -120,6 +121,7 @@ void FUISprite::_notification(int p_what)
 
 void FUISprite::clearContent()
 {
+    _realTexture.unref();
     set_texture(nullptr);
     _scale9Enabled = false;
     _empty = get_texture();
@@ -211,15 +213,20 @@ void FUISprite::setFillAmount(float value)
     }
 }
 
+void FUISprite::setTexture(const Ref<Texture2D>& t)
+{
+    _realTexture = t;
+    // Keep Sprite2D texture null to block auto-rendering via RenderingServer
+    Sprite2D::set_texture(nullptr);
+}
+
 void FUISprite::set_content_size(const Vector2& size)
 {
+    _contentSize = size;
     if (_scaleByTile)
     {
-        // Set texture region to match content size for tiling
         set_region_rect(Rect2(Vector2(), size));
     }
-    Sprite2D::set_region_rect(get_region_rect()); // ensure texture rect reflects tiles
-    set_position(get_position()); // no explicit content size in Godot, use rect
 }
 
 void FUISprite::setupFill()
@@ -412,14 +419,15 @@ Vector2 FUISprite::boundaryTexCoord(char index) const
 
 void FUISprite::_draw()
 {
-    Ref<Texture2D> tex = get_texture();
-    if (tex.is_null() || tex == _empty)
+    if (_realTexture.is_null() || _realTexture == _empty)
         return;
 
-    Vector2 contentSize = get_rect().size;
+    Ref<Texture2D> tex = _realTexture;
+
+    Vector2 contentSize = _contentSize.x > 0 ? _contentSize : get_rect().size;
     Rect2 texRect = get_region_rect();
-    if (texRect.size.x == 0 || texRect.size.y == 0)
-        texRect = Rect2(Vector2(), tex->get_size());
+    if (texRect.size.x <= 0 || texRect.size.y <= 0)
+        return; // region not set yet — nothing to draw
 
     if (_fillMethod != FillMethod::None)
     {
@@ -453,19 +461,37 @@ void FUISprite::_draw()
         return;
     }
 
-    // Normal sprite draw (already handled by Sprite2D base, but use custom draw for control)
-    draw_texture_rect_region(tex,
-        Rect2(0, 0, contentSize.x, contentSize.y),
-        texRect,
-        get_modulate());
+    // Normal sprite draw
+    if (_rotated)
+    {
+        // Sprite is rotated 90° CW in atlas. texRect has swapped dims (H_orig, W_orig).
+        // Un-rotate by applying -90° transform, drawing atlas rect centered at origin.
+        Vector2 atlasSize = texRect.size; // (H, W) for rotated sprite
+        Vector2 displaySize = _contentSize.x > 0 ? _contentSize : Vector2(atlasSize.y, atlasSize.x);
+        Vector2 center(displaySize.x * 0.5f, displaySize.y * 0.5f);
+        draw_set_transform(center, Math::deg_to_rad(-90.0f), Vector2(1, 1));
+        draw_texture_rect_region(tex,
+            Rect2(-atlasSize.x * 0.5f, -atlasSize.y * 0.5f, atlasSize.x, atlasSize.y),
+            texRect,
+            get_modulate());
+        draw_set_transform(Vector2(), 0, Vector2(1, 1));
+    }
+    else
+    {
+        draw_texture_rect_region(tex,
+            Rect2(0, 0, contentSize.x, contentSize.y),
+            texRect,
+            get_modulate());
+    }
 }
 
 void FUISprite::drawScale9()
 {
-    Ref<Texture2D> tex = get_texture();
-    if (tex.is_null()) return;
+    if (_realTexture.is_null()) return;
 
-    Vector2 contentSize = get_rect().size;
+    Ref<Texture2D> tex = _realTexture;
+
+    Vector2 contentSize = _contentSize.x > 0 ? _contentSize : get_rect().size;
     Rect2 texRect = get_region_rect();
     if (texRect.size.x == 0)
         texRect.size = tex->get_size();
@@ -473,16 +499,20 @@ void FUISprite::drawScale9()
     float srcX = texRect.position.x;
     float srcY = texRect.position.y;
 
+    // scale9Grid coords are always in original (unrotated) sprite space.
+    // If the atlas sprite was rotated 90° CW, texRect has swapped dimensions.
+    float origW = texRect.size.x;
+    float origH = texRect.size.y;
+
     float l = _scale9Grid.position.x;
     float t = _scale9Grid.position.y;
     float r = _scale9Grid.position.x + _scale9Grid.size.x;
     float b = _scale9Grid.position.y + _scale9Grid.size.y;
-    float tw = texRect.size.x;
-    float th = texRect.size.y;
+    float tw = origW;
+    float th = origH;
     float sw = contentSize.x;
     float sh = contentSize.y;
 
-    // Ensure content size >= split areas
     float marginLeft = l;
     float marginTop = t;
     float marginRight = tw - r;
@@ -495,34 +525,77 @@ void FUISprite::drawScale9()
     if (destMidW < 0) destMidW = 0;
     if (destMidH < 0) destMidH = 0;
 
-    // 9 regions
-    struct { Rect2 src; Rect2 dst; } regions[9];
-    // Top-left
-    regions[0] = { Rect2(srcX, srcY, l, t), Rect2(0, 0, marginLeft, marginTop) };
-    // Top-mid
-    regions[1] = { Rect2(srcX + l, srcY, midW, t), Rect2(marginLeft, 0, destMidW, marginTop) };
-    // Top-right
-    regions[2] = { Rect2(srcX + r, srcY, marginRight, t), Rect2(marginLeft + destMidW, 0, marginRight, marginTop) };
-    // Mid-left
-    regions[3] = { Rect2(srcX, srcY + t, l, midH), Rect2(0, marginTop, marginLeft, destMidH) };
-    // Mid-mid
-    regions[4] = { Rect2(srcX + l, srcY + t, midW, midH), Rect2(marginLeft, marginTop, destMidW, destMidH) };
-    // Mid-right
-    regions[5] = { Rect2(srcX + r, srcY + t, marginRight, midH), Rect2(marginLeft + destMidW, marginTop, marginRight, destMidH) };
-    // Bottom-left
-    regions[6] = { Rect2(srcX, srcY + b, l, marginBottom), Rect2(0, marginTop + destMidH, marginLeft, marginBottom) };
-    // Bottom-mid
-    regions[7] = { Rect2(srcX + l, srcY + b, midW, marginBottom), Rect2(marginLeft, marginTop + destMidH, destMidW, marginBottom) };
-    // Bottom-right
-    regions[8] = { Rect2(srcX + r, srcY + b, marginRight, marginBottom), Rect2(marginLeft + destMidW, marginTop + destMidH, marginRight, marginBottom) };
+    // 9 source rects in original (unrotated) image space
+    const float origRects[9][4] = {
+        //  TL           TM            TR
+        { 0, 0, l, t }, { l, 0, midW, t }, { r, 0, marginRight, t },
+        //  ML           MM            MR
+        { 0, t, l, midH }, { l, t, midW, midH }, { r, t, marginRight, midH },
+        //  BL           BM            BR
+        { 0, b, l, marginBottom }, { l, b, midW, marginBottom }, { r, b, marginRight, marginBottom },
+    };
+
+    // 9 destination rects in screen space
+    const float destRects[9][4] = {
+        { 0, 0, marginLeft, marginTop },
+        { marginLeft, 0, destMidW, marginTop },
+        { marginLeft + destMidW, 0, marginRight, marginTop },
+        { 0, marginTop, marginLeft, destMidH },
+        { marginLeft, marginTop, destMidW, destMidH },
+        { marginLeft + destMidW, marginTop, marginRight, destMidH },
+        { 0, marginTop + destMidH, marginLeft, marginBottom },
+        { marginLeft, marginTop + destMidH, destMidW, marginBottom },
+        { marginLeft + destMidW, marginTop + destMidH, marginRight, marginBottom },
+    };
+
+    if (_rotated)
+    {
+        print_line(vformat("rotated scale9: contentSize=%s origW=%f origH=%f grid=[%f,%f,%f,%f] texRect=%s",
+            contentSize, origW, origH,
+            _scale9Grid.position.x, _scale9Grid.position.y,
+            _scale9Grid.size.x, _scale9Grid.size.y,
+            texRect));
+
+        // ... keep existing rotated code
+        Vector2 center(contentSize.x * 0.5f, contentSize.y * 0.5f);
+        draw_set_transform(center, Math::deg_to_rad(-90.0f), Vector2(1, 1));
+
+        for (int i = 0; i < 9; i++)
+        {
+            float ox = origRects[i][0], oy = origRects[i][1];
+            float ow = origRects[i][2], oh = origRects[i][3];
+            if (ow <= 0 || oh <= 0) continue;
+
+            Rect2 src(srcX + oy,
+                      srcY + origW - ox - ow,
+                      oh, ow);
+
+            float dx = destRects[i][0], dy = destRects[i][1];
+            float dw = destRects[i][2], dh = destRects[i][3];
+            if (dw <= 0 || dh <= 0) continue;
+
+            Rect2 localDst(dy - center.y,
+                           center.x - dx - dw,
+                           dh, dw);
+            draw_texture_rect_region(tex, localDst, src, get_modulate());
+        }
+        draw_set_transform(Vector2(), 0, Vector2(1, 1));
+        return;
+    }
 
     for (int i = 0; i < 9; i++)
     {
-        if (regions[i].dst.size.x <= 0 || regions[i].dst.size.y <= 0) continue;
-        if (regions[i].src.size.x <= 0 || regions[i].src.size.y <= 0) continue;
+        float ox = origRects[i][0], oy = origRects[i][1];
+        float ow = origRects[i][2], oh = origRects[i][3];
+        if (ow <= 0 || oh <= 0) continue;
 
-        Rect2 dst = regions[i].dst;
-        draw_texture_rect_region(tex, dst, regions[i].src, get_modulate());
+        Rect2 src(srcX + ox, srcY + oy, ow, oh);
+
+        Rect2 dst(destRects[i][0], destRects[i][1],
+                  destRects[i][2], destRects[i][3]);
+        if (dst.size.x <= 0 || dst.size.y <= 0) continue;
+
+        draw_texture_rect_region(tex, dst, src, get_modulate());
     }
 }
 
