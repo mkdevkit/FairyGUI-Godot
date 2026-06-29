@@ -98,7 +98,7 @@ public:
     IHitTest* getHitArea() const { return _hitArea; }
     void setHitArea(IHitTest* value);
 
-    ScrollPane* getScrollPane() const { return _scrollPane; }
+    ScrollPane* getScrollPane() const { return _scrollPane.ptr(); }
 
     float getViewWidth() const;
     void setViewWidth(float value);
@@ -145,7 +145,7 @@ protected:
     std::vector<GController*> _controllers;
     std::vector<Transition*> _transitions;
     FUIInnerContainer* _container;
-    ScrollPane* _scrollPane;
+    Ref<ScrollPane> _scrollPane;
     Margin _margin;
     Vector2 _alignOffset;
     ChildrenRenderOrder _childrenRenderOrder;

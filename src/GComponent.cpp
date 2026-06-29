@@ -14,7 +14,6 @@ NS_FGUI_BEGIN
 using namespace std;
 
 GComponent::GComponent() : _container(nullptr),
-_scrollPane(nullptr),
 _childrenRenderOrder(ChildrenRenderOrder::ASCENT),
 _apexIndex(0),
 _boundsChanged(false),
@@ -364,7 +363,7 @@ bool GComponent::isAncestorOf(const GObject* obj) const
 
 bool GComponent::isChildInView(GObject* child)
 {
-    if (_scrollPane != nullptr)
+    if (_scrollPane.is_valid())
     {
         return _scrollPane->isChildInView(child);
     }
@@ -577,7 +576,7 @@ const std::string& GComponent::getBaseUserData() const
 
 float GComponent::getViewWidth() const
 {
-    if (_scrollPane != nullptr)
+    if (_scrollPane.is_valid())
         return _scrollPane->getViewSize().width;
     else
         return _size.width - _margin.left - _margin.right;
@@ -585,7 +584,7 @@ float GComponent::getViewWidth() const
 
 void GComponent::setViewWidth(float value)
 {
-    if (_scrollPane != nullptr)
+    if (_scrollPane.is_valid())
         _scrollPane->setViewWidth(value);
     else
         setWidth(value + _margin.left + _margin.right);
@@ -593,7 +592,7 @@ void GComponent::setViewWidth(float value)
 
 float GComponent::getViewHeight() const
 {
-    if (_scrollPane != nullptr)
+    if (_scrollPane.is_valid())
         return _scrollPane->getViewSize().height;
     else
         return _size.height - _margin.top - _margin.bottom;
@@ -601,7 +600,7 @@ float GComponent::getViewHeight() const
 
 void GComponent::setViewHeight(float value)
 {
-    if (_scrollPane != nullptr)
+    if (_scrollPane.is_valid())
         _scrollPane->setViewHeight(value);
     else
         setHeight(value + _margin.top + _margin.bottom);
@@ -609,7 +608,7 @@ void GComponent::setViewHeight(float value)
 
 void GComponent::setBoundsChangedFlag()
 {
-    if (_scrollPane == nullptr && !_trackBounds)
+    if (!_scrollPane.is_valid() && !_trackBounds)
         return;
 
     _boundsChanged = true;
@@ -665,7 +664,7 @@ void GComponent::updateBounds()
 void GComponent::setBounds(float ax, float ay, float aw, float ah)
 {
     _boundsChanged = false;
-    if (_scrollPane != nullptr)
+    if (_scrollPane.is_valid())
         _scrollPane->setContentSize(std::ceil(ax + aw), std::ceil(ay + ah));
 }
 
@@ -942,7 +941,7 @@ GObject* GComponent::hitTest(const Vector2& worldPoint, const Camera2D* camera)
         }
     }
 
-    if (_scrollPane)
+    if (_scrollPane.is_valid())
     {
         target = _scrollPane->hitTest(worldPoint, camera);
         if (!target)
@@ -1041,7 +1040,7 @@ void GComponent::setupOverflow(OverflowType overflow)
 
 void GComponent::setupScroll(ByteBuffer* buffer)
 {
-    _scrollPane = new ScrollPane(this);
+    _scrollPane = memnew(ScrollPane(this));
     _scrollPane->setup(buffer);
 }
 
@@ -1049,7 +1048,7 @@ void GComponent::handleSizeChanged()
 {
     GObject::handleSizeChanged();
 
-    if (_scrollPane != nullptr)
+    if (_scrollPane.is_valid())
         _scrollPane->onOwnerSizeChanged();
     else
         _container->set_position(Vector2(_margin.left, _margin.top));
@@ -1088,7 +1087,7 @@ void GComponent::handleControllerChanged(GController* c)
 {
     GObject::handleControllerChanged(c);
 
-    if (_scrollPane != nullptr)
+    if (_scrollPane.is_valid())
         _scrollPane->handleControllerChanged(c);
 }
 
@@ -1345,7 +1344,7 @@ void GComponent::setup_afterAdd(ByteBuffer* buffer, int beginPos)
     buffer->seek(beginPos, 4);
 
     int pageController = buffer->readShort();
-    if (pageController != -1 && _scrollPane != nullptr && _scrollPane->isPageMode())
+    if (pageController != -1 && _scrollPane.is_valid() && _scrollPane->isPageMode())
         _scrollPane->setPageController(_parent->getControllerAt(pageController));
 
     int cnt = buffer->readShort();

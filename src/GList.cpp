@@ -665,7 +665,7 @@ void GList::onItemTouchBegin(EventContext* context)
 
     _selectionHandled = false;
 
-    if (UIConfig::defaultScrollTouchEffect && (_scrollPane != nullptr || (_parent != nullptr && _parent->getScrollPane() != nullptr)))
+    if (UIConfig::defaultScrollTouchEffect && (_scrollPane.is_valid() || (_parent != nullptr && _parent->getScrollPane() != nullptr)))
         return;
 
     if (_selectionMode == ListSelectionMode::SINGLE)
@@ -686,7 +686,7 @@ void GList::onClickItem(EventContext* context)
         setSelectionOnEvent(item, context->getInput());
     _selectionHandled = false;
 
-    if (_scrollPane != nullptr && scrollItemToViewOnClick)
+    if (_scrollPane.is_valid() && scrollItemToViewOnClick)
         _scrollPane->scrollToView(item, true);
 
     dispatchItemEvent(item, context);
@@ -909,7 +909,7 @@ void GList::scrollToView(int index, bool ani, bool setFirst)
         }
 
         setFirst = true;
-        if (_scrollPane != nullptr)
+        if (_scrollPane.is_valid())
             _scrollPane->scrollToView(rect, ani, setFirst);
         else if (_parent != nullptr && _parent->getScrollPane() != nullptr)
             _parent->getScrollPane()->scrollToView(transformRect(rect, _parent), ani, setFirst);
@@ -917,7 +917,7 @@ void GList::scrollToView(int index, bool ani, bool setFirst)
     else
     {
         GObject* obj = getChildAt(index);
-        if (_scrollPane != nullptr)
+        if (_scrollPane.is_valid())
             _scrollPane->scrollToView(obj, ani, setFirst);
         else if (_parent != nullptr && _parent->getScrollPane() != nullptr)
             _parent->getScrollPane()->scrollToView(obj, ani, setFirst);
@@ -993,7 +993,7 @@ void GList::setVirtual(bool loop)
 {
     if (!_virtual)
     {
-        // CCASSERT(_scrollPane != nullptr, "FairyGUI: Virtual list must be scrollable!")
+        // CCASSERT(_scrollPane.is_valid(), "FairyGUI: Virtual list must be scrollable!")
 
         if (loop)
         {
@@ -2051,7 +2051,7 @@ void GList::handleAlign(float contentWidth, float contentHeight)
     if (newOffset != _alignOffset)
     {
         _alignOffset = newOffset;
-        if (_scrollPane != nullptr)
+        if (_scrollPane.is_valid())
             _scrollPane->adjustMaskContainer();
         else
             _container->set_position(-_alignOffset);
@@ -2093,7 +2093,7 @@ void GList::updateBounds()
                 maxWidth = child->getWidth();
         }
         ch = curY;
-        if (ch <= viewHeight && _autoResizeItem && _scrollPane != nullptr && _scrollPane->_displayInDemand && _scrollPane->_vtScrollBar != nullptr)
+        if (ch <= viewHeight && _autoResizeItem && _scrollPane.is_valid() && _scrollPane->_displayInDemand && _scrollPane->_vtScrollBar != nullptr)
         {
             viewWidth += _scrollPane->_vtScrollBar->getWidth();
             for (i = 0; i < cnt; i++)
@@ -2127,7 +2127,7 @@ void GList::updateBounds()
                 maxHeight = child->getHeight();
         }
         cw = curX;
-        if (cw <= viewWidth && _autoResizeItem && _scrollPane != nullptr && _scrollPane->_displayInDemand && _scrollPane->_hzScrollBar != nullptr)
+        if (cw <= viewWidth && _autoResizeItem && _scrollPane.is_valid() && _scrollPane->_displayInDemand && _scrollPane->_hzScrollBar != nullptr)
         {
             viewHeight += _scrollPane->_hzScrollBar->getHeight();
             for (i = 0; i < cnt; i++)

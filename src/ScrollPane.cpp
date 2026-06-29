@@ -107,10 +107,12 @@ ScrollPane::ScrollPane(GComponent* owner)
     _maskContainer = FUIContainer::create();
     _owner->displayObject()->add_child(_maskContainer);
 
-    _container = Object::cast_to<FUIInnerContainer>(_owner->displayObject()->find_child("", true, false));
-    _container->set_position(Vector2(0, 0));
-    _container->get_parent()->remove_child(_container);
-    _maskContainer->add_child(_container);
+    // Use the container already created in GComponent::handleInit()
+    _container = _owner->_container;
+    if (_container)
+        _container->get_parent()->remove_child(_container);
+    if (_container)
+        _maskContainer->add_child(_container);
 
     _owner->addEventListener(UIEventType::MouseWheel, [this](EventContext* ctx) { onMouseWheel(ctx); });
     _owner->addEventListener(UIEventType::TouchBegin, [this](EventContext* ctx) { onTouchBegin(ctx); });
@@ -823,19 +825,27 @@ void ScrollPane::handleSizeChanged()
 
     _xPos = std::clamp(_xPos, 0.0f, _overlapSize.width);
     _yPos = std::clamp(_yPos, 0.0f, _overlapSize.height);
-    float max = sp_getField(_overlapSize, _refreshBarAxis);
-    if (max == 0)
-        max = std::max(sp_getField(_contentSize, _refreshBarAxis) + _footerLockedSize - sp_getField(_viewSize, _refreshBarAxis), 0.0f);
-    else
-        max += _footerLockedSize;
-    if (_refreshBarAxis == 0)
-        _container->set_position(Vector2(
-            std::clamp(_container->get_position().x, -max, (float)_headerLockedSize),
-            std::clamp(_container->get_position().y, -_overlapSize.height, 0.0f)));
-    else
-        _container->set_position(Vector2(
-            std::clamp(_container->get_position().x, -_overlapSize.width, 0.0f),
-            std::clamp(_container->get_position().y, -max, (float)_headerLockedSize)));
+    // Only adjust container position when it exists (may not during construction)
+    if (_container != nullptr)
+    {
+        float max = sp_getField(_overlapSize, _refreshBarAxis);
+        if (max == 0)
+            max = std::max(sp_getField(_contentSize, _refreshBarAxis) + _footerLockedSize - sp_getField(_viewSize, _refreshBarAxis), 0.0f);
+        else
+            max += _footerLockedSize;
+        if (_container->get_parent() != nullptr)
+        {
+            Vector2 containerPos = _container->get_position();
+            if (_refreshBarAxis == 0)
+                _container->set_position(Vector2(
+                    std::clamp(containerPos.x, -max, (float)_headerLockedSize),
+                    std::clamp(containerPos.y, -_overlapSize.height, 0.0f)));
+            else
+                _container->set_position(Vector2(
+                    std::clamp(containerPos.x, -_overlapSize.width, 0.0f),
+                    std::clamp(containerPos.y, -max, (float)_headerLockedSize)));
+        }
+    }
 
     if (_header != nullptr)
     {

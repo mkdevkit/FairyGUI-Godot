@@ -122,6 +122,8 @@ void uninitialize_fairygui_module(ModuleInitializationLevel p_level)
 {
     if (p_level == MODULE_INITIALIZATION_LEVEL_SCENE)
     {
-        // No explicit cleanup needed for Godot classes
+        // Clear static Ref<Texture2D> to avoid exit crash (Godot resource cleanup before C++ static destructors)
+        fairygui::FUISprite::clearStaticRefs();
+        fairygui::UIPackage::clearStaticRefs();
     }
 }

@@ -319,6 +319,8 @@ bool InputProcessor::onTouchBegin(const Vector2& screenPos, int touchId)
     if (_captureCallback)
         _captureCallback(UIEventType::TouchBegin);
 
+    setBegin(ti, target);
+
     WeakPtr wptr(target);
     target->bubbleEvent(UIEventType::TouchBegin);
     target = wptr.ptr();
@@ -473,7 +475,7 @@ bool InputProcessor::onMouseDown(const Vector2& screenPos, int button)
         target->bubbleEvent(UIEventType::MiddleClick);
     else if (button == (int)MouseButton::LEFT)
     {
-        // Nothing extra for left click - handled by TouchBegin
+        setBegin(ti, target);
     }
 
     _activeProcessor = nullptr;

@@ -120,7 +120,7 @@ void GRoot::_bind_methods()
     ClassDB::bind_method(D_METHOD("hasModalWindow"), &GRoot::gd_hasModalWindow);
     ClassDB::bind_method(D_METHOD("isModalWaiting"), &GRoot::isModalWaiting);
 
-    ClassDB::bind_method(D_METHOD("getTouchPosition", "touch_id"), &GRoot::getTouchPosition);
+    ClassDB::bind_method(D_METHOD("getTouchPosition", "touch_id"), &GRoot::getTouchPosition, DEFVAL(0));
     ClassDB::bind_method(D_METHOD("getTouchTarget"), &GRoot::gd_getTouchTarget);
 
     ClassDB::bind_method(D_METHOD("worldToRoot", "pt"), &GRoot::worldToRoot);

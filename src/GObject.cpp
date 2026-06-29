@@ -84,7 +84,7 @@ bool GObject::init()
 
     if (_displayObject != nullptr)
     {
-        handlePositionChanged(); // Godot Y-down: no cocos anchor offset needed
+        ((Node2D*)_displayObject)->set_position(_size * Vector2(0, -1)); // GODOT_ADAPT: anchor->offset
         // _displayObject->setOnEnterCallback([this]() { GObject::onEnter(); });
     }
     return true;
@@ -260,7 +260,7 @@ void GObject::setPivot(float xv, float yv, bool asAnchor)
         _pivot = Vector2(xv, yv);
         _pivotAsAnchor = asAnchor;
         if (_displayObject != nullptr)
-            ((Node2D*)_displayObject)->set_position(_size * _pivot); // Godot Y-down: anchor offset = pivot * size
+            ((Node2D*)_displayObject)->set_position(Vector2(_pivot.x, 1 - _pivot.y) * _size * Vector2(1,-1)); // GODOT_ADAPT: anchor->offset
         handlePositionChanged(); 
     }
 }
@@ -1214,6 +1214,9 @@ void GObject::_bind_methods()
     ClassDB::bind_method(D_METHOD("setText", "text"), &GObject::gd_setText);
     ClassDB::bind_method(D_METHOD("getText"), &GObject::gd_getText);
 
+    ClassDB::bind_method(D_METHOD("setName", "name"), &GObject::gd_setName);
+    ClassDB::bind_method(D_METHOD("getName"), &GObject::gd_getName);
+
     ClassDB::bind_method(D_METHOD("setTooltips", "text"), &GObject::gd_setTooltips);
     ClassDB::bind_method(D_METHOD("getTooltips"), &GObject::gd_getTooltips);
 
@@ -1258,6 +1261,9 @@ void GObject::_bind_methods()
 
 void GObject::gd_setText(const String& text) { setText(text.utf8().get_data()); }
 String GObject::gd_getText() const { return toGodotStr(getText()); }
+
+void GObject::gd_setName(const String& v) { name = v.utf8().get_data(); }
+String GObject::gd_getName() const { return toGodotStr(name); }
 void GObject::gd_setTooltips(const String& value) { setTooltips(value.utf8().get_data()); }
 String GObject::gd_getTooltips() const { return toGodotStr(getTooltips()); }
 String GObject::gd_getResourceURL() const { return toGodotStr(getResourceURL()); }

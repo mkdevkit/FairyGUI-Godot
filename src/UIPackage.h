@@ -46,6 +46,7 @@ public:
     static void* getItemAsset(const std::string& pkgName, const std::string& resName, PackageItemType type = PackageItemType::UNKNOWN);
     static void* getItemAssetByURL(const std::string& url, PackageItemType type = PackageItemType::UNKNOWN);
     static Ref<Texture2D> getEmptyTexture() { return _emptyTexture; }
+    static void clearStaticRefs() { _emptyTexture.unref(); }
 
     const std::string& getId() const { return _id; }
 

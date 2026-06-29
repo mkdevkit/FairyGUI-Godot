@@ -59,6 +59,7 @@ public:
     const Vector2& getContentSize() const { return _contentSize; }
     void setRotated(bool v) { _rotated = v; }
     bool isRotated() const { return _rotated; }
+    static void clearStaticRefs() { _empty.unref(); }
 
     static void _bind_methods();
     void _draw();

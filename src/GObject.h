@@ -98,6 +98,8 @@ public:
 
     void gd_setText(const String& text);
     String gd_getText() const;
+    void gd_setName(const String& v);
+    String gd_getName() const;
 
     void gd_setTooltips(const String& value);
     String gd_getTooltips() const;
