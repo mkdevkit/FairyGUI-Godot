@@ -1,4 +1,4 @@
-﻿#include "GObjectPool.h"
+#include "GObjectPool.h"
 #include "GObject.h"
 #include "UIPackage.h"
 
@@ -11,23 +11,20 @@ GObjectPool::~GObjectPool()
 {
 }
 
-GObject* GObjectPool::getObject(const std::string & url)
+Ref<GObject> GObjectPool::getObject(const std::string & url)
 {
     std::string url2 = UIPackage::normalizeURL(url);
     if (url2.length() == 0)
-        return nullptr;
+        return Ref<GObject>();
 
-    GObject* ret;
-    std::vector<GObject*>& arr = _pool[url2];
+    std::vector<Ref<GObject>>& arr = _pool[url2];
     if (!arr.empty())
     {
-        ret = arr.back();
+        Ref<GObject> ref = arr.back();
         arr.pop_back();
-        ret;
+        return ref;
     }
-    else
-        ret = UIPackage::createObjectFromURL(url2);
-    return ret;
+    return Ref<GObject>(UIPackage::createObjectFromURL(url2));
 }
 
 void GObjectPool::returnObject(GObject* obj)

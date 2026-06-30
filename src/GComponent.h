@@ -41,7 +41,7 @@ public:
     GObject* getChildByPath(const std::string& path) const;
     GObject* getChildInGroup(const GGroup* group, const std::string& name) const;
     GObject* getChildById(const std::string& id) const;
-    const std::vector<GObject*>& getChildren() const { return _children; }
+    const std::vector<Ref<GObject>>& getChildren() const { return _children; }
 
     GObject* gd_getChild(const String& name) const;
     GObject* gd_getChildByPath(const String& path) const;
@@ -142,7 +142,7 @@ protected:
     void setupOverflow(OverflowType overflow);
     void setupScroll(ByteBuffer* buffer);
 
-    std::vector<GObject*> _children;
+    std::vector<Ref<GObject>> _children;
     std::vector<Ref<GController>> _controllers;
     std::vector<Ref<Transition>> _transitions;
     FUIInnerContainer* _container;

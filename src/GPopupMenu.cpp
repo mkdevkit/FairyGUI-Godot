@@ -75,7 +75,8 @@ GButton * GPopupMenu::addItem(const std::string & caption, EventCallback callbac
 
 GButton * GPopupMenu::addItemAt(const std::string & caption, int index, EventCallback callback)
 {
-    GButton* item = _list->getFromPool(_list->getDefaultItem())->as<GButton>();
+    Ref<GObject> obj = _list->getFromPool(_list->getDefaultItem());
+    GButton* item = obj->as<GButton>();
     _list->addChildAt(item, index);
 
     item->setTitle(caption);

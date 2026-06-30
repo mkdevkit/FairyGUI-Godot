@@ -17,23 +17,23 @@ GObjectPool& HtmlObject::getObjectPool() {
     static GObjectPool pool;
     return pool;
 }
-std::vector<GObject*> HtmlObject::loaderPool;
+std::vector<Ref<GObject>> HtmlObject::loaderPool;
 
-HtmlObject::HtmlObject() :_ui(nullptr), _hidden(false)
+HtmlObject::HtmlObject() :_ui(), _hidden(false)
 {
 }
 
 HtmlObject::~HtmlObject()
 {
-    if (_ui != nullptr)
+    if (_ui.is_valid())
     {
         destroy();
 
         if (usePool)
         {
             if (!_ui->getResourceURL().empty())
-                getObjectPool().returnObject(_ui);
-            else if (dynamic_cast<GLoader*>(_ui) != nullptr)
+                getObjectPool().returnObject(_ui.ptr());
+            else if (dynamic_cast<GLoader*>(_ui.ptr()) != nullptr)
                 loaderPool.push_back(_ui);
         }
     }
@@ -78,7 +78,7 @@ void HtmlObject::destroy()
     switch (_element->type)
     {
     case HtmlElement::Type::IMAGE:
-        ((GLoader*)_ui)->setURL("");
+        ((GLoader*)_ui.ptr())->setURL("");
         break;
     }
 }
@@ -119,7 +119,7 @@ void HtmlObject::createImage()
     GLoader* loader;
     if (!loaderPool.empty())
     {
-        loader = (GLoader*)loaderPool.back();
+        loader = (GLoader*)loaderPool.back().ptr();
         loaderPool.pop_back();
     }
     else
@@ -150,7 +150,7 @@ void HtmlObject::createButton()
     _ui->setSize(width, height);
     _ui->setText(_element->getString("value"));
 
-    GButton *button = dynamic_cast<GButton*>(_ui);
+    GButton *button = dynamic_cast<GButton*>(_ui.ptr());
     if (button != nullptr)
     {
         button->setSelected(_element->getString("checked") == "true");
@@ -189,7 +189,7 @@ void HtmlObject::createInput()
     _ui->setSize(width, height);
     _ui->setText(_element->getString("value"));
 
-    GLabel *label = dynamic_cast<GLabel*>(_ui);
+    GLabel *label = dynamic_cast<GLabel*>(_ui.ptr());
     if (label != nullptr)
     {
         GTextInput* input = dynamic_cast<GTextInput*>(label->getTextField());
@@ -216,7 +216,7 @@ void HtmlObject::createSelect()
 
     _ui->setSize(width, height);
 
-    GComboBox* comboBox = dynamic_cast<GComboBox*>(_ui);
+    GComboBox* comboBox = dynamic_cast<GComboBox*>(_ui.ptr());
     if (comboBox != nullptr)
     {
         auto items = _element->getArray("items");

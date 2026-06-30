@@ -153,16 +153,16 @@ void GList::setAutoResizeItem(bool value)
     }
 }
 
-GObject* GList::getFromPool(const std::string& url)
+Ref<GObject> GList::getFromPool(const std::string& url)
 {
-    GObject* ret;
+    Ref<GObject> ref;
     if (url.length() == 0)
-        ret = _pool->getObject(_defaultItem);
+        ref = _pool->getObject(_defaultItem);
     else
-        ret = _pool->getObject(url);
-    if (ret != nullptr)
-        ((CanvasItem*)ret->displayObject())->set_visible(true);
-    return ret;
+        ref = _pool->getObject(url);
+    if (ref.is_valid())
+        ((CanvasItem*)ref->displayObject())->set_visible(true);
+    return ref;
 }
 
 void GList::returnToPool(GObject* obj)
@@ -172,9 +172,8 @@ void GList::returnToPool(GObject* obj)
 
 GObject* GList::addItemFromPool(const std::string& url)
 {
-    GObject* obj = getFromPool(url);
-
-    return addChild(obj);
+    Ref<GObject> obj = getFromPool(url);
+    return addChild(obj.ptr());
 }
 
 GObject* GList::addChildAt(GObject* child, int index)
@@ -196,7 +195,7 @@ GObject* GList::addChildAt(GObject* child, int index)
 
 void GList::removeChildAt(int index)
 {
-    GObject* child = _children.at(index);
+    GObject* child = _children.at(index).ptr();
     child->removeClickListener(EventTag(this));
     child->removeEventListener(UIEventType::TouchBegin, EventTag(this));
     child->removeEventListener(UIEventType::RightClick, EventTag(this));
@@ -238,7 +237,7 @@ int GList::getSelectedIndex() const
         for (int i = 0; i < cnt; i++)
         {
             const ItemInfo& ii = _virtualItems[i];
-            if ((dynamic_cast<GButton*>(ii.obj) != nullptr && ((GButton*)ii.obj)->isSelected()) || (ii.obj == nullptr && ii.selected))
+            if ((dynamic_cast<GButton*>(ii.obj.ptr()) != nullptr && ((GButton*)ii.obj.ptr())->isSelected()) || (ii.obj == nullptr && ii.selected))
             {
                 if (_loop)
                     return i % _numItems;
@@ -286,7 +285,7 @@ void GList::getSelection(std::vector<int>& result) const
         for (int i = 0; i < cnt; i++)
         {
             const ItemInfo& ii = _virtualItems[i];
-            if ((dynamic_cast<GButton*>(ii.obj) != nullptr && ((GButton*)ii.obj)->isSelected()) || (ii.obj == nullptr && ii.selected))
+            if ((dynamic_cast<GButton*>(ii.obj.ptr()) != nullptr && ((GButton*)ii.obj.ptr())->isSelected()) || (ii.obj == nullptr && ii.selected))
             {
                 int j = i;
                 if (_loop)
@@ -371,8 +370,8 @@ void GList::clearSelection()
         for (int i = 0; i < cnt; i++)
         {
             ItemInfo& ii = _virtualItems[i];
-            if (dynamic_cast<GButton*>(ii.obj))
-                ((GButton*)ii.obj)->setSelected(false);
+            if (dynamic_cast<GButton*>(ii.obj.ptr()))
+                ((GButton*)ii.obj.ptr())->setSelected(false);
             ii.selected = false;
         }
     }
@@ -398,8 +397,8 @@ void GList::clearSelectionExcept(GObject* g)
             ItemInfo& ii = _virtualItems[i];
             if (ii.obj != g)
             {
-                if (dynamic_cast<GButton*>(ii.obj))
-                    ((GButton*)ii.obj)->setSelected(false);
+                if (dynamic_cast<GButton*>(ii.obj.ptr()))
+                    ((GButton*)ii.obj.ptr())->setSelected(false);
                 ii.selected = false;
             }
         }
@@ -427,9 +426,9 @@ void GList::selectAll()
         for (int i = 0; i < cnt; i++)
         {
             ItemInfo& ii = _virtualItems[i];
-            if (dynamic_cast<GButton*>(ii.obj) && !((GButton*)ii.obj)->isSelected())
+            if (dynamic_cast<GButton*>(ii.obj.ptr()) && !((GButton*)ii.obj.ptr())->isSelected())
             {
-                ((GButton*)ii.obj)->setSelected(true);
+                ((GButton*)ii.obj.ptr())->setSelected(true);
                 last = i;
             }
             ii.selected = true;
@@ -464,10 +463,10 @@ void GList::selectReverse()
         for (int i = 0; i < cnt; i++)
         {
             ItemInfo& ii = _virtualItems[i];
-            if (dynamic_cast<GButton*>(ii.obj))
+            if (dynamic_cast<GButton*>(ii.obj.ptr()))
             {
-                ((GButton*)ii.obj)->setSelected(!((GButton*)ii.obj)->isSelected());
-                if (((GButton*)ii.obj)->isSelected())
+                ((GButton*)ii.obj.ptr())->setSelected(!((GButton*)ii.obj.ptr())->isSelected());
+                if (((GButton*)ii.obj.ptr())->isSelected())
                     last = i;
             }
             ii.selected = !ii.selected;
@@ -512,12 +511,12 @@ void GList::handleArrowKey(int dir)
         }
         else if (_layout == ListLayoutType::FLOW_HORIZONTAL || _layout == ListLayoutType::PAGINATION)
         {
-            GObject* current = _children.at(index);
+            GObject* current = _children.at(index).ptr();
             int k = 0;
             int i;
             for (i = index - 1; i >= 0; i--)
             {
-                GObject* obj = _children.at(i);
+                GObject* obj = _children.at(i).ptr();
                 if (obj->getY() != current->getY())
                 {
                     current = obj;
@@ -527,7 +526,7 @@ void GList::handleArrowKey(int dir)
             }
             for (; i >= 0; i--)
             {
-                GObject* obj = _children.at(i);
+                GObject* obj = _children.at(i).ptr();
                 if (obj->getY() != current->getY())
                 {
                     clearSelection();
@@ -550,13 +549,13 @@ void GList::handleArrowKey(int dir)
         }
         else if (_layout == ListLayoutType::FLOW_VERTICAL)
         {
-            GObject* current = _children.at(index);
+            GObject* current = _children.at(index).ptr();
             int k = 0;
             int cnt = (int)_children.size();
             int i;
             for (i = index + 1; i < cnt; i++)
             {
-                GObject* obj = _children.at(i);
+                GObject* obj = _children.at(i).ptr();
                 if (obj->getX() != current->getX())
                 {
                     current = obj;
@@ -566,7 +565,7 @@ void GList::handleArrowKey(int dir)
             }
             for (; i < cnt; i++)
             {
-                GObject* obj = _children.at(i);
+                GObject* obj = _children.at(i).ptr();
                 if (obj->getX() != current->getX())
                 {
                     clearSelection();
@@ -589,13 +588,13 @@ void GList::handleArrowKey(int dir)
         }
         else if (_layout == ListLayoutType::FLOW_HORIZONTAL || _layout == ListLayoutType::PAGINATION)
         {
-            GObject* current = _children.at(index);
+            GObject* current = _children.at(index).ptr();
             int k = 0;
             int cnt = (int)_children.size();
             int i;
             for (i = index + 1; i < cnt; i++)
             {
-                GObject* obj = _children.at(i);
+                GObject* obj = _children.at(i).ptr();
                 if (obj->getY() != current->getY())
                 {
                     current = obj;
@@ -605,7 +604,7 @@ void GList::handleArrowKey(int dir)
             }
             for (; i < cnt; i++)
             {
-                GObject* obj = _children.at(i);
+                GObject* obj = _children.at(i).ptr();
                 if (obj->getY() != current->getY())
                 {
                     clearSelection();
@@ -628,12 +627,12 @@ void GList::handleArrowKey(int dir)
         }
         else if (_layout == ListLayoutType::FLOW_VERTICAL)
         {
-            GObject* current = _children.at(index);
+            GObject* current = _children.at(index).ptr();
             int k = 0;
             int i;
             for (i = index - 1; i >= 0; i--)
             {
-                GObject* obj = _children.at(i);
+                GObject* obj = _children.at(i).ptr();
                 if (obj->getX() != current->getX())
                 {
                     current = obj;
@@ -643,7 +642,7 @@ void GList::handleArrowKey(int dir)
             }
             for (; i >= 0; i--)
             {
-                GObject* obj = _children.at(i);
+                GObject* obj = _children.at(i).ptr();
                 if (obj->getX() != current->getX())
                 {
                     clearSelection();
@@ -730,8 +729,8 @@ void GList::setSelectionOnEvent(GObject* item, InputEvent* evt)
                         for (int i = min; i <= max; i++)
                         {
                             ItemInfo& ii = _virtualItems[i];
-                            if (dynamic_cast<GButton*>(ii.obj))
-                                ((GButton*)ii.obj)->setSelected(true);
+                            if (dynamic_cast<GButton*>(ii.obj.ptr()))
+                                ((GButton*)ii.obj.ptr())->setSelected(true);
                             ii.selected = true;
                         }
                     }
@@ -959,7 +958,7 @@ int GList::itemIndexToChildIndex(int index)
 
     if (_layout == ListLayoutType::PAGINATION)
     {
-        return getChildIndex(_virtualItems[index].obj);
+        return getChildIndex(_virtualItems[index].obj.ptr());
     }
     else
     {
@@ -1008,12 +1007,12 @@ void GList::setVirtual(bool loop)
 
         if (_itemSize.x == 0 || _itemSize.y == 0)
         {
-            GObject* obj = getFromPool();
-            // CCASSERT(obj != nullptr, "FairyGUI: Virtual List must have a default list item resource.")
+            Ref<GObject> obj = getFromPool();
+            // CCASSERT(obj.is_valid(), "FairyGUI: Virtual List must have a default list item resource.")
             _itemSize = obj->getSize();
             _itemSize.x = ceil(_itemSize.x);
             _itemSize.y = ceil(_itemSize.y);
-            returnToPool(obj);
+            returnToPool(obj.ptr());
         }
 
         if (_layout == ListLayoutType::SINGLE_COLUMN || _layout == ListLayoutType::FLOW_HORIZONTAL)
@@ -1511,9 +1510,9 @@ bool GList::handleScroll1(bool forceUpdate)
 
             if (ii.obj != nullptr && ii.obj->getResourceURL().compare(url) != 0)
             {
-                if (dynamic_cast<GButton*>(ii.obj))
-                    ii.selected = ((GButton*)ii.obj)->isSelected();
-                removeChildToPool(ii.obj);
+                if (dynamic_cast<GButton*>(ii.obj.ptr()))
+                    ii.selected = ((GButton*)ii.obj.ptr())->isSelected();
+                removeChildToPool(ii.obj.ptr());
                 ii.obj = nullptr;
             }
         }
@@ -1527,8 +1526,8 @@ bool GList::handleScroll1(bool forceUpdate)
                     ItemInfo& ii2 = _virtualItems[j];
                     if (ii2.obj != nullptr && ii2.updateFlag != _itemInfoVer && ii2.obj->getResourceURL().compare(url) == 0)
                     {
-                        if (dynamic_cast<GButton*>(ii2.obj))
-                            ii2.selected = ((GButton*)ii2.obj)->isSelected();
+                        if (dynamic_cast<GButton*>(ii2.obj.ptr()))
+                            ii2.selected = ((GButton*)ii2.obj.ptr())->isSelected();
                         ii.obj = ii2.obj;
                         ii2.obj = nullptr;
                         if (j == reuseIndex)
@@ -1544,8 +1543,8 @@ bool GList::handleScroll1(bool forceUpdate)
                     ItemInfo& ii2 = _virtualItems[j];
                     if (ii2.obj != nullptr && ii2.updateFlag != _itemInfoVer && ii2.obj->getResourceURL().compare(url) == 0)
                     {
-                        if (dynamic_cast<GButton*>(ii2.obj))
-                            ii2.selected = ((GButton*)ii2.obj)->isSelected();
+                        if (dynamic_cast<GButton*>(ii2.obj.ptr()))
+                            ii2.selected = ((GButton*)ii2.obj.ptr())->isSelected();
                         ii.obj = ii2.obj;
                         ii2.obj = nullptr;
                         if (j == reuseIndex)
@@ -1557,18 +1556,18 @@ bool GList::handleScroll1(bool forceUpdate)
 
             if (ii.obj != nullptr)
             {
-                setChildIndex(ii.obj, forward ? curIndex - newFirstIndex : numChildren());
+                setChildIndex(ii.obj.ptr(), forward ? curIndex - newFirstIndex : numChildren());
             }
             else
             {
                 ii.obj = _pool->getObject(url);
                 if (forward)
-                    addChildAt(ii.obj, curIndex - newFirstIndex);
+                    addChildAt(ii.obj.ptr(), curIndex - newFirstIndex);
                 else
-                    addChild(ii.obj);
+                    addChild(ii.obj.ptr());
             }
-            if (dynamic_cast<GButton*>(ii.obj))
-                ((GButton*)ii.obj)->setSelected(ii.selected);
+            if (dynamic_cast<GButton*>(ii.obj.ptr()))
+                ((GButton*)ii.obj.ptr())->setSelected(ii.selected);
 
             needRender = true;
         }
@@ -1580,7 +1579,7 @@ bool GList::handleScroll1(bool forceUpdate)
             if (_autoResizeItem && (_layout == ListLayoutType::SINGLE_COLUMN || _columnCount > 0))
                 ii.obj->setSize(partSize, ii.obj->getHeight(), true);
 
-            itemRenderer(curIndex % _numItems, ii.obj);
+            itemRenderer(curIndex % _numItems, ii.obj.ptr());
             if (curIndex % _curLineItemCount == 0)
             {
                 deltaSize += ceil(ii.obj->getHeight()) - ii.size.y;
@@ -1613,9 +1612,9 @@ bool GList::handleScroll1(bool forceUpdate)
         ItemInfo& ii = _virtualItems[oldFirstIndex + i];
         if (ii.updateFlag != _itemInfoVer && ii.obj != nullptr)
         {
-            if (dynamic_cast<GButton*>(ii.obj))
-                ii.selected = ((GButton*)ii.obj)->isSelected();
-            removeChildToPool(ii.obj);
+            if (dynamic_cast<GButton*>(ii.obj.ptr()))
+                ii.selected = ((GButton*)ii.obj.ptr())->isSelected();
+            removeChildToPool(ii.obj.ptr());
             ii.obj = nullptr;
         }
     }
@@ -1623,8 +1622,8 @@ bool GList::handleScroll1(bool forceUpdate)
     childCount = (int)_children.size();
     for (int i = 0; i < childCount; i++)
     {
-        GObject* obj = _virtualItems[newFirstIndex + i].obj;
-        if (_children.at(i) != obj)
+        GObject* obj = _virtualItems[newFirstIndex + i].obj.ptr();
+        if (_children.at(i).ptr() != obj)
             setChildIndex(obj, i);
     }
 
@@ -1678,9 +1677,9 @@ bool GList::handleScroll2(bool forceUpdate)
 
             if (ii.obj != nullptr && ii.obj->getResourceURL().compare(url) != 0)
             {
-                if (dynamic_cast<GButton*>(ii.obj))
-                    ii.selected = ((GButton*)ii.obj)->isSelected();
-                removeChildToPool(ii.obj);
+                if (dynamic_cast<GButton*>(ii.obj.ptr()))
+                    ii.selected = ((GButton*)ii.obj.ptr())->isSelected();
+                removeChildToPool(ii.obj.ptr());
                 ii.obj = nullptr;
             }
         }
@@ -1694,8 +1693,8 @@ bool GList::handleScroll2(bool forceUpdate)
                     ItemInfo& ii2 = _virtualItems[j];
                     if (ii2.obj != nullptr && ii2.updateFlag != _itemInfoVer && ii2.obj->getResourceURL().compare(url) == 0)
                     {
-                        if (dynamic_cast<GButton*>(ii2.obj))
-                            ii2.selected = ((GButton*)ii2.obj)->isSelected();
+                        if (dynamic_cast<GButton*>(ii2.obj.ptr()))
+                            ii2.selected = ((GButton*)ii2.obj.ptr())->isSelected();
                         ii.obj = ii2.obj;
                         ii2.obj = nullptr;
                         if (j == reuseIndex)
@@ -1711,8 +1710,8 @@ bool GList::handleScroll2(bool forceUpdate)
                     ItemInfo& ii2 = _virtualItems[j];
                     if (ii2.obj != nullptr && ii2.updateFlag != _itemInfoVer && ii2.obj->getResourceURL().compare(url) == 0)
                     {
-                        if (dynamic_cast<GButton*>(ii2.obj))
-                            ii2.selected = ((GButton*)ii2.obj)->isSelected();
+                        if (dynamic_cast<GButton*>(ii2.obj.ptr()))
+                            ii2.selected = ((GButton*)ii2.obj.ptr())->isSelected();
                         ii.obj = ii2.obj;
                         ii2.obj = nullptr;
                         if (j == reuseIndex)
@@ -1724,18 +1723,18 @@ bool GList::handleScroll2(bool forceUpdate)
 
             if (ii.obj != nullptr)
             {
-                setChildIndex(ii.obj, forward ? curIndex - newFirstIndex : numChildren());
+                setChildIndex(ii.obj.ptr(), forward ? curIndex - newFirstIndex : numChildren());
             }
             else
             {
                 ii.obj = _pool->getObject(url);
                 if (forward)
-                    addChildAt(ii.obj, curIndex - newFirstIndex);
+                    addChildAt(ii.obj.ptr(), curIndex - newFirstIndex);
                 else
-                    addChild(ii.obj);
+                    addChild(ii.obj.ptr());
             }
-            if (dynamic_cast<GButton*>(ii.obj))
-                ((GButton*)ii.obj)->setSelected(ii.selected);
+            if (dynamic_cast<GButton*>(ii.obj.ptr()))
+                ((GButton*)ii.obj.ptr())->setSelected(ii.selected);
 
             needRender = true;
         }
@@ -1747,7 +1746,7 @@ bool GList::handleScroll2(bool forceUpdate)
             if (_autoResizeItem && (_layout == ListLayoutType::SINGLE_ROW || _lineCount > 0))
                 ii.obj->setSize(ii.obj->getWidth(), partSize, true);
 
-            itemRenderer(curIndex % _numItems, ii.obj);
+            itemRenderer(curIndex % _numItems, ii.obj.ptr());
             if (curIndex % _curLineItemCount == 0)
             {
                 deltaSize += ceil(ii.obj->getWidth()) - ii.size.x;
@@ -1780,9 +1779,9 @@ bool GList::handleScroll2(bool forceUpdate)
         ItemInfo& ii = _virtualItems[oldFirstIndex + i];
         if (ii.updateFlag != _itemInfoVer && ii.obj != nullptr)
         {
-            if (dynamic_cast<GButton*>(ii.obj))
-                ii.selected = ((GButton*)ii.obj)->isSelected();
-            removeChildToPool(ii.obj);
+            if (dynamic_cast<GButton*>(ii.obj.ptr()))
+                ii.selected = ((GButton*)ii.obj.ptr())->isSelected();
+            removeChildToPool(ii.obj.ptr());
             ii.obj = nullptr;
         }
     }
@@ -1790,8 +1789,8 @@ bool GList::handleScroll2(bool forceUpdate)
     childCount = (int)_children.size();
     for (int i = 0; i < childCount; i++)
     {
-        GObject* obj = _virtualItems[newFirstIndex + i].obj;
-        if (_children.at(i) != obj)
+        GObject* obj = _virtualItems[newFirstIndex + i].obj.ptr();
+        if (_children.at(i).ptr() != obj)
             setChildIndex(obj, i);
     }
 
@@ -1869,8 +1868,8 @@ void GList::handleScroll3(bool forceUpdate)
                 ItemInfo& ii2 = _virtualItems[reuseIndex];
                 if (ii2.obj != nullptr && ii2.updateFlag != _itemInfoVer)
                 {
-                    if (dynamic_cast<GButton*>(ii2.obj))
-                        ii2.selected = ((GButton*)ii2.obj)->isSelected();
+                    if (dynamic_cast<GButton*>(ii2.obj.ptr()))
+                        ii2.selected = ((GButton*)ii2.obj.ptr())->isSelected();
                     ii.obj = ii2.obj;
                     ii2.obj = nullptr;
                     break;
@@ -1892,16 +1891,16 @@ void GList::handleScroll3(bool forceUpdate)
                 }
 
                 ii.obj = _pool->getObject(url);
-                addChildAt(ii.obj, insertIndex);
+                addChildAt(ii.obj.ptr(), insertIndex);
             }
             else
             {
-                insertIndex = setChildIndexBefore(ii.obj, insertIndex);
+                insertIndex = setChildIndexBefore(ii.obj.ptr(), insertIndex);
             }
             insertIndex++;
 
-            if (dynamic_cast<GButton*>(ii.obj))
-                ((GButton*)ii.obj)->setSelected(ii.selected);
+            if (dynamic_cast<GButton*>(ii.obj.ptr()))
+                ((GButton*)ii.obj.ptr())->setSelected(ii.selected);
 
             needRender = true;
         }
@@ -1909,7 +1908,7 @@ void GList::handleScroll3(bool forceUpdate)
         {
             needRender = forceUpdate;
             insertIndex = -1;
-            lastObj = ii.obj;
+            lastObj = ii.obj.ptr();
         }
 
         if (needRender)
@@ -1924,7 +1923,7 @@ void GList::handleScroll3(bool forceUpdate)
                     ii.obj->setSize(ii.obj->getWidth(), partHeight, true);
             }
 
-            itemRenderer(i % _numItems, ii.obj);
+            itemRenderer(i % _numItems, ii.obj.ptr());
             ii.size.x = ceil(ii.obj->getWidth());
             ii.size.y = ceil(ii.obj->getHeight());
         }
@@ -1967,9 +1966,9 @@ void GList::handleScroll3(bool forceUpdate)
         ItemInfo& ii = _virtualItems[i];
         if (ii.updateFlag != _itemInfoVer && ii.obj != nullptr)
         {
-            if (dynamic_cast<GButton*>(ii.obj))
-                ii.selected = ((GButton*)ii.obj)->isSelected();
-            removeChildToPool(ii.obj);
+            if (dynamic_cast<GButton*>(ii.obj.ptr()))
+                ii.selected = ((GButton*)ii.obj.ptr())->isSelected();
+            removeChildToPool(ii.obj.ptr());
             ii.obj = nullptr;
         }
     }
@@ -2490,11 +2489,11 @@ void GList::readItems(ByteBuffer* buffer)
             }
         }
 
-        GObject* obj = getFromPool(*str);
-        if (obj != nullptr)
+        Ref<GObject> obj = getFromPool(*str);
+        if (obj.is_valid())
         {
-            addChild(obj);
-            setupItem(buffer, obj);
+            addChild(obj.ptr());
+            setupItem(buffer, obj.ptr());
         }
 
         buffer->setPos(nextPos);

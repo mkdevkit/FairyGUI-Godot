@@ -18,16 +18,15 @@
 
 #define CALL_LATER_CANCEL(__TYPE__,__FUNC__)
 
-// FAIRYGUI_CREATE - inline static create() with init() check and Ref counting.
-// Place in class body to replace: static TYPE* create();
+// FAIRYGUI_CREATE - memnew sets refcount=1. addChild() pushes a Ref<>
+// into _children (refcount=2). ~GComponent() clears _children, dropping
+// the last Ref<> and auto-freeing via memdelete.
 #define FAIRYGUI_CREATE(TYPE) \
     static TYPE* create() { \
-        Ref<TYPE> ref = memnew(TYPE); \
-        TYPE* pRet = ref.ptr(); \
-        if (pRet->init()) { \
-            pRet->reference(); \
+        TYPE* pRet = memnew(TYPE); \
+        if (pRet->init()) \
             return pRet; \
-        } \
+        memdelete(pRet); \
         return nullptr; \
     }
 

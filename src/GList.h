@@ -61,8 +61,8 @@ public:
     void setSelectionMode(ListSelectionMode value) { _selectionMode = value; }
 
     GObjectPool* getItemPool() const { return _pool; }
-    GObject* getFromPool() { return getFromPool(EMPTY_STRING); }
-    GObject* getFromPool(const std::string& url);
+    Ref<GObject> getFromPool() { return getFromPool(EMPTY_STRING); }
+    Ref<GObject> getFromPool(const std::string& url);
     void returnToPool(GObject* obj);
     GObject* addItemFromPool() { return addItemFromPool(EMPTY_STRING); }
     GObject* addItemFromPool(const std::string& url);
@@ -199,7 +199,7 @@ private:
     struct ItemInfo
     {
         Vector2 size;
-        GObject* obj;
+        Ref<GObject> obj;
         uint32_t updateFlag;
         bool selected;
 

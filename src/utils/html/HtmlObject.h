@@ -20,15 +20,15 @@ public:
     static bool usePool;
 
     static GObjectPool& getObjectPool();
-    static std::vector<GObject*> loaderPool;
 
     HtmlObject();
     virtual ~HtmlObject();
 
     HtmlElement* getElement() const { return _element; }
     void setElement(HtmlElement* elem) { _element = elem; }
-    GObject* getUI() const { return _ui; }
+    GObject* getUI() const { return _ui.ptr(); }
     bool isHidden() const { return _hidden; }
+    static std::vector<Ref<GObject>> loaderPool;
 
     virtual void create(FUIRichText* owner, HtmlElement* element);
     virtual void destroy();
@@ -42,7 +42,7 @@ protected:
 
     HtmlElement* _element;
     FUIRichText* _owner;
-    GObject* _ui;
+    Ref<GObject> _ui;
     bool _hidden;
 };
 

@@ -209,7 +209,10 @@ void GRoot::bringToFront(GWindow* win)
 
 void GRoot::closeAllExceptModals()
 {
-    std::vector<GObject*> map(_children);
+    std::vector<GObject*> map;
+    map.reserve(_children.size());
+    for (const auto& child : _children)
+        map.push_back(child.ptr());
 
     for (const auto& child : map)
     {
@@ -220,7 +223,10 @@ void GRoot::closeAllExceptModals()
 
 void GRoot::closeAllWindows()
 {
-    std::vector<GObject*> map(_children);
+    std::vector<GObject*> map;
+    map.reserve(_children.size());
+    for (const auto& child : _children)
+        map.push_back(child.ptr());
 
     for (const auto& child : map)
     {

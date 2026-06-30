@@ -5,14 +5,12 @@
 NS_FGUI_BEGIN
 GTreeNode* GTreeNode::create(bool isFolder, const std::string& resURL)
 {
-    Ref<GTreeNode> ref = memnew(GTreeNode);
-    GTreeNode* pRet = ref.ptr();
+    GTreeNode* pRet = memnew(GTreeNode);
     if (pRet->init(isFolder, resURL))
     {
-        pRet->reference(); // keep alive after ref dtor (2→1)
         return pRet;
     }
-    // ref dtor cleans up (1→0→freed)
+    memdelete(pRet);
     return nullptr;
 }
 

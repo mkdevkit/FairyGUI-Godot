@@ -1,4 +1,4 @@
-﻿#ifndef __GOBJECTPOOL_H__
+#ifndef __GOBJECTPOOL_H__
 #define __GOBJECTPOOL_H__
 
 #include "FairyGUIMacros.h"
@@ -14,11 +14,11 @@ public:
     GObjectPool();
     ~GObjectPool();
 
-    GObject* getObject(const std::string& url);
+    Ref<GObject> getObject(const std::string& url);
     void returnObject(GObject* obj);
 
 private:
-    std::unordered_map<std::string, std::vector<GObject*>> _pool;
+    std::unordered_map<std::string, std::vector<Ref<GObject>>> _pool;
 };
 
 NS_FGUI_END
