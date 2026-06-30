@@ -19,6 +19,7 @@ FUIContainer::FUIContainer() :
     _stencil(nullptr),
     _alphaThreshold(1.0f),
     _inverted(false),
+    _clipMode(CanvasItem::CLIP_CHILDREN_AND_DRAW),
     gOwner(nullptr)
 {
     item_rect_changed(); // enable NOTIFICATION_DRAW for Node2D
@@ -231,11 +232,17 @@ void FUIContainer::setInverted(bool inverted)
 
 void FUIContainer::applyClipping()
 {
-    // Godot's clip_children mode automatically clips children to the node's bounding rect
     if (_clippingEnabled || _stencil != nullptr)
-        set_clip_children_mode(CanvasItem::CLIP_CHILDREN_AND_DRAW);
+        set_clip_children_mode(_clipMode);
     else
         set_clip_children_mode(CanvasItem::CLIP_CHILDREN_DISABLED);
+}
+
+void FUIContainer::setClipMode(int mode)
+{
+    _clipMode = (CanvasItem::ClipChildrenMode)mode;
+    if (_clippingEnabled || _stencil != nullptr)
+        applyClipping();
 }
 
 NS_FGUI_END

@@ -9,6 +9,32 @@
 #include "scene/main/viewport.h"
 
 NS_FGUI_BEGIN
+
+// Control-based clip container. Uses Control.clip_contents (like C# NClipContainer)
+// which clips children to the Control rect without depending on _draw() commands.
+// Avoids the Node2D CLIP_CHILDREN_AND_DRAW frame-delay deadloop.
+class MaskContainer : public Control
+{
+    GDCLASS(MaskContainer, Control)
+public:
+    std::function<void(float)> _processCallback;
+
+    static void _bind_methods() {}
+
+    MaskContainer()
+    {
+        set_clip_contents(true);
+        set_mouse_filter(MOUSE_FILTER_IGNORE);
+    }
+
+protected:
+    void _notification(int p_what)
+    {
+        if (p_what == NOTIFICATION_PROCESS && _processCallback)
+            _processCallback(get_process_delta_time());
+        Control::_notification(p_what);
+    }
+};
 ScrollPane* ScrollPane::_draggingPane = nullptr;
 int ScrollPane::_gestureFlag = 0;
 
@@ -104,7 +130,7 @@ ScrollPane::ScrollPane(GComponent* owner)
     _bouncebackEffect = UIConfig::defaultScrollBounceEffect;
     _pageSize = Vector2(1, 1);
 
-    _maskContainer = FUIContainer::create();
+    _maskContainer = memnew(MaskContainer);
     _owner->displayObject()->add_child(_maskContainer);
 
     // Use the container already created in GComponent::handleInit()
@@ -174,7 +200,7 @@ void ScrollPane::setup(ByteBuffer* buffer)
     else if ((flags & 128) != 0)
         _bouncebackEffect = false;
     _inertiaDisabled = (flags & 256) != 0;
-    _maskContainer->setClippingEnabled((flags & 512) == 0);
+    _maskContainer->set_clip_contents((flags & 512) == 0);
     _floating = (flags & 1024) != 0;
     _dontClipMargin = (flags & 2048) != 0;
 
@@ -787,7 +813,11 @@ void ScrollPane::handleSizeChanged()
 
     updateScrollBarVisible();
 
-    Rect maskRect(Vector2(-_owner->_alignOffset.x, _owner->_alignOffset.y), _viewSize);
+    // Clipping region in _maskContainer's local space (position set by adjustMaskContainer).
+    // _viewSize already has scrollbar widths and margins subtracted in setSize().
+    // Re-add scrollbar size when scrollNone (not subtracted from _viewSize) and
+    // margin when dontClipMargin is set.
+    Rect2 maskRect(0, 0, _viewSize.width, _viewSize.height);
     if (_vScrollNone && _vtScrollBar != nullptr)
         maskRect.size.x += _vtScrollBar->getWidth();
     if (_hScrollNone && _hzScrollBar != nullptr)
@@ -799,7 +829,10 @@ void ScrollPane::handleSizeChanged()
         maskRect.position.y -= _owner->_margin.top;
         maskRect.size.y += _owner->_margin.top + _owner->_margin.bottom;
     }
-    _maskContainer->setClippingRegion(maskRect);
+    // MaskContainer is a Control with clip_contents=true.
+    // The clip region is the Control's rect (position + size).
+    _maskContainer->set_position(maskRect.position);
+    _maskContainer->set_size(maskRect.size);
 
     if (_vtScrollBar)
         _vtScrollBar->handlePositionChanged();
@@ -891,10 +924,9 @@ GObject* ScrollPane::hitTest(const Vector2& pt, const Camera2D* camera)
         if (target)
             return target;
     }
-    if (_maskContainer->isClippingEnabled())
+    if (_maskContainer->is_clipping_contents())
     {
-        Vector2 localPoint = _maskContainer->to_local(pt);
-        if (_maskContainer->getClippingRegion().has_point(localPoint))
+        if (_maskContainer->get_global_rect().has_point(pt))
             return _owner;
         else
             return nullptr;

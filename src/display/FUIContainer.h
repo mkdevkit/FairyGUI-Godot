@@ -22,6 +22,7 @@ public:
     void setClippingEnabled(bool value);
     const Rect2& getClippingRegion() const;
     void setClippingRegion(const Rect2& clippingRegion);
+    void setClipMode(int mode);
 
     Node* getStencil() const;
     void setStencil(Node* stencil);
@@ -48,6 +49,7 @@ private:
     // Rect clipping support
     bool _clippingEnabled;
     Rect2 _clippingRegion;
+    CanvasItem::ClipChildrenMode _clipMode; // stored for applyClipping()
 
     // Stencil clipping support
     Node* _stencil;
