@@ -31,6 +31,7 @@ GLoader::GLoader()
     _playing(true),
     _frame(0)
 {
+	_touchable = false; // icon, not independently interactive
 }
 
 GLoader::~GLoader()
@@ -43,7 +44,7 @@ GLoader::~GLoader()
 void GLoader::handleInit()
 {
     _content = FUISprite::create();
-    _displayObject = _content;
+	_displayObject = _content;
 
 }
 
