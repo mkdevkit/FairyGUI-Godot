@@ -59,6 +59,7 @@ void GMovieClip::_bind_methods()
 void GMovieClip::handleInit()
 {
     _content = FUISprite::create();
+    _displayObject = _content;
 }
 
 void GMovieClip::setPlaySettings(int start, int end, int times, int endAt, std::function<void()> completeCallback)
