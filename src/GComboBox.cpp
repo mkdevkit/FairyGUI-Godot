@@ -299,7 +299,7 @@ void GComboBox::constructExtension(ByteBuffer* buffer)
     const std::string& dropdown = buffer->readS();
     if (!dropdown.empty())
     {
-        _dropdown = dynamic_cast<GComponent*>(UIPackage::createObjectFromURL(dropdown));
+        _dropdown = Object::cast_to<GComponent>(UIPackage::createObjectFromURL(dropdown).ptr());
         // CCASSERT(_dropdown != nullptr, "FairyGUI: should be a component.")
 
         _list = dynamic_cast<GList*>(_dropdown->getChild("list"));

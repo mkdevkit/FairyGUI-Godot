@@ -51,17 +51,17 @@ void GComponent::handleInit()
     _displayObject->add_child(_container);
 }
 
-GObject* GComponent::addChild(GObject* child)
+GObject* GComponent::addChild(const Ref<GObject>& child)
 {
     addChildAt(child, (int)_children.size());
-    return child;
+    return child.ptr();
 }
 
-GObject* GComponent::addChildAt(GObject* child, int index)
+GObject* GComponent::addChildAt(const Ref<GObject>& child, int index)
 {
     if (child->_parent == this)
     {
-        setChildIndex(child, index);
+        setChildIndex(child.ptr(), index);
     }
     else
     {
@@ -72,7 +72,7 @@ GObject* GComponent::addChildAt(GObject* child, int index)
         if (child->_sortingOrder != 0)
         {
             _sortingChildCount++;
-            index = getInsertPosForSortingChild(child);
+            index = getInsertPosForSortingChild(child.ptr());
         }
         else if (_sortingChildCount > 0)
         {
@@ -81,14 +81,14 @@ GObject* GComponent::addChildAt(GObject* child, int index)
         }
 
         if (index == cnt)
-            _children.push_back(Ref<GObject>(child));
+            _children.push_back(child);
         else
-            _children.insert(_children.begin() + index, Ref<GObject>(child));
+            _children.insert(_children.begin() + index, child);
 
-        childStateChanged(child);
+        childStateChanged(child.ptr());
         setBoundsChangedFlag();
     }
-    return child;
+    return child.ptr();
 }
 
 int GComponent::getInsertPosForSortingChild(GObject* target)
@@ -1199,7 +1199,7 @@ void GComponent::constructFromResource(std::vector<GObject*>* objectPool, int po
 
     buffer->seek(0, 2);
 
-    GObject* child;
+    Ref<GObject> child;
     int childCount = buffer->readShort();
     for (int i = 0; i < childCount; i++)
     {
@@ -1231,20 +1231,20 @@ void GComponent::constructFromResource(std::vector<GObject*>* objectPool, int po
             if (pi != nullptr)
             {
                 child = UIObjectFactory::newObject(pi);
-                if (child)					
+                if (child.is_valid())					
                     child->constructFromResource();
             }
             else
                 child = UIObjectFactory::newObject(type);
 
-            if (!child)
+            if (!child.is_valid())
                 continue;
         }
 
         child->_underConstruct = true;
         child->setup_beforeAdd(buffer, curPos);
         child->_parent = this;
-        _children.push_back(Ref<GObject>(child));
+        _children.push_back(child);
 
         buffer->setPos(curPos + dataLen);
     }
@@ -1424,7 +1424,7 @@ void GComponent::_bind_methods()
 void GComponent::gd_removeChildAt(int index) { removeChildAt(index); }
 void GComponent::gd_addChildAt(Object* child, int index) {
     GObject* go = Object::cast_to<GObject>(child);
-    if (go) addChildAt(go, index);
+    if (go) addChildAt(Ref<GObject>(go), index);
 }
 void GComponent::gd_removeChildren(int beginIndex, int endIndex) { removeChildren(beginIndex, endIndex); }
 

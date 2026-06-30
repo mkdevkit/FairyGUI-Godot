@@ -6,17 +6,12 @@
 #include "UIConfig.h"
 
 NS_FGUI_BEGIN
-GPopupMenu* GPopupMenu::create(const std::string & resourceURL)
+Ref<GPopupMenu> GPopupMenu::create(const std::string & resourceURL)
 {
     Ref<GPopupMenu> ref = memnew(GPopupMenu);
-    GPopupMenu* pRet = ref.ptr();
-    if (pRet->init(resourceURL))
-    {
-        pRet->reference(); // keep alive after ref dtor (2→1)
-        return pRet;
-    }
-    // ref dtor cleans up (1→0→freed)
-    return nullptr;
+    if (ref->init(resourceURL))
+        return ref;
+    return Ref<GPopupMenu>();
 }
 
 GPopupMenu::GPopupMenu() :
@@ -77,7 +72,7 @@ GButton * GPopupMenu::addItemAt(const std::string & caption, int index, EventCal
 {
     Ref<GObject> obj = _list->getFromPool(_list->getDefaultItem());
     GButton* item = obj->as<GButton>();
-    _list->addChildAt(item, index);
+    _list->addChildAt(obj, index);
 
     item->setTitle(caption);
     item->setGrayed(false);

@@ -212,7 +212,7 @@ protected:
 
     void addChild(Node* node);
     void removeChild(Node* node);
-    virtual GObject* addChild(GObject* child);
+    virtual GObject* addChild(const Ref<GObject>& child);
     virtual void removeChild(GObject* child);
     void gd_addChild(Object* node);
     void gd_removeChild(Object* node);

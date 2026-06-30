@@ -17,8 +17,8 @@ class GPopupMenu : public RefCounted
     GDCLASS(GPopupMenu, RefCounted)
 
 public:
-    static GPopupMenu* create(const std::string& resourceURL);
-    static GPopupMenu* create() { return create(""); }
+    static Ref<GPopupMenu> create(const std::string& resourceURL);
+    static Ref<GPopupMenu> create() { return create(""); }
 
     GPopupMenu();
     virtual ~GPopupMenu();

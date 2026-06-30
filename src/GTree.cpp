@@ -49,19 +49,19 @@ void GTree::getSelectedNodes(std::vector<GTreeNode*>& result) const
 void GTree::selectNode(GTreeNode* node, bool scrollItToView)
 {
     GTreeNode* parentNode = node->_parent;
-    while (parentNode != nullptr && parentNode != _rootNode)
+    while (parentNode != nullptr && parentNode != _rootNode.ptr())
     {
         parentNode->setExpaned(true);
         parentNode = parentNode->_parent;
     }
     if (node->_cell != nullptr)
-        addSelection(getChildIndex(node->_cell), scrollItToView);
+        addSelection(getChildIndex(node->_cell.ptr()), scrollItToView);
 }
 
 void GTree::unselectNode(GTreeNode* node)
 {
     if (node->_cell != nullptr)
-        removeSelection(getChildIndex(node->_cell));
+        removeSelection(getChildIndex(node->_cell.ptr()));
 }
 
 void GTree::expandAll(GTreeNode* folderNode)
@@ -70,33 +70,29 @@ void GTree::expandAll(GTreeNode* folderNode)
     for (auto& it : folderNode->_children)
     {
         if (it->isFolder())
-            expandAll(it);
+            expandAll(it.ptr());
     }
 }
 
 void GTree::collapseAll(GTreeNode* folderNode)
 {
-    if (folderNode != _rootNode)
+    if (folderNode != _rootNode.ptr())
         folderNode->setExpaned(false);
     for (auto& it : folderNode->_children)
     {
         if (it->isFolder())
-            collapseAll(it);
+            collapseAll(it.ptr());
     }
 }
 
 void GTree::createCell(GTreeNode* node)
 {
     const std::string& url = node->_resURL.empty() ? getDefaultItem() : node->_resURL;
-    GComponent* child = getItemPool()->getObject(url)->as<GComponent>();
+    Ref<GObject> obj = getItemPool()->getObject(url);
+    GComponent* child = Object::cast_to<GComponent>(obj.ptr());
     // CCASSERT(child, "Unable to create tree cell")
     child->_treeNode = node;
-    if (node->_cell != child)
-    {
-        // // CC_SAFE_RELEASE removed - node->_cell managed by Godot ref counting;
-        node->_cell = child;
-        // CC_SAFE_RETAIN removed
-    }
+    node->_cell = child;
 
     GObject* indentObj = node->_cell->getChild("indent");
     if (indentObj != nullptr)
@@ -128,9 +124,9 @@ void GTree::afterInserted(GTreeNode* node)
         createCell(node);
 
     int index = getInsertIndexForNode(node);
-    addChildAt(node->_cell, index);
+    addChildAt(Ref<GObject>(node->_cell.ptr()), index);
     if (treeNodeRender != nullptr)
-        treeNodeRender(node, node->_cell);
+        treeNodeRender(node, node->_cell.ptr());
 
     if (node->isFolder() && node->isExpanded())
         checkChildren(node, index);
@@ -143,7 +139,7 @@ int GTree::getInsertIndexForNode(GTreeNode* node)
         prevNode = node->getParent();
     int insertIndex;
     if (prevNode->_cell != nullptr)
-        insertIndex = getChildIndex(prevNode->_cell) + 1;
+        insertIndex = getChildIndex(prevNode->_cell.ptr()) + 1;
     else
         insertIndex = 0;
     int myLevel = node->_level;
@@ -167,9 +163,9 @@ void GTree::afterRemoved(GTreeNode* node)
 
 void GTree::afterExpanded(GTreeNode* node)
 {
-    if (node == _rootNode)
+    if (node == _rootNode.ptr())
     {
-        checkChildren(_rootNode, 0);
+        checkChildren(_rootNode.ptr(), 0);
         return;
     }
 
@@ -180,21 +176,21 @@ void GTree::afterExpanded(GTreeNode* node)
         return;
 
     if (treeNodeRender != nullptr)
-        treeNodeRender(node, node->_cell);
+        treeNodeRender(node, node->_cell.ptr());
 
     GController* cc = node->_cell->getController("expanded");;
     if (cc != nullptr)
         cc->setSelectedIndex(1);
 
     if (node->_cell->getParent() != nullptr)
-        checkChildren(node, getChildIndex(node->_cell));
+        checkChildren(node, getChildIndex(node->_cell.ptr()));
 }
 
 void GTree::afterCollapsed(GTreeNode* node)
 {
-    if (node == _rootNode)
+    if (node == _rootNode.ptr())
     {
-        checkChildren(_rootNode, 0);
+        checkChildren(_rootNode.ptr(), 0);
         return;
     }
 
@@ -205,7 +201,7 @@ void GTree::afterCollapsed(GTreeNode* node)
         return;
 
     if (treeNodeRender != nullptr)
-        treeNodeRender(node, node->_cell);
+        treeNodeRender(node, node->_cell.ptr());
 
     GController* cc = node->_cell->getController("expanded");;
     if (cc != nullptr)
@@ -217,7 +213,7 @@ void GTree::afterCollapsed(GTreeNode* node)
 
 void GTree::afterMoved(GTreeNode* node)
 {
-    int startIndex = getChildIndex(node->_cell);
+    int startIndex = getChildIndex(node->_cell.ptr());
     int endIndex;
     if (node->isFolder())
         endIndex = getFolderEndIndex(startIndex, node->_level);
@@ -268,7 +264,7 @@ int GTree::checkChildren(GTreeNode* folderNode, int index)
             createCell(node);
 
         if (node->_cell->getParent() == nullptr)
-            addChildAt(node->_cell, index);
+            addChildAt(Ref<GObject>(node->_cell.ptr()), index);
 
         if (node->isFolder() && node->isExpanded())
             index = checkChildren(node, index);
@@ -284,7 +280,7 @@ void GTree::hideFolderNode(GTreeNode* folderNode)
     {
         GTreeNode* node = folderNode->getChildAt(i);
         if (node->_cell != nullptr && node->_cell->getParent() != nullptr)
-            removeChild(node->_cell);
+            removeChild(node->_cell.ptr());
 
         if (node->isFolder() && node->isExpanded())
             hideFolderNode(node);
@@ -293,11 +289,11 @@ void GTree::hideFolderNode(GTreeNode* folderNode)
 
 void GTree::removeNode(GTreeNode* node)
 {
-    if (node->_cell != nullptr)
+    if (node->_cell.is_valid())
     {
         if (node->_cell->getParent() != nullptr)
-            removeChild(node->_cell);
-        getItemPool()->returnObject(node->_cell);
+            removeChild(node->_cell.ptr());
+        getItemPool()->returnObject(node->_cell.ptr());
         node->_cell->_treeNode = nullptr;
         node->_cell = nullptr;
     }
@@ -385,7 +381,7 @@ void GTree::readItems(ByteBuffer* buffer)
         isFolder = buffer->readBool();
         level = buffer->readByte();
 
-        GTreeNode* node = GTreeNode::create(isFolder, str);
+        Ref<GTreeNode> node = GTreeNode::create(isFolder, str);
         node->setExpaned(true);
         if (i == 0)
             _rootNode->addChild(node);
@@ -402,10 +398,10 @@ void GTree::readItems(ByteBuffer* buffer)
             else
                 lastNode->getParent()->addChild(node);
         }
-        lastNode = node;
+        lastNode = node.ptr();
         prevLevel = level;
 
-        setupItem(buffer, node->_cell);
+        setupItem(buffer, node->_cell.ptr());
 
         buffer->setPos(nextPos);
     }

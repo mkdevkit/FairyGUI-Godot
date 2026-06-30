@@ -67,7 +67,7 @@ public:
     GObject* addItemFromPool() { return addItemFromPool(EMPTY_STRING); }
     GObject* addItemFromPool(const std::string& url);
 
-    GObject* addChildAt(GObject* child, int index) override;
+    GObject* addChildAt(const Ref<GObject>& child, int index) override;
     void removeChildAt(int index) override;
     void removeChildToPoolAt(int index);
     void removeChildToPool(GObject* child);

@@ -24,8 +24,8 @@ public:
 
     static void _bind_methods();
 
-    GObject* addChild(GObject* child) override;
-    virtual GObject* addChildAt(GObject* child, int index);
+    GObject* addChild(const Ref<GObject>& child) override;
+    virtual GObject* addChildAt(const Ref<GObject>& child, int index);
 
     void gd_addChildAt(Object* child, int index);
     void gd_removeChildren(int beginIndex, int endIndex);

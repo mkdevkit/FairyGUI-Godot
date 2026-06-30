@@ -172,7 +172,7 @@ void UIPackage::removeAllPackages()
     _packageList.clear();
 }
 
-GObject* UIPackage::createObject(const string& pkgName, const string& resName)
+Ref<GObject> UIPackage::createObject(const string& pkgName, const string& resName)
 {
     UIPackage* pkg = UIPackage::getByName(pkgName);
     if (pkg)
@@ -180,11 +180,11 @@ GObject* UIPackage::createObject(const string& pkgName, const string& resName)
     else
     {
         print_line("FairyGUI: package not found - ", pkgName.c_str());
-        return nullptr;
+        return Ref<GObject>();
     }
 }
 
-GObject* UIPackage::createObjectFromURL(const string& url)
+Ref<GObject> UIPackage::createObjectFromURL(const string& url)
 {
     PackageItem* pi = UIPackage::getItemByURL(url);
     if (pi)
@@ -192,7 +192,7 @@ GObject* UIPackage::createObjectFromURL(const string& url)
     else
     {
         print_line("FairyGUI: resource not found - ", url.c_str());
-        return nullptr;
+        return Ref<GObject>();
     }
 }
 
@@ -312,23 +312,23 @@ PackageItem* UIPackage::getItemByName(const string& itemName)
     return nullptr;
 }
 
-GObject* UIPackage::createObject(const string& resName)
+Ref<GObject> UIPackage::createObject(const string& resName)
 {
     PackageItem* pi = getItemByName(resName);
     if (!pi)
     {
         print_line("FairyGUI: resource not found - ", resName.c_str(), " in ", _name.c_str());
-        return nullptr;
+        return Ref<GObject>();
     }
 
     return createObject(pi);
 }
 
-GObject* UIPackage::createObject(PackageItem* item)
+Ref<GObject> UIPackage::createObject(PackageItem* item)
 {
-    GObject* g = UIObjectFactory::newObject(item);
-    if (g == nullptr)
-        return nullptr;
+    Ref<GObject> g = UIObjectFactory::newObject(item);
+    if (g.is_null())
+        return Ref<GObject>();
 
     _constructing++;
     g->constructFromResource();
@@ -970,8 +970,22 @@ UIPackage* UIPackage::gd_getById(const String& id) { return getById(id.utf8().ge
 UIPackage* UIPackage::gd_getByName(const String& name) { return getByName(name.utf8().get_data()); }
 UIPackage* UIPackage::gd_addPackage(const String& descFilePath) { return addPackage(descFilePath.utf8().get_data()); }
 void UIPackage::gd_removePackage(const String& packageIdOrName) { removePackage(packageIdOrName.utf8().get_data()); }
-GObject* UIPackage::gd_createObject(const String& pkgName, const String& resName) { return createObject(pkgName.utf8().get_data(), resName.utf8().get_data()); }
-GObject* UIPackage::gd_createObjectFromURL(const String& url) { return createObjectFromURL(url.utf8().get_data()); }
+GObject* UIPackage::gd_createObject(const String& pkgName, const String& resName)
+{
+    Ref<GObject> obj = createObject(pkgName.utf8().get_data(), resName.utf8().get_data());
+    if (obj.is_null())
+        return nullptr;
+    obj->reference(); // keep alive after this function's Ref<> goes out of scope
+    return obj.ptr();
+}
+GObject* UIPackage::gd_createObjectFromURL(const String& url)
+{
+    Ref<GObject> obj = createObjectFromURL(url.utf8().get_data());
+    if (obj.is_null())
+        return nullptr;
+    obj->reference(); // keep alive after this function's Ref<> goes out of scope
+    return obj.ptr();
+}
 String UIPackage::gd_getItemURL(const String& pkgName, const String& resName) { return String(getItemURL(pkgName.utf8().get_data(), resName.utf8().get_data()).c_str()); }
 
 void UIPackage::gd_registerFont(const String& aliasName, const String& realName) { UIConfig::registerFont(aliasName.utf8().get_data(), realName.utf8().get_data()); }

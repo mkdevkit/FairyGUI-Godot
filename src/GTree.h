@@ -31,7 +31,7 @@ public:
     int getClickToExpand() const { return _clickToExpand; }
     void setClickToExpand(int value) { _clickToExpand = value; }
 
-    GTreeNode* getRootNode() const { return _rootNode; }
+    GTreeNode* getRootNode() const { return _rootNode.ptr(); }
     GTreeNode* getSelectedNode() const;
     void getSelectedNodes(std::vector<GTreeNode*>& result) const;
     void selectNode(GTreeNode* node, bool scrollItToView = false);
@@ -65,7 +65,7 @@ private:
     void onExpandedStateChanged(EventContext* context);
 
     int _indent;
-    GTreeNode* _rootNode;
+    Ref<GTreeNode> _rootNode;
     int _clickToExpand;
     bool _expandedStatusInEvt;
 

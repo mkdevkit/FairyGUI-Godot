@@ -41,20 +41,20 @@ void UIObjectFactory::setPackageItemExtension(const string& url, GComponentCreat
     _packageItemExtensions[url] = creator;
 }
 
-GObject* UIObjectFactory::newObject(PackageItem* pi)
+Ref<GObject> UIObjectFactory::newObject(PackageItem* pi)
 {
-    GObject* obj;
+    Ref<GObject> obj;
     if (pi->extensionCreator != nullptr)
         obj = pi->extensionCreator();
     else
         obj = newObject(pi->objectType);
-    if (obj != nullptr)
+    if (obj.is_valid())
         obj->_packageItem = pi;
 
     return obj;
 }
 
-GObject* UIObjectFactory::newObject(ObjectType type)
+Ref<GObject> UIObjectFactory::newObject(ObjectType type)
 {
     switch (type)
     {
@@ -116,7 +116,7 @@ GObject* UIObjectFactory::newObject(ObjectType type)
         return GLoader3D::create();
 
     default:
-        return nullptr;
+        return Ref<GObject>();
     }
 }
 

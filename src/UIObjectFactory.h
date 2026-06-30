@@ -1,4 +1,4 @@
-﻿#ifndef __UIOBJECTFACTORY_H__
+#ifndef __UIOBJECTFACTORY_H__
 #define __UIOBJECTFACTORY_H__
 
 // cocos2d.h removed - see godot_types.h
@@ -12,12 +12,12 @@ NS_FGUI_BEGIN
 class UIObjectFactory
 {
 public:
-    typedef std::function<GComponent*()> GComponentCreator;
-    typedef std::function<GLoader*()> GLoaderCreator;
+    typedef std::function<Ref<GComponent>()> GComponentCreator;
+    typedef std::function<Ref<GLoader>()> GLoaderCreator;
 
     static void setPackageItemExtension(const std::string& url, GComponentCreator creator);
-    static GObject* newObject(PackageItem* pi);
-    static GObject* newObject(ObjectType type);
+    static Ref<GObject> newObject(PackageItem* pi);
+    static Ref<GObject> newObject(ObjectType type);
 
     static void setLoaderExtension(GLoaderCreator creator);
 

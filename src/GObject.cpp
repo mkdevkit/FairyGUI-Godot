@@ -757,10 +757,10 @@ void GObject::removeChild(Node* node)
         _displayObject->remove_child(node);
 }
 
-GObject* GObject::addChild(GObject* child)
+GObject* GObject::addChild(const Ref<GObject>& child)
 {
     addChild(child->displayObject());
-    return child;
+    return child.ptr();
 }
 
 void GObject::removeChild(GObject* child)
@@ -771,7 +771,7 @@ void GObject::removeChild(GObject* child)
 void GObject::gd_addChild(Object* node)
 {
     GObject* go = Object::cast_to<GObject>(node);
-    if (go) addChild(go);
+    if (go) addChild(Ref<GObject>(go));
 }
 
 void GObject::gd_removeChild(Object* node)

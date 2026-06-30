@@ -114,7 +114,7 @@ void GWindow::setContentPane(GComponent* value)
         _contentPane = value;
         if (_contentPane != nullptr)
         {
-            addChild(_contentPane);
+            addChild(Ref<GObject>(_contentPane));
             setSize(_contentPane->getWidth(), _contentPane->getHeight());
             _contentPane->addRelation(this, RelationType::Size);
             _frame = dynamic_cast<GComponent*>(_contentPane->getChild("frame"));
@@ -207,13 +207,13 @@ void GWindow::showModalWait(int requestingCmd)
     {
         if (_modalWaitPane == nullptr)
         {
-            _modalWaitPane = UIPackage::createObjectFromURL(UIConfig::windowModalWaiting);
+            _modalWaitPane = UIPackage::createObjectFromURL(UIConfig::windowModalWaiting).ptr();
             _modalWaitPane;
         }
 
         layoutModalWaitPane();
 
-        addChild(_modalWaitPane);
+        addChild(Ref<GObject>(_modalWaitPane));
     }
 }
 

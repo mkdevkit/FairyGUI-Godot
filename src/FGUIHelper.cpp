@@ -23,7 +23,7 @@ Object* FGUIHelper::getGRoot()
 
 Object* FGUIHelper::createObject(const String& pkgName, const String& resName)
 {
-    return (Object*)UIPackage::createObject(pkgName.utf8().get_data(), resName.utf8().get_data());
+    return UIPackage::createObject(pkgName.utf8().get_data(), resName.utf8().get_data()).ptr();
 }
 
 void FGUIHelper::addPackage(const String& path)

@@ -1,4 +1,4 @@
-﻿#ifndef __DRAGDROPMANAGER_H__
+#ifndef __DRAGDROPMANAGER_H__
 #define __DRAGDROPMANAGER_H__
 
 #include "FairyGUIMacros.h"
@@ -15,7 +15,7 @@ public:
 
     static DragDropManager* getInstance();
 
-    GLoader* getAgent() const { return _agent; }
+    GLoader* getAgent() const { return _agent.ptr(); }
     bool isDragging() const { return _agent->getParent() != nullptr; }
     void startDrag(const std::string& icon, const Variant& sourceData = Variant(), int touchPointID = -1);
     void cancel();
@@ -25,7 +25,7 @@ private:
 
     static DragDropManager* _inst;
 
-    GLoader* _agent;
+    Ref<GLoader> _agent;
     Variant _sourceData;
 };
 

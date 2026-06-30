@@ -18,16 +18,18 @@
 
 #define CALL_LATER_CANCEL(__TYPE__,__FUNC__)
 
-// FAIRYGUI_CREATE - memnew sets refcount=1. addChild() pushes a Ref<>
-// into _children (refcount=2). ~GComponent() clears _children, dropping
-// the last Ref<> and auto-freeing via memdelete.
+// FAIRYGUI_CREATE - returns Ref<TYPE>. memnew sets refcount=1,
+// Ref<TYPE>(pRet) calls reference() once (refcount=2). When the
+// returned Ref<> is stored (e.g. in _children), the refcount reflects
+// all active references. Objects are auto-freed when the last Ref<>
+// goes out of scope.
 #define FAIRYGUI_CREATE(TYPE) \
-    static TYPE* create() { \
+    static Ref<TYPE> create() { \
         TYPE* pRet = memnew(TYPE); \
         if (pRet->init()) \
-            return pRet; \
+            return Ref<TYPE>(pRet); \
         memdelete(pRet); \
-        return nullptr; \
+        return Ref<TYPE>(); \
     }
 
 #endif

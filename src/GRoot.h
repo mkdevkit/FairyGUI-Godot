@@ -119,7 +119,7 @@ private:
     InputProcessor* _inputProcessor;
 
     GGraph* _modalLayer;
-    GObject* _modalWaitPane;
+    Ref<GObject> _modalWaitPane;
     std::vector<WeakPtr> _popupStack;
     std::vector<WeakPtr> _justClosedPopups;
     GObject* _tooltipWin;

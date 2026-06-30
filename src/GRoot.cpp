@@ -82,10 +82,8 @@ GRoot::~GRoot()
 {
     delete _inputProcessor;
 
-    if (_modalWaitPane)
+    if (_modalWaitPane.is_valid())
     {
-        if (!_modalWaitPane->displayObject()->is_inside_tree())
-            memdelete(_modalWaitPane);
         _modalWaitPane = nullptr;
     }
     if (_defaultTooltipWin)
@@ -168,7 +166,7 @@ void GRoot::_bind_methods()
 
 void GRoot::showWindow(GWindow* win)
 {
-    addChild(win);
+    addChild(Ref<GObject>(win));
     adjustModalLayer();
 }
 
@@ -260,7 +258,7 @@ GGraph* GRoot::getModalLayer()
 
 void GRoot::createModalLayer()
 {
-    _modalLayer = GGraph::create();
+    _modalLayer = GGraph::create().ptr();
     _modalLayer->drawRect(getWidth(), getHeight(), 0, Color(1.0f, 1.0f, 1.0f, 1.0f), UIConfig::modalLayerColor);
     _modalLayer->addRelation(this, RelationType::Size);
 }
@@ -272,8 +270,8 @@ void GRoot::adjustModalLayer()
 
     int cnt = numChildren();
 
-    if (_modalWaitPane != nullptr && _modalWaitPane->getParent() != nullptr)
-        setChildIndex(_modalWaitPane, cnt - 1);
+    if (_modalWaitPane.is_valid() && _modalWaitPane->getParent() != nullptr)
+        setChildIndex(_modalWaitPane.ptr(), cnt - 1);
 
     for (int i = cnt - 1; i >= 0; i--)
     {
@@ -281,7 +279,7 @@ void GRoot::adjustModalLayer()
         if (dynamic_cast<GWindow*>(child) && ((GWindow*)child)->isModal())
         {
             if (_modalLayer->getParent() == nullptr)
-                addChildAt(_modalLayer, i);
+                addChildAt(Ref<GObject>(_modalLayer), i);
             else
                 setChildIndexBefore(_modalLayer, i);
             return;
@@ -300,21 +298,21 @@ bool GRoot::hasModalWindow()
 void GRoot::showModalWait()
 {
     getModalWaitingPane();
-    if (_modalWaitPane)
+    if (_modalWaitPane.is_valid())
         addChild(_modalWaitPane);
 }
 
 void GRoot::closeModalWait()
 {
-    if (_modalWaitPane != nullptr && _modalWaitPane->getParent() != nullptr)
-        removeChild(_modalWaitPane);
+    if (_modalWaitPane.is_valid() && _modalWaitPane->getParent() != nullptr)
+        removeChild(_modalWaitPane.ptr());
 }
 
 GObject* GRoot::getModalWaitingPane()
 {
     if (!UIConfig::globalModalWaiting.empty())
     {
-        if (_modalWaitPane == nullptr)
+        if (!_modalWaitPane.is_valid())
         {
             _modalWaitPane = UIPackage::createObjectFromURL(UIConfig::globalModalWaiting);
             _modalWaitPane->setSortingOrder(INT_MAX);
@@ -323,7 +321,7 @@ GObject* GRoot::getModalWaitingPane()
         _modalWaitPane->setSize(getWidth(), getHeight());
         _modalWaitPane->addRelation(this, RelationType::Size);
 
-        return _modalWaitPane;
+        return _modalWaitPane.ptr();
     }
     else
         return nullptr;
@@ -331,7 +329,7 @@ GObject* GRoot::getModalWaitingPane()
 
 bool GRoot::isModalWaiting()
 {
-    return (_modalWaitPane != nullptr) && _modalWaitPane->onStage();
+    return (_modalWaitPane.is_valid()) && _modalWaitPane->onStage();
 }
 
 Vector2 GRoot::getTouchPosition(int touchId)
@@ -384,7 +382,7 @@ void GRoot::showPopup(GObject* popup, GObject* target, PopupDirection dir)
         }
     }
 
-    addChild(popup);
+    addChild(Ref<GObject>(popup));
     adjustModalLayer();
 
     if (dynamic_cast<GWindow*>(popup) && target == nullptr && dir == PopupDirection::AUTO)
@@ -536,7 +534,7 @@ void GRoot::showTooltips(const std::string& msg)
             return;
         }
 
-        _defaultTooltipWin = UIPackage::createObjectFromURL(resourceURL);
+        _defaultTooltipWin = UIPackage::createObjectFromURL(resourceURL).ptr();
         _defaultTooltipWin->setTouchable(false);
     }
 
@@ -575,7 +573,7 @@ void GRoot::doShowTooltipsWin()
     }
 
     _tooltipWin->setPosition(round(xx), round(yy));
-    addChild(_tooltipWin);
+    addChild(Ref<GObject>(_tooltipWin));
 }
 
 void GRoot::hideTooltips()

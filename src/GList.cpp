@@ -173,15 +173,15 @@ void GList::returnToPool(GObject* obj)
 GObject* GList::addItemFromPool(const std::string& url)
 {
     Ref<GObject> obj = getFromPool(url);
-    return addChild(obj.ptr());
+    return addChild(obj);
 }
 
-GObject* GList::addChildAt(GObject* child, int index)
+GObject* GList::addChildAt(const Ref<GObject>& child, int index)
 {
     GComponent::addChildAt(child, index);
-    if (dynamic_cast<GButton*>(child))
+    if (dynamic_cast<GButton*>(child.ptr()))
     {
-        GButton* button = (GButton*)child;
+        GButton* button = static_cast<GButton*>(child.ptr());
         button->setSelected(false);
         button->setChangeStateOnClick(false);
     }
@@ -190,7 +190,7 @@ GObject* GList::addChildAt(GObject* child, int index)
     child->addClickListener([this](EventContext* ctx) { GList::onClickItem(ctx); }, EventTag(this));
     child->addEventListener(UIEventType::RightClick, [this](EventContext* ctx) { GList::onClickItem(ctx); }, EventTag(this));
 
-    return child;
+    return child.ptr();
 }
 
 void GList::removeChildAt(int index)
@@ -1562,9 +1562,9 @@ bool GList::handleScroll1(bool forceUpdate)
             {
                 ii.obj = _pool->getObject(url);
                 if (forward)
-                    addChildAt(ii.obj.ptr(), curIndex - newFirstIndex);
+                    addChildAt(ii.obj, curIndex - newFirstIndex);
                 else
-                    addChild(ii.obj.ptr());
+                    addChild(ii.obj);
             }
             if (dynamic_cast<GButton*>(ii.obj.ptr()))
                 ((GButton*)ii.obj.ptr())->setSelected(ii.selected);
@@ -1729,9 +1729,9 @@ bool GList::handleScroll2(bool forceUpdate)
             {
                 ii.obj = _pool->getObject(url);
                 if (forward)
-                    addChildAt(ii.obj.ptr(), curIndex - newFirstIndex);
+                    addChildAt(ii.obj, curIndex - newFirstIndex);
                 else
-                    addChild(ii.obj.ptr());
+                    addChild(ii.obj);
             }
             if (dynamic_cast<GButton*>(ii.obj.ptr()))
                 ((GButton*)ii.obj.ptr())->setSelected(ii.selected);
@@ -1891,7 +1891,7 @@ void GList::handleScroll3(bool forceUpdate)
                 }
 
                 ii.obj = _pool->getObject(url);
-                addChildAt(ii.obj.ptr(), insertIndex);
+                addChildAt(ii.obj, insertIndex);
             }
             else
             {
@@ -2492,7 +2492,7 @@ void GList::readItems(ByteBuffer* buffer)
         Ref<GObject> obj = getFromPool(*str);
         if (obj.is_valid())
         {
-            addChild(obj.ptr());
+            addChild(obj);
             setupItem(buffer, obj.ptr());
         }
 

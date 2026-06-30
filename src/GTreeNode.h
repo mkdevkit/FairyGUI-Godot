@@ -14,7 +14,7 @@ class GTreeNode : public RefCounted
     GDCLASS(GTreeNode, RefCounted)
 
 public:
-    static GTreeNode* create(bool isFolder = false, const std::string& resURL = EMPTY_STRING);
+    static Ref<GTreeNode> create(bool isFolder = false, const std::string& resURL = EMPTY_STRING);
 
     GTreeNode();
     virtual ~GTreeNode();
@@ -23,7 +23,7 @@ public:
 
     GTreeNode* getParent() const { return _parent; }
     GTree* getTree() const { return _tree; }
-    GComponent* getCell() const { return _cell; }
+    GComponent* getCell() const { return _cell.ptr(); }
     const Variant& getData() const { return _data; }
     void setData(const Variant& value) { _data = value; }
     bool isExpanded() const { return _expanded; }
@@ -46,8 +46,8 @@ public:
     void gd_setIcon(const String& value);
     String gd_getIcon() const;
 
-    GTreeNode* addChild(GTreeNode* child);
-    GTreeNode* addChildAt(GTreeNode* child, int index);
+    GTreeNode* addChild(const Ref<GTreeNode>& child);
+    GTreeNode* addChildAt(const Ref<GTreeNode>& child, int index);
 
     void removeChild(GTreeNode* child);
     void removeChildAt(int index);
@@ -73,12 +73,12 @@ private:
 
     GTree* _tree;
     GTreeNode* _parent;
-    GComponent* _cell;
+    Ref<GComponent> _cell;
     int _level;
     bool _expanded;
     bool _isFolder;
     Variant _data;
-    std::vector<GTreeNode*> _children;
+    std::vector<Ref<GTreeNode>> _children;
     std::string _resURL;
 
     friend class GTree;

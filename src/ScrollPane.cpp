@@ -194,7 +194,7 @@ void ScrollPane::setup(ByteBuffer* buffer)
             const std::string& res = vtScrollBarRes.size() == 0 ? UIConfig::verticalScrollBar : vtScrollBarRes;
             if (res.length() > 0)
             {
-                _vtScrollBar = dynamic_cast<GScrollBar*>(UIPackage::createObjectFromURL(res));
+                _vtScrollBar = Object::cast_to<GScrollBar>(UIPackage::createObjectFromURL(res).ptr());
                 if (_vtScrollBar == nullptr)
                     // CCLOGWARN("FairyGUI: cannot create scrollbar from %s", res.c_str());
                 ;
@@ -210,7 +210,7 @@ void ScrollPane::setup(ByteBuffer* buffer)
             const std::string& res = hzScrollBarRes.length() == 0 ? UIConfig::horizontalScrollBar : hzScrollBarRes;
             if (res.length() > 0)
             {
-                _hzScrollBar = dynamic_cast<GScrollBar*>(UIPackage::createObjectFromURL(res));
+                _hzScrollBar = Object::cast_to<GScrollBar>(UIPackage::createObjectFromURL(res).ptr());
                 if (_hzScrollBar == nullptr)
                     // CCLOGWARN("FairyGUI: cannot create scrollbar from %s", res.c_str());
                 ;
@@ -239,7 +239,7 @@ void ScrollPane::setup(ByteBuffer* buffer)
 
     if (headerRes.length() > 0)
     {
-        _header = dynamic_cast<GComponent*>(UIPackage::createObjectFromURL(headerRes));
+        _header = Object::cast_to<GComponent>(UIPackage::createObjectFromURL(headerRes).ptr());
         if (_header == nullptr)
             // CCLOGWARN("FairyGUI: cannot create scrollPane header from %s", headerRes.c_str());
             ;
@@ -252,7 +252,7 @@ void ScrollPane::setup(ByteBuffer* buffer)
 
     if (footerRes.length() > 0)
     {
-        _footer = dynamic_cast<GComponent*>(UIPackage::createObjectFromURL(footerRes));
+        _footer = Object::cast_to<GComponent>(UIPackage::createObjectFromURL(footerRes).ptr());
         if (_footer == nullptr)
             // CCLOGWARN("FairyGUI: cannot create scrollPane footer from %s", footerRes.c_str());
             ;

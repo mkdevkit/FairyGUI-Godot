@@ -124,7 +124,8 @@ void HtmlObject::createImage()
     }
     else
     {
-        loader = GLoader::create();
+        _ui = GLoader::create();
+        loader = Object::cast_to<GLoader>(_ui.ptr());
     }
 
     _ui = loader;

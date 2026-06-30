@@ -242,7 +242,7 @@ void GLoader::loadFromPackage()
         }
         else if (_contentItem->type == PackageItemType::COMPONENT)
         {
-            GObject* obj = UIPackage::createObjectFromURL(_url);
+            GObject* obj = UIPackage::createObjectFromURL(_url).ptr();
             if (obj == nullptr)
                 setErrorState();
             else if (dynamic_cast<GComponent*>(obj) == nullptr)

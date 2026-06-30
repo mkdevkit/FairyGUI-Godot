@@ -101,7 +101,7 @@ public:
     bool swing;              // kept for GMovieClip (original field)
 
     //component
-    std::function<GComponent*()> extensionCreator;
+    std::function<Ref<GComponent>()> extensionCreator;
     bool translated;
 
     //font

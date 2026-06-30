@@ -26,8 +26,8 @@ public:
     static UIPackage* addPackage(const std::string& descFilePath);
     static void removePackage(const std::string& packageIdOrName);
     static void removeAllPackages();
-    static GObject* createObject(const std::string& pkgName, const std::string& resName);
-    static GObject* createObjectFromURL(const std::string& url);
+    static Ref<GObject> createObject(const std::string& pkgName, const std::string& resName);
+    static Ref<GObject> createObjectFromURL(const std::string& url);
     static std::string getItemURL(const std::string& pkgName, const std::string& resName);
     static PackageItem* getItemByURL(const std::string& url);
 
@@ -75,8 +75,8 @@ private:
     void loadMovieClip(PackageItem* item);
     void loadFont(PackageItem* item);
 
-    GObject* createObject(const std::string& resName);
-    GObject* createObject(PackageItem* item);
+    Ref<GObject> createObject(const std::string& resName);
+    Ref<GObject> createObject(PackageItem* item);
 
 private:
     std::string _id;

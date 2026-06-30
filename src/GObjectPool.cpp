@@ -24,7 +24,7 @@ Ref<GObject> GObjectPool::getObject(const std::string & url)
         arr.pop_back();
         return ref;
     }
-    return Ref<GObject>(UIPackage::createObjectFromURL(url2));
+    return UIPackage::createObjectFromURL(url2);
 }
 
 void GObjectPool::returnObject(GObject* obj)

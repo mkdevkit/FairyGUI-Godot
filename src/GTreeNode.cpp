@@ -3,15 +3,15 @@
 #include "GTree.h"
 
 NS_FGUI_BEGIN
-GTreeNode* GTreeNode::create(bool isFolder, const std::string& resURL)
+Ref<GTreeNode> GTreeNode::create(bool isFolder, const std::string& resURL)
 {
     GTreeNode* pRet = memnew(GTreeNode);
     if (pRet->init(isFolder, resURL))
     {
-        return pRet;
+        return Ref<GTreeNode>(pRet);
     }
     memdelete(pRet);
-    return nullptr;
+    return Ref<GTreeNode>();
 }
 
 GTreeNode::GTreeNode()
@@ -91,24 +91,24 @@ void GTreeNode::setIcon(const std::string& value)
         return _cell->setIcon(value);
 }
 
-GTreeNode* GTreeNode::addChild(GTreeNode* child)
+GTreeNode* GTreeNode::addChild(const Ref<GTreeNode>& child)
 {
     addChildAt(child, (int)_children.size());
-    return child;
+    return child.ptr();
 }
 
-GTreeNode* GTreeNode::addChildAt(GTreeNode* child, int index)
+GTreeNode* GTreeNode::addChildAt(const Ref<GTreeNode>& child, int index)
 {
     // CCASSERT(child != nullptr, "Argument must be non-nil")
 
     if (child->_parent == this)
     {
-        setChildIndex(child, index);
+        setChildIndex(child.ptr(), index);
     }
     else
     {
         if (child->_parent != nullptr)
-            child->_parent->removeChild(child);
+            child->_parent->removeChild(child.ptr());
         child->_parent = this;
 
         int cnt = (int)_children.size();
@@ -119,9 +119,9 @@ GTreeNode* GTreeNode::addChildAt(GTreeNode* child, int index)
         child->_level = _level + 1;
         child->setTree(_tree);
         if ((_tree != nullptr && this == _tree->getRootNode()) || (_cell != nullptr && _cell->getParent() != nullptr && _expanded))
-            _tree->afterInserted(child);
+            _tree->afterInserted(child.ptr());
     }
-    return child;
+    return child.ptr();
 }
 
 void GTreeNode::removeChild(GTreeNode* child)
@@ -138,7 +138,7 @@ void GTreeNode::removeChildAt(int index)
 {
     // CCASSERT(index >= 0 && index < _children.size(), "Invalid child index");
 
-    GTreeNode* child = _children.at(index);
+    GTreeNode* child = _children.at(index).ptr();
     child->_parent = nullptr;
 
     if (_tree != nullptr)
@@ -163,7 +163,7 @@ GTreeNode* GTreeNode::getChildAt(int index) const
 {
     // CCASSERT(index >= 0 && index < _children.size(), "Invalid child index");
 
-    return _children.at(index);
+    return _children.at(index).ptr();
 }
 
 GTreeNode* GTreeNode::getPrevSibling() const
@@ -175,7 +175,7 @@ GTreeNode* GTreeNode::getPrevSibling() const
     if (i <= 0)
         return nullptr;
 
-    return _parent->_children.at(i - 1);
+    return _parent->_children.at(i - 1).ptr();
 }
 
 GTreeNode* GTreeNode::getNextSibling() const
@@ -187,7 +187,7 @@ GTreeNode* GTreeNode::getNextSibling() const
     if (i < 0 || i >= _parent->_children.size() - 1)
         return nullptr;
 
-    return _parent->_children.at(i + 1);
+    return _parent->_children.at(i + 1).ptr();
 }
 
 int GTreeNode::getChildIndex(const GTreeNode* child) const
@@ -229,12 +229,14 @@ int GTreeNode::moveChild(GTreeNode* child, int oldIndex, int index)
     if (oldIndex == index)
         return oldIndex;
 
-    child->_children.erase(child->_children.begin() + oldIndex);
+    Ref<GTreeNode> tmp = _children[oldIndex];
+    _children.erase(_children.begin() + oldIndex);
     if (index >= cnt)
-        _children.push_back(child);
+        _children.push_back(tmp);
     else
-        _children.insert(_children.begin() + index, child);
+        _children.insert(_children.begin() + index, tmp);
     if ((_tree != nullptr && this == _tree->getRootNode()) || (_cell != nullptr && _cell->getParent() != nullptr && _expanded))
+        _tree->afterMoved(child);
 
     return index;
 }
@@ -255,8 +257,8 @@ void GTreeNode::swapChildren(GTreeNode* child1, GTreeNode* child2)
 
 void GTreeNode::swapChildrenAt(int index1, int index2)
 {
-    GTreeNode* child1 = _children.at(index1);
-    GTreeNode* child2 = _children.at(index2);
+    GTreeNode* child1 = _children.at(index1).ptr();
+    GTreeNode* child2 = _children.at(index2).ptr();
 
     setChildIndex(child1, index2);
     setChildIndex(child2, index1);
