@@ -84,7 +84,7 @@ private:
 
 private:
     void* _target;
-    RefCounted* _refTarget;
+    Ref<RefCounted> _refTarget;
     TweenPropType _propType;
     bool _killed;
     bool _paused;

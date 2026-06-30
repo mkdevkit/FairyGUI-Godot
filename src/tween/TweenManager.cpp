@@ -1,4 +1,4 @@
-﻿#include "TweenManager.h"
+#include "TweenManager.h"
 #include "GTweener.h"
 
 NS_FGUI_BEGIN
@@ -31,7 +31,7 @@ GTweener* TweenManager::createTween()
         _tweenerPool.pop_back();
     }
     else
-        tweener = new GTweener();
+        tweener = memnew(GTweener);
     tweener->_init();
     _activeTweens[_totalActiveTweens++] = tweener;
 

@@ -1,7 +1,8 @@
-#ifndef __FUICONTAINER_H__
-#define __FUICONTAINER_H__
+#ifndef __FUICONTANER_H__
+#define __FUICONTANER_H__
 
 #include "FairyGUIMacros.h"
+#include <functional>
 
 NS_FGUI_BEGIN
 
@@ -30,6 +31,8 @@ public:
     void setInverted(bool inverted);
 
     GObject* gOwner;
+
+    std::function<void(float)> _processCallback;
 
 protected:
     static void _bind_methods();

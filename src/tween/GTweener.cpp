@@ -77,7 +77,6 @@ GTweener* GTweener::setSnapping(bool value)
 
 GTweener* GTweener::setTargetAny(void* value)
 {
-    // CC_SAFE_RELEASE(_refTarget)
     _refTarget = nullptr;
     _target = value;
     return this;
@@ -90,10 +89,9 @@ GTweener* GTweener::setTarget(RefCounted* value)
 
 GTweener* GTweener::setTarget(RefCounted* target, TweenPropType propType)
 {
-    // // CC_SAFE_RELEASE removed - _refTarget managed by Godot ref counting;
-    _target = _refTarget = target;
+    _refTarget = target;
+    _target = target;
     _propType = propType;
-    // CC_SAFE_RETAIN(_refTarget);
     return this;
 }
 
@@ -277,7 +275,6 @@ void GTweener::_init()
 
 void GTweener::_reset()
 {
-    // // CC_SAFE_RELEASE removed - _refTarget managed by Godot ref counting;
     _target = nullptr;
     _refTarget = nullptr;
     _userData = Variant();
@@ -425,14 +422,14 @@ void GTweener::update()
         value.d = value.x;
     }
 
-    if (_refTarget != nullptr && _propType != TweenPropType::None)
+    if (_refTarget.is_valid() && _propType != TweenPropType::None)
     {
-        GObject* gobj = dynamic_cast<GObject*>(_refTarget);
+        GObject* gobj = dynamic_cast<GObject*>(_refTarget.ptr());
         if (gobj != nullptr)
             TweenPropTypeUtils::setProps(gobj, _propType, value);
         else
         {
-            Node* node = dynamic_cast<Node*>(_refTarget);
+            Node* node = dynamic_cast<Node*>(_refTarget.ptr());
             if (node != nullptr)
                 TweenPropTypeUtils::setProps(node, _propType, value);
         }

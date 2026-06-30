@@ -138,13 +138,13 @@ void GTreeNode::removeChildAt(int index)
 {
     // CCASSERT(index >= 0 && index < _children.size(), "Invalid child index");
 
-    GTreeNode* child = _children.at(index).ptr();
+    Ref<GTreeNode> child = _children.at(index);
     child->_parent = nullptr;
 
     if (_tree != nullptr)
     {
         child->setTree(nullptr);
-        _tree->afterRemoved(child);
+        _tree->afterRemoved(child.ptr());
     }
 
     _children.erase(_children.begin() + index);

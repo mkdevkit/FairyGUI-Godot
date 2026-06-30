@@ -121,7 +121,7 @@ void GComponent::removeChildAt(int index)
 {
     // CCASSERT(index >= 0 && index < _children.size(), "Invalid child index");
 
-    GObject* child = _children.at(index).ptr();
+    Ref<GObject> child = _children.at(index);
 
     child->_parent = nullptr;
 
@@ -281,11 +281,12 @@ int GComponent::moveChild(GObject* child, int oldIndex, int index)
     if (oldIndex == index)
         return oldIndex;
 
+    Ref<GObject> tmp = _children[oldIndex];
     _children.erase(_children.begin() + oldIndex);
     if (index >= cnt)
-        _children.push_back(Ref<GObject>(child));
+        _children.push_back(tmp);
     else
-        _children.insert(_children.begin() + index, Ref<GObject>(child));
+        _children.insert(_children.begin() + index, tmp);
     if (child->_displayObject->get_parent() != nullptr)
     {
         if (_childrenRenderOrder == ChildrenRenderOrder::ASCENT)
@@ -1054,7 +1055,18 @@ void GComponent::handleSizeChanged()
     if (_scrollPane.is_valid())
         _scrollPane->onOwnerSizeChanged();
     else
+    {
         _container->set_position(Vector2(_margin.left, _margin.top));
+
+        // Keep the non-scroll clipping region in sync with size changes.
+        FUIContainer* fui = dynamic_cast<FUIContainer*>(_displayObject);
+        if (fui && fui->isClippingEnabled())
+        {
+            fui->setClippingRegion(Rect(_margin.left, _margin.top,
+                _size.width - _margin.left - _margin.right,
+                _size.height - _margin.top - _margin.bottom));
+        }
+    }
 
     if (_maskOwner)
         _maskOwner->handlePositionChanged();

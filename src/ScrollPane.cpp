@@ -548,8 +548,6 @@ void ScrollPane::lockHeader(int size)
         sp_setField(_tweenChange, _refreshBarAxis, _headerLockedSize - sp_getField(_tweenStart, _refreshBarAxis));
         _tweenDuration = Vector2(TWEEN_TIME_DEFAULT, TWEEN_TIME_DEFAULT);
         startTween(2);
-
-        // CALL_PER_FRAME removed
     }
 }
 
@@ -573,8 +571,6 @@ void ScrollPane::lockFooter(int size)
         sp_setField(_tweenChange, _refreshBarAxis, -max - sp_getField(_tweenStart, _refreshBarAxis));
         _tweenDuration = Vector2(TWEEN_TIME_DEFAULT, TWEEN_TIME_DEFAULT);
         startTween(2);
-
-        // CALL_PER_FRAME removed
     }
 }
 
@@ -1318,7 +1314,9 @@ void ScrollPane::startTween(int type)
 {
     _tweenTime = Vector2();
     _tweening = type;
-    // CALL_PER_FRAME removed
+    // Drive tweenUpdate via _maskContainer's _process callback.
+    _maskContainer->set_process(true);
+    _maskContainer->_processCallback = [this](float dt) { tweenUpdate(dt); };
     updateScrollBarVisible();
 }
 
@@ -1332,7 +1330,8 @@ void ScrollPane::killTween()
     }
 
     _tweening = 0;
-    // CALL_PER_FRAME_CANCEL removed
+    _maskContainer->set_process(false);
+    _maskContainer->_processCallback = nullptr;
     _owner->dispatchEvent(UIEventType::ScrollEnd);
 }
 
@@ -1406,7 +1405,8 @@ void ScrollPane::tweenUpdate(float dt)
     if (_tweenChange.x == 0 && _tweenChange.y == 0)
     {
         _tweening = 0;
-        // CALL_PER_FRAME_CANCEL removed
+        _maskContainer->set_process(false);
+        _maskContainer->_processCallback = nullptr;
 
         loopCheckingCurrent();
 
@@ -1609,21 +1609,21 @@ void ScrollPane::onTouchMove(EventContext* context)
             if (!_bouncebackEffect)
                 _container->set_position(Vector2(_container->get_position().x, 0));
             else if (_header != nullptr && _header->maxSize.height != 0)
-                _container->set_position(Vector2(newPos.x, (int)std::min(newPos.y * 0.5f, _header->maxSize.height)));
+                _container->set_position(Vector2(_container->get_position().x, (int)std::min(newPos.y * 0.5f, _header->maxSize.height)));
             else
-                _container->set_position(Vector2(newPos.x, (int)std::min(newPos.y * 0.5f, _viewSize.height * PULL_RATIO)));
+                _container->set_position(Vector2(_container->get_position().x, (int)std::min(newPos.y * 0.5f, _viewSize.height * PULL_RATIO)));
         }
         else if (newPos.y < -_overlapSize.height)
         {
             if (!_bouncebackEffect)
-                _container->set_position(Vector2(newPos.x, -_overlapSize.height));
+                _container->set_position(Vector2(_container->get_position().x, -_overlapSize.height));
             else if (_footer != nullptr && _footer->maxSize.height > 0)
-                _container->set_position(Vector2(newPos.x, (int)std::max((newPos.y + _overlapSize.height) * 0.5f, -_footer->maxSize.height) - _overlapSize.height));
+                _container->set_position(Vector2(_container->get_position().x, (int)std::max((newPos.y + _overlapSize.height) * 0.5f, -_footer->maxSize.height) - _overlapSize.height));
             else
-                _container->set_position(Vector2(newPos.x, (int)std::max((newPos.y + _overlapSize.height) * 0.5f, -_viewSize.height * PULL_RATIO) - _overlapSize.height));
+                _container->set_position(Vector2(_container->get_position().x, (int)std::max((newPos.y + _overlapSize.height) * 0.5f, -_viewSize.height * PULL_RATIO) - _overlapSize.height));
         }
         else
-            _container->set_position(Vector2(newPos.x, newPos.y));
+            _container->set_position(Vector2(_container->get_position().x, newPos.y));
     }
 
     if (sh)
