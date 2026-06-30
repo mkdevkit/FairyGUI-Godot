@@ -64,6 +64,7 @@ public:
     GController* getController(const std::string& name) const;
 
     Ref<GController> gd_getController(const String& name) const;
+    Ref<GController> gd_getControllerAt(int index) const;
 
     void removeController(GController* c);
     void gd_removeController(GController* c) { removeController(c); }
@@ -76,10 +77,10 @@ public:
     Transition* getTransition(const std::string& name) const;
     Transition* getTransitionAt(int index) const;
 
-    Transition* gd_getTransition(const String& name) const;
-    Transition* gd_getTransitionAt(int index) const { return getTransitionAt(index); }
+    Ref<Transition> gd_getTransition(const String& name) const;
+    Ref<Transition> gd_getTransitionAt(int index) const { return Ref<Transition>(getTransitionAt(index)); }
 
-    const std::vector<Transition*>& getTransitions() const { return _transitions; }
+    const std::vector<Ref<Transition>>& getTransitions() const { return _transitions; }
 
     bool getOpaque() const { return _opaque; }
     void setOpaque(bool value);
@@ -143,7 +144,7 @@ protected:
 
     std::vector<GObject*> _children;
     std::vector<Ref<GController>> _controllers;
-    std::vector<Transition*> _transitions;
+    std::vector<Ref<Transition>> _transitions;
     FUIInnerContainer* _container;
     Ref<ScrollPane> _scrollPane;
     Margin _margin;

@@ -628,7 +628,7 @@ void ScrollPane::adjustMaskContainer()
     mx += _owner->_alignOffset.x;
     my += _owner->_alignOffset.y;
 
-    _maskContainer->set_position(Vector2(mx, _owner->getHeight() - _viewSize.height - my));
+    _maskContainer->set_position(Vector2(mx, my));
 }
 
 void ScrollPane::onOwnerSizeChanged()

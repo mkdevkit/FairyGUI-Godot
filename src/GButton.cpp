@@ -18,8 +18,6 @@ const std::string GButton::SELECTED_DISABLED = "selectedDisabled";
 GButton::GButton() : _mode(ButtonMode::COMMON),
                      _titleObject(nullptr),
                      _iconObject(nullptr),
-                     _buttonController(nullptr),
-                     _relatedController(nullptr),
                      _selected(false),
                      _over(false),
                      _down(false),
@@ -115,13 +113,13 @@ void GButton::setSelected(bool Variant)
             if (_iconObject != nullptr)
                 _iconObject->setIcon(str);
         }
-        if (_relatedController != nullptr && getParent() != nullptr && !getParent()->_buildingDisplayList)
+        if (_relatedController.is_valid() && getParent() != nullptr && !getParent()->_buildingDisplayList)
         {
             if (_selected)
             {
                 _relatedController->setSelectedPageId(_relatedPageId);
                 if (_relatedController->autoRadioGroupDepth)
-                    getParent()->adjustRadioGroupDepth(this, _relatedController);
+                    getParent()->adjustRadioGroupDepth(this, _relatedController.ptr());
             }
             else if (_mode == ButtonMode::CHECK && _relatedController->getSelectedPageId().compare(_relatedPageId) == 0)
                 _relatedController->setOppositePageId(_relatedPageId);
@@ -136,7 +134,7 @@ void GButton::setRelatedController(GController* c)
 
 void GButton::setState(const std::string& value)
 {
-    if (_buttonController != nullptr)
+    if (_buttonController.is_valid())
         _buttonController->setSelectedPage(value);
 
     if (_downEffect == 1)
@@ -187,7 +185,7 @@ void GButton::setState(const std::string& value)
 
 void GButton::setCurrentState()
 {
-    if (isGrayed() && _buttonController != nullptr && _buttonController->hasPage(DISABLED))
+    if (isGrayed() && _buttonController.is_valid() && _buttonController->hasPage(DISABLED))
     {
         if (_selected)
             setState(SELECTED_DISABLED);
@@ -276,7 +274,7 @@ void GButton::constructExtension(ByteBuffer* buffer)
     if (_downEffect == 2)
         setPivot(0.5f, 0.5f, isPivotAsAnchor());
 
-    _buttonController = getController("button");
+    _buttonController = Ref<GController>(getController("button"));
     _titleObject = getChild("title");
     _iconObject = getChild("icon");
     if (_titleObject != nullptr)
@@ -322,7 +320,7 @@ void GButton::setup_afterAdd(ByteBuffer* buffer, int beginPos)
         setTitleFontSize(iv);
     iv = buffer->readShort();
     if (iv >= 0)
-        _relatedController = _parent->getControllerAt(iv);
+        _relatedController = Ref<GController>(_parent->getControllerAt(iv));
     _relatedPageId = buffer->readS();
 
     buffer->readS(_sound);
@@ -336,13 +334,13 @@ void GButton::handleControllerChanged(GController* c)
 {
     GObject::handleControllerChanged(c);
 
-    if (_relatedController == c)
+    if (_relatedController.ptr() == c)
         setSelected(_relatedPageId.compare(c->getSelectedPageId()) == 0);
 }
 
 void GButton::onRollOver(EventContext* context)
 {
-    if (_buttonController == nullptr || !_buttonController->hasPage(OVER))
+    if (_buttonController.is_null() || !_buttonController->hasPage(OVER))
         return;
 
     _over = true;
@@ -357,7 +355,7 @@ void GButton::onRollOver(EventContext* context)
 
 void GButton::onRollOut(EventContext* context)
 {
-    if (_buttonController == nullptr || !_buttonController->hasPage(OVER))
+    if (_buttonController.is_null() || !_buttonController->hasPage(OVER))
         return;
 
     _over = false;
@@ -380,7 +378,7 @@ void GButton::onTouchBegin(EventContext* context)
 
     if (_mode == ButtonMode::COMMON)
     {
-        if (isGrayed() && _buttonController != nullptr && _buttonController->hasPage(DISABLED))
+        if (isGrayed() && _buttonController.is_valid() && _buttonController->hasPage(DISABLED))
             setState(SELECTED_DISABLED);
         else
             setState(DOWN);
@@ -397,7 +395,7 @@ void GButton::onTouchEnd(EventContext* context)
         _down = false;
         if (_mode == ButtonMode::COMMON)
         {
-            if (isGrayed() && _buttonController != nullptr && _buttonController->hasPage(DISABLED))
+            if (isGrayed() && _buttonController.is_valid() && _buttonController->hasPage(DISABLED))
                 setState(DISABLED);
             else if (_over)
                 setState(OVER);
@@ -406,7 +404,7 @@ void GButton::onTouchEnd(EventContext* context)
         }
         else
         {
-            if (!_over && _buttonController != nullptr && (_buttonController->getSelectedPage() == OVER || _buttonController->getSelectedPage() == SELECTED_OVER))
+            if (!_over && _buttonController.is_valid() && (_buttonController->getSelectedPage() == OVER || _buttonController->getSelectedPage() == SELECTED_OVER))
             {
                 setCurrentState();
             }
@@ -437,7 +435,7 @@ void GButton::onClick(EventContext* context)
     }
     else
     {
-        if (_relatedController != nullptr)
+        if (_relatedController.is_valid())
             _relatedController->setSelectedPageId(_relatedPageId);
     }
 }

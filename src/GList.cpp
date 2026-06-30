@@ -27,7 +27,6 @@ GList::GList() : foldInvisibleItems(false),
                  _align(AlignType::LEFT),
                  _verticalAlign(VertAlignType::TOP),
                  _autoResizeItem(true),
-                 _selectionController(nullptr),
                  _pool(nullptr),
                  _selectionHandled(false),
                  _lastSelectedIndex(-1),
@@ -51,7 +50,7 @@ GList::~GList()
     if (_virtualListChanged != 0)
         CALL_LATER_CANCEL(GList, doRefreshVirtualList);
 
-    _selectionController = nullptr;
+    
     scrollItemToViewOnClick = false;
 }
 
@@ -275,7 +274,7 @@ void GList::setSelectedIndex(int value)
 
 void GList::setSelectionController(GController* value)
 {
-    _selectionController = value;
+    _selectionController = Ref<GController>(value);
 }
 
 void GList::getSelection(std::vector<int>& result) const
@@ -857,18 +856,18 @@ void GList::handleControllerChanged(GController* c)
 {
     GComponent::handleControllerChanged(c);
 
-    if (_selectionController == c)
+    if (_selectionController.ptr() == c)
         setSelectedIndex(c->getSelectedIndex());
 }
 
 void GList::updateSelectionController(int index)
 {
-    if (_selectionController != nullptr && !_selectionController->changing && index < _selectionController->getPageCount())
+    if (_selectionController.is_valid() && !_selectionController->changing && index < _selectionController->getPageCount())
     {
-        GController* c = _selectionController;
-        _selectionController = nullptr;
+        GController* c = _selectionController.ptr();
+        
         c->setSelectedIndex(index);
-        _selectionController = c;
+        _selectionController = Ref<GController>(c);
     }
 }
 
@@ -1595,7 +1594,7 @@ bool GList::handleScroll1(bool forceUpdate)
         }
 
         ii.updateFlag = _itemInfoVer;
-        ((Node2D*)ii.obj->displayObject())->set_position(Vector2(curX, curY));
+        ii.obj->setPosition(curX, curY);
         if (curIndex == newFirstIndex)
             max += ii.size.y;
 
@@ -1762,7 +1761,7 @@ bool GList::handleScroll2(bool forceUpdate)
         }
 
         ii.updateFlag = _itemInfoVer;
-        ((Node2D*)ii.obj->displayObject())->set_position(Vector2(curX, curY));
+        ii.obj->setPosition(curX, curY);
         if (curIndex == newFirstIndex)
             max += ii.size.x;
 
@@ -1942,7 +1941,7 @@ void GList::handleScroll3(bool forceUpdate)
 
         ItemInfo& ii = _virtualItems[i];
         if (ii.updateFlag == _itemInfoVer)
-            ((Node2D*)ii.obj->displayObject())->set_position(Vector2(xx, yy));
+            ii.obj->setPosition(xx, yy);
 
         if (ii.size.y > lineHeight)
             lineHeight = ii.size.y;
@@ -2169,7 +2168,7 @@ void GList::updateBounds()
                         if (foldInvisibleItems && !((CanvasItem*)child->displayObject())->is_visible())
                             continue;
 
-                        ((Node2D*)child->displayObject())->set_position(Vector2(curX, curY));
+                        child->setPosition(curX, curY);
 
                         if (j < i)
                         {
@@ -2213,7 +2212,7 @@ void GList::updateBounds()
                     maxHeight = 0;
                     j = 0;
                 }
-                ((Node2D*)child->displayObject())->set_position(Vector2(curX, curY));
+                child->setPosition(curX, curY);
                 curX += ceil(child->getWidth());
                 if (curX > maxWidth)
                     maxWidth = curX;
@@ -2251,7 +2250,7 @@ void GList::updateBounds()
                         if (foldInvisibleItems && !((CanvasItem*)child->displayObject())->is_visible())
                             continue;
 
-                        ((Node2D*)child->displayObject())->set_position(Vector2(curX, curY));
+                        child->setPosition(curX, curY);
 
                         if (j < i)
                         {
@@ -2294,7 +2293,7 @@ void GList::updateBounds()
                     maxWidth = 0;
                     j = 0;
                 }
-                ((Node2D*)child->displayObject())->set_position(Vector2(curX, curY));
+                child->setPosition(curX, curY);
                 curY += child->getHeight();
                 if (curY > maxHeight)
                     maxHeight = curY;
@@ -2346,7 +2345,7 @@ void GList::updateBounds()
                         if (foldInvisibleItems && !((CanvasItem*)child->displayObject())->is_visible())
                             continue;
 
-                        ((Node2D*)child->displayObject())->set_position(Vector2(page * viewWidth + curX, curY));
+                        child->setPosition(page * viewWidth + curX, curY);
 
                         if (j < i)
                         {
@@ -2401,7 +2400,7 @@ void GList::updateBounds()
                         k = 0;
                     }
                 }
-                ((Node2D*)child->displayObject())->set_position(Vector2(page * viewWidth + curX, curY));
+                child->setPosition(page * viewWidth + curX, curY);
                 curX += ceil(child->getWidth());
                 if (curX > maxWidth)
                     maxWidth = curX;
@@ -2553,7 +2552,7 @@ void GList::setup_afterAdd(ByteBuffer* buffer, int beginPos)
 
     int i = buffer->readShort();
     if (i != -1)
-        _selectionController = _parent->getControllerAt(i);
+        _selectionController = Ref<GController>(_parent->getControllerAt(i));
 }
 
 void GList::_bind_methods()

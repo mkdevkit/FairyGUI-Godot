@@ -64,7 +64,7 @@ public:
     bool isSelected() const { return _selected; }
     void setSelected(bool value);
 
-    GController* getRelatedController() const { return _relatedController; }
+    GController* getRelatedController() const { return _relatedController.ptr(); }
     void setRelatedController(GController* c);
 
     bool isChangeStateOnClick() { return _changeStateOnClick; }
@@ -94,8 +94,8 @@ private:
     ButtonMode _mode;
     GObject* _titleObject;
     GObject* _iconObject;
-    GController* _buttonController;
-    GController* _relatedController;
+    Ref<GController> _buttonController;
+    Ref<GController> _relatedController;
     std::string _relatedPageId;
     std::string _title;
     std::string _selectedTitle;

@@ -297,12 +297,12 @@ void GTreeNode::_bind_methods()
     ClassDB::bind_method(D_METHOD("isExpanded"), &GTreeNode::isExpanded);
     ClassDB::bind_method(D_METHOD("setExpanded", "value"), &GTreeNode::setExpaned);
 
-    ClassDB::bind_method(D_METHOD("getParent"), &GTreeNode::getParent);
-    ClassDB::bind_method(D_METHOD("getTree"), &GTreeNode::getTree);
-    ClassDB::bind_method(D_METHOD("getCell"), &GTreeNode::getCell);
+    ClassDB::bind_method(D_METHOD("getParent"), &GTreeNode::gd_getParent);
+    ClassDB::bind_method(D_METHOD("getTree"), &GTreeNode::gd_getTree);
+    ClassDB::bind_method(D_METHOD("getCell"), &GTreeNode::gd_getCell);
     ClassDB::bind_method(D_METHOD("getData"), &GTreeNode::getData);
     ClassDB::bind_method(D_METHOD("setData", "value"), &GTreeNode::setData);
-    ClassDB::bind_method(D_METHOD("getChildAt", "index"), &GTreeNode::getChildAt);
+    ClassDB::bind_method(D_METHOD("getChildAt", "index"), &GTreeNode::gd_getChildAt);
     ClassDB::bind_method(D_METHOD("numChildren"), &GTreeNode::numChildren);
     ClassDB::bind_method(D_METHOD("addChild", "child"), &GTreeNode::addChild);
     ClassDB::bind_method(D_METHOD("init", "is_folder", "res_url"), &GTreeNode::gd_init, DEFVAL(""));

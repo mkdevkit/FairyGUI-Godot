@@ -73,6 +73,8 @@ private:
 
     // GDScript extension
     void gd_setTreeNodeRender(const Callable& callable);
+    Ref<GTreeNode> gd_getRootNode() const { return Ref<GTreeNode>(getRootNode()); }
+    Ref<GTreeNode> gd_getSelectedNode() const;
 };
 
 NS_FGUI_END

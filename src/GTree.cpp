@@ -413,8 +413,8 @@ void GTree::readItems(ByteBuffer* buffer)
 
 void GTree::_bind_methods()
 {
-    ClassDB::bind_method(D_METHOD("getRootNode"), &GTree::getRootNode);
-    ClassDB::bind_method(D_METHOD("getSelectedNode"), &GTree::getSelectedNode);
+    ClassDB::bind_method(D_METHOD("getRootNode"), &GTree::gd_getRootNode);
+    ClassDB::bind_method(D_METHOD("getSelectedNode"), &GTree::gd_getSelectedNode);
     ClassDB::bind_method(D_METHOD("selectNode", "node", "scroll_to_view"), &GTree::selectNode, DEFVAL(false));
     ClassDB::bind_method(D_METHOD("unselectNode", "node"), &GTree::unselectNode);
     ClassDB::bind_method(D_METHOD("expandAll", "folder_node"), &GTree::expandAll);
@@ -437,6 +437,8 @@ void GTree::gd_setTreeNodeRender(const Callable& callable)
         callable.call(node, obj);
     };
 }
+
+Ref<GTreeNode> GTree::gd_getSelectedNode() const { return Ref<GTreeNode>(getSelectedNode()); }
 
 NS_FGUI_END
 

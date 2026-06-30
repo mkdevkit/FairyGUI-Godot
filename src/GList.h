@@ -105,7 +105,7 @@ public:
 
     void scrollToView(int index, bool ani = false, bool setFirst = false);
 
-    GController* getSelectionController() const { return _selectionController; }
+    GController* getSelectionController() const { return _selectionController.ptr(); }
     void setSelectionController(GController* value);
 
     void setVirtual();
@@ -177,7 +177,7 @@ private:
     bool _autoResizeItem;
     ListSelectionMode _selectionMode;
     std::string _defaultItem;
-    GController* _selectionController;
+    Ref<GController> _selectionController;
 
     GObjectPool* _pool;
     bool _selectionHandled;

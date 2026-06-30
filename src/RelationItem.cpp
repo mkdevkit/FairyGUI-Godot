@@ -144,8 +144,8 @@ void RelationItem::applyOnSelfSizeChanged(float dWidth, float dHeight, bool appl
 
         if (_owner->_parent != nullptr)
         {
-            const std::vector<Transition*>& arr = _owner->_parent->getTransitions();
-            for (auto it : arr)
+            const std::vector<Ref<Transition>>& arr = _owner->_parent->getTransitions();
+            for (auto& it : arr)
                 it->updateFromRelations(_owner->id, ox, oy);
         }
     }
@@ -592,8 +592,8 @@ void RelationItem::onTargetXYChanged(EventContext* context)
 
         if (_owner->_parent != nullptr)
         {
-            const std::vector<Transition*>& arr = _owner->_parent->getTransitions();
-            for (auto it : arr)
+            const std::vector<Ref<Transition>>& arr = _owner->_parent->getTransitions();
+            for (auto& it : arr)
                 it->updateFromRelations(_owner->id, ox, oy);
         }
     }
@@ -633,8 +633,8 @@ void RelationItem::onTargetSizeChanged(EventContext* context)
 
         if (_owner->_parent != nullptr)
         {
-            const std::vector<Transition*>& arr = _owner->_parent->getTransitions();
-            for (auto it : arr)
+            const std::vector<Ref<Transition>>& arr = _owner->_parent->getTransitions();
+            for (auto& it : arr)
                 it->updateFromRelations(_owner->id, ox, oy);
         }
     }

@@ -450,7 +450,7 @@ Transition* GComponent::getTransition(const std::string& name) const
     for (const auto& c : _transitions)
     {
         if (c->name.compare(name) == 0)
-            return c;
+            return c.ptr();
     }
 
     return nullptr;
@@ -460,7 +460,7 @@ Transition* GComponent::getTransitionAt(int index) const
 {
     // CCASSERT(index >= 0 && index < _transitions.size(), "Invalid transition index");
 
-    return _transitions.at(index);
+    return _transitions[index].ptr();
 }
 
 void GComponent::adjustRadioGroupDepth(GObject* obj, GController* c)
@@ -1312,7 +1312,7 @@ void GComponent::constructFromResource(std::vector<GObject*>* objectPool, int po
         int nextPos = buffer->readUshort();
         nextPos += buffer->getPos();
 
-        Transition* trans = new Transition(this);
+        Ref<Transition> trans = memnew(Transition(this));
         trans->setup(buffer);
         _transitions.push_back(trans);
         buffer->setPos(nextPos);
@@ -1387,7 +1387,7 @@ void GComponent::_bind_methods()
     ClassDB::bind_method(D_METHOD("numChildren"), &GComponent::numChildren);
 
     ClassDB::bind_method(D_METHOD("addController", "controller"), &GComponent::addController);
-    ClassDB::bind_method(D_METHOD("getControllerAt", "index"), &GComponent::getControllerAt);
+    ClassDB::bind_method(D_METHOD("getControllerAt", "index"), &GComponent::gd_getControllerAt);
     ClassDB::bind_method(D_METHOD("getController", "name"), &GComponent::gd_getController);
     ClassDB::bind_method(D_METHOD("removeController", "controller"), &GComponent::gd_removeController);
     ClassDB::bind_method(D_METHOD("applyController", "controller"), &GComponent::applyController);
@@ -1430,7 +1430,8 @@ GObject* GComponent::gd_getChild(const String& name) const { return getChild(nam
 GObject* GComponent::gd_getChildByPath(const String& path) const { return getChildByPath(path.utf8().get_data()); }
 GObject* GComponent::gd_getChildById(const String& id) const { return getChildById(id.utf8().get_data()); }
 Ref<GController> GComponent::gd_getController(const String& name) const { return Ref<GController>(getController(name.utf8().get_data())); }
-Transition* GComponent::gd_getTransition(const String& name) const { return getTransition(name.utf8().get_data()); }
+Ref<GController> GComponent::gd_getControllerAt(int index) const { return Ref<GController>(getControllerAt(index)); }
+Ref<Transition> GComponent::gd_getTransition(const String& name) const { return Ref<Transition>(getTransition(name.utf8().get_data())); }
 
 NS_FGUI_END
 

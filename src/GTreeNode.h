@@ -37,6 +37,10 @@ public:
     void gd_init(bool is_folder, const String& res_url);
 
     const std::string& getIcon() const;
+    Ref<GTreeNode> gd_getParent() const { return Ref<GTreeNode>(getParent()); }
+    Ref<GTree> gd_getTree() const { return Ref<GTree>(getTree()); }
+    Ref<GComponent> gd_getCell() const { return Ref<GComponent>(getCell()); }
+    Ref<GTreeNode> gd_getChildAt(int index) const { return Ref<GTreeNode>(getChildAt(index)); }
     void setIcon(const std::string& value);
 
     void gd_setIcon(const String& value);
