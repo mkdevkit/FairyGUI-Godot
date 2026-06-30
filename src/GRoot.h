@@ -24,6 +24,7 @@ public:
     static GRoot* create(SceneTree* tree, int zOrder = 1000);
     static GRoot* createDeferred(SceneTree* tree, int zOrder = 1000);
     static GRoot* getInstance() { return _inst; }
+    static void cleanup();
 
     static void _bind_methods();
 

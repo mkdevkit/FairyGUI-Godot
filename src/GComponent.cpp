@@ -390,10 +390,10 @@ int GComponent::getFirstChildInView()
 
 GController* GComponent::getController(const std::string& name) const
 {
-    for (const auto& c : _controllers)
+    for (auto& c : _controllers)
     {
         if (c->name.compare(name) == 0)
-            return c;
+            return c.ptr();
     }
 
     return nullptr;
@@ -403,21 +403,22 @@ void GComponent::addController(GController* c)
 {
     // CCASSERT(c != nullptr, "Argument must be non-nil")
 
-    _controllers.push_back(c);
+    _controllers.push_back(Ref<GController>(c));
 }
 
 GController* GComponent::getControllerAt(int index) const
 {
     // CCASSERT(index >= 0 && index < _controllers.size(), "Invalid controller index");
 
-    return _controllers.at(index);
+    return _controllers[index].ptr();
 }
 
 void GComponent::removeController(GController* c)
 {
     // CCASSERT(c != nullptr, "Argument must be non-nil")
 
-    auto it = std::find(_controllers.begin(), _controllers.end(), c);
+    auto it = std::find_if(_controllers.begin(), _controllers.end(),
+        [c](const Ref<GController>& ref) { return ref.ptr() == c; });
     if (it == _controllers.end())
         return;
     
@@ -441,7 +442,7 @@ void GComponent::applyController(GController* c)
 void GComponent::applyAllControllers()
 {
     for (const auto& c : _controllers)
-        applyController(c);
+        applyController(c.ptr());
 }
 
 Transition* GComponent::getTransition(const std::string& name) const
@@ -1187,9 +1188,7 @@ void GComponent::constructFromResource(std::vector<GObject*>* objectPool, int po
         int nextPos = buffer->readUshort();
         nextPos += buffer->getPos();
 
-        Ref<GController> ref = memnew(GController);
-        GController* controller = ref.ptr();
-        controller->reference();
+        Ref<GController> controller = memnew(GController);
         _controllers.push_back(controller);
         controller->setParent(this);
         controller->setup(buffer);
@@ -1430,7 +1429,7 @@ void GComponent::gd_removeChildren(int beginIndex, int endIndex) { removeChildre
 GObject* GComponent::gd_getChild(const String& name) const { return getChild(name.utf8().get_data()); }
 GObject* GComponent::gd_getChildByPath(const String& path) const { return getChildByPath(path.utf8().get_data()); }
 GObject* GComponent::gd_getChildById(const String& id) const { return getChildById(id.utf8().get_data()); }
-GController* GComponent::gd_getController(const String& name) const { return getController(name.utf8().get_data()); }
+Ref<GController> GComponent::gd_getController(const String& name) const { return Ref<GController>(getController(name.utf8().get_data())); }
 Transition* GComponent::gd_getTransition(const String& name) const { return getTransition(name.utf8().get_data()); }
 
 NS_FGUI_END

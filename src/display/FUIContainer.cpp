@@ -76,6 +76,13 @@ void FUIContainer::_notification(int p_what)
         applyClipping();
         call_deferred("_deferred_redraw_all");
     }
+    if (p_what == NOTIFICATION_PREDELETE)
+    {
+        // Remove all children before Godot's recursive PREDELETE cascade.
+        // Prevents StringName/Callable double-free during SceneTree::finalize().
+        while (get_child_count() > 0)
+            remove_child(get_child(0));
+    }
     Node2D::_notification(p_what);
 }
 

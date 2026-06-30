@@ -53,6 +53,21 @@ GRoot* GRoot::createDeferred(SceneTree* tree, int zOrder)
     return nullptr;
 }
 
+void GRoot::cleanup()
+{
+    if (_inst != nullptr)
+    {
+        Node* displayNode = _inst->displayObject();
+        if (displayNode != nullptr)
+        {
+            Node* parent = displayNode->get_parent();
+            if (parent != nullptr)
+                parent->remove_child(displayNode);
+        }
+        _inst = nullptr;
+    }
+}
+
 GRoot::GRoot()
     : _inputProcessor(nullptr),
       _modalLayer(nullptr),

@@ -63,12 +63,12 @@ public:
     GController* getControllerAt(int index) const;
     GController* getController(const std::string& name) const;
 
-    GController* gd_getController(const String& name) const;
+    Ref<GController> gd_getController(const String& name) const;
 
     void removeController(GController* c);
     void gd_removeController(GController* c) { removeController(c); }
 
-    const std::vector<GController*>& getControllers() const { return _controllers; }
+    const std::vector<Ref<GController>>& getControllers() const { return _controllers; }
 
     void applyController(GController* c);
     void applyAllControllers();
@@ -142,7 +142,7 @@ protected:
     void setupScroll(ByteBuffer* buffer);
 
     std::vector<GObject*> _children;
-    std::vector<GController*> _controllers;
+    std::vector<Ref<GController>> _controllers;
     std::vector<Transition*> _transitions;
     FUIInnerContainer* _container;
     Ref<ScrollPane> _scrollPane;
