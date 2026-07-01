@@ -166,7 +166,10 @@ void GRoot::_bind_methods()
 
 void GRoot::showWindow(GWindow* win)
 {
-    addChild(Ref<GObject>(win));
+    if (!win)
+        return;
+    Ref<GObject> ref(win);
+    addChild(ref);
     adjustModalLayer();
 }
 
