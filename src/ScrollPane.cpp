@@ -155,13 +155,13 @@ ScrollPane::~ScrollPane()
     // CALL_PER_FRAME_CANCEL removed
     // CALL_LATER_CANCEL removed
 
-    if (_hzScrollBar)
+    if (_hzScrollBar.is_valid());
         // _hzScrollBar->unref(); // TODO
-    if (_vtScrollBar)
+    if (_vtScrollBar.is_valid());
         // _vtScrollBar->unref(); // TODO
-    if (_header)
+    if (_header.is_valid());
         // _header->unref(); // TODO
-    if (_footer)
+    if (_footer.is_valid());
         // _footer->unref(); // TODO
 
     if (_draggingPane == this)
@@ -220,7 +220,8 @@ void ScrollPane::setup(ByteBuffer* buffer)
             const std::string& res = vtScrollBarRes.size() == 0 ? UIConfig::verticalScrollBar : vtScrollBarRes;
             if (res.length() > 0)
             {
-                _vtScrollBar = Object::cast_to<GScrollBar>(UIPackage::createObjectFromURL(res).ptr());
+                Ref<GObject> obj = UIPackage::createObjectFromURL(res);
+                _vtScrollBar = Object::cast_to<GScrollBar>(obj.ptr());
                 if (_vtScrollBar == nullptr)
                     // CCLOGWARN("FairyGUI: cannot create scrollbar from %s", res.c_str());
                 ;
@@ -236,7 +237,8 @@ void ScrollPane::setup(ByteBuffer* buffer)
             const std::string& res = hzScrollBarRes.length() == 0 ? UIConfig::horizontalScrollBar : hzScrollBarRes;
             if (res.length() > 0)
             {
-                _hzScrollBar = Object::cast_to<GScrollBar>(UIPackage::createObjectFromURL(res).ptr());
+                Ref<GObject> obj = UIPackage::createObjectFromURL(res);
+                _hzScrollBar = Object::cast_to<GScrollBar>(obj.ptr());
                 if (_hzScrollBar == nullptr)
                     // CCLOGWARN("FairyGUI: cannot create scrollbar from %s", res.c_str());
                 ;
@@ -265,7 +267,8 @@ void ScrollPane::setup(ByteBuffer* buffer)
 
     if (headerRes.length() > 0)
     {
-        _header = Object::cast_to<GComponent>(UIPackage::createObjectFromURL(headerRes).ptr());
+        Ref<GObject> obj = UIPackage::createObjectFromURL(headerRes);
+        _header = Object::cast_to<GComponent>(obj.ptr());
         if (_header == nullptr)
             // CCLOGWARN("FairyGUI: cannot create scrollPane header from %s", headerRes.c_str());
             ;
@@ -278,7 +281,8 @@ void ScrollPane::setup(ByteBuffer* buffer)
 
     if (footerRes.length() > 0)
     {
-        _footer = Object::cast_to<GComponent>(UIPackage::createObjectFromURL(footerRes).ptr());
+        Ref<GObject> obj = UIPackage::createObjectFromURL(footerRes);
+        _footer = Object::cast_to<GComponent>(obj.ptr());
         if (_footer == nullptr)
             // CCLOGWARN("FairyGUI: cannot create scrollPane footer from %s", footerRes.c_str());
             ;
@@ -834,13 +838,13 @@ void ScrollPane::handleSizeChanged()
     _maskContainer->set_position(maskRect.position);
     _maskContainer->set_size(maskRect.size);
 
-    if (_vtScrollBar)
+    if (_vtScrollBar.is_valid())
         _vtScrollBar->handlePositionChanged();
-    if (_hzScrollBar)
+    if (_hzScrollBar.is_valid())
         _hzScrollBar->handlePositionChanged();
-    if (_header)
+	if (_header.is_valid())
         _header->handlePositionChanged();
-    if (_footer)
+	if (_footer.is_valid())
         _footer->handlePositionChanged();
 
     if (_scrollType == ScrollType::HORIZONTAL || _scrollType == ScrollType::BOTH)
@@ -900,25 +904,25 @@ void ScrollPane::handleSizeChanged()
 GObject* ScrollPane::hitTest(const Vector2& pt, const Camera2D* camera)
 {
     GObject* target = nullptr;
-    if (_vtScrollBar)
+    if (_vtScrollBar.is_valid())
     {
         target = _vtScrollBar->hitTest(pt, camera);
         if (target)
             return target;
     }
-    if (_hzScrollBar)
+    if (_hzScrollBar.is_valid())
     {
         target = _hzScrollBar->hitTest(pt, camera);
         if (target)
             return target;
     }
-    if (_header && _header->displayObject()->get_parent() != nullptr)
+    if (_header.is_valid() && _header->displayObject()->get_parent() != nullptr)
     {
         target = _header->hitTest(pt, camera);
         if (target)
             return target;
     }
-    if (_footer && _footer->displayObject()->get_parent() != nullptr)
+    if (_footer.is_valid() && _footer->displayObject()->get_parent() != nullptr)
     {
         target = _footer->hitTest(pt, camera);
         if (target)
@@ -1039,7 +1043,7 @@ void ScrollPane::updateScrollBarVisible()
         if (_viewSize.height <= _vtScrollBar->getMinSize() || _vScrollNone)
             ((CanvasItem*)_vtScrollBar->displayObject())->set_visible(false);
         else
-            updateScrollBarVisible2(_vtScrollBar);
+            updateScrollBarVisible2(_vtScrollBar.ptr());
     }
 
     if (_hzScrollBar != nullptr)
@@ -1047,7 +1051,7 @@ void ScrollPane::updateScrollBarVisible()
         if (_viewSize.width <= _hzScrollBar->getMinSize() || _hScrollNone)
             ((CanvasItem*)_hzScrollBar->displayObject())->set_visible(false);
         else
-            updateScrollBarVisible2(_hzScrollBar);
+            updateScrollBarVisible2(_hzScrollBar.ptr());
     }
 }
 

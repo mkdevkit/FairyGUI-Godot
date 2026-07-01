@@ -820,17 +820,20 @@ void GObject::handlePositionChanged()
 
 void GObject::handleSizeChanged()
 {
-    if (_displayObject)
-    {
-        if (_sizeImplType == 0 || sourceSize.width == 0 || sourceSize.height == 0)
-            ((Node2D*)_displayObject)->set_scale(Vector2(1, 1)); // GODOT_ADAPT: setContentSize _size (TODO)
-        else
-            ((Node2D*)_displayObject)->set_scale(Vector2(_scale.x * _size.width / sourceSize.width, _scale.y * _size.height / sourceSize.height));
-    }
+    if (!_displayObject)
+        return;
+
+    if (_sizeImplType == 0 || sourceSize.width == 0 || sourceSize.height == 0)
+        ((Node2D*)_displayObject)->set_scale(Vector2(1, 1));
+    else
+        ((Node2D*)_displayObject)->set_scale(Vector2(_scale.x * _size.width / sourceSize.width, _scale.y * _size.height / sourceSize.height));
 }
 
 void GObject::handleScaleChanged()
 {
+    if (!_displayObject)
+        return;
+
     if (_sizeImplType == 0 || sourceSize.width == 0 || sourceSize.height == 0)
         ((Node2D*)_displayObject)->set_scale(Vector2(_scale.x, _scale.y));
     else
@@ -839,6 +842,9 @@ void GObject::handleScaleChanged()
 
 void GObject::handleAlphaChanged()
 {
+    if (!_displayObject)
+        return;
+
     ((CanvasItem*)_displayObject)->set_self_modulate(Color(1, 1, 1, _alpha));
 }
 
@@ -849,7 +855,8 @@ void GObject::handleGrayedChanged()
 
 void GObject::handleVisibleChanged()
 {
-    ((CanvasItem*)_displayObject)->set_visible(internalVisible2());
+    if (_displayObject)
+        ((CanvasItem*)_displayObject)->set_visible(internalVisible2());
 }
 
 void GObject::handleControllerChanged(GController* c)

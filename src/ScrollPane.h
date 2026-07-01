@@ -29,10 +29,10 @@ public:
     void setup(ByteBuffer* buffer);
 
     GComponent* getOwner() const { return _owner; }
-    GComponent* getHeader() const { return _header; }
-    GComponent* getFooter() const { return _footer; }
-    GScrollBar* getVtScrollBar() const { return _vtScrollBar; }
-    GScrollBar* getHzScrollBar() const { return _hzScrollBar; }
+    GComponent* getHeader() const { return _header.ptr(); }
+    GComponent* getFooter() const { return _footer.ptr(); }
+    GScrollBar* getVtScrollBar() const { return _vtScrollBar.ptr(); }
+    GScrollBar* getHzScrollBar() const { return _hzScrollBar.ptr(); }
 
     static void _bind_methods();
 
@@ -214,10 +214,10 @@ private:
     GComponent* _owner;
     MaskContainer* _maskContainer;
     FUIInnerContainer* _container;
-    GScrollBar* _hzScrollBar;
-    GScrollBar* _vtScrollBar;
-    GComponent* _header;
-    GComponent* _footer;
+    Ref<GScrollBar> _hzScrollBar;
+    Ref<GScrollBar> _vtScrollBar;
+    Ref<GComponent> _header;
+    Ref<GComponent> _footer;
     GController* _pageController;
 
     static int _gestureFlag;
