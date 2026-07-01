@@ -707,22 +707,23 @@ void GComponent::childStateChanged(GObject* child)
                 int index = (int)(std::find_if(_children.begin(), _children.end(), [&](const Ref<GObject>& r) { return r.ptr() == child; }) - _children.begin());
                 _container->add_child(child->_displayObject, index);
                 size_t cnt = _children.size();
-                for (size_t i = index + 1; i < cnt; i++)
+                for (size_t i = index; i < cnt; i++)
                 {
-                    child = _children.at(i).ptr();
-                    if (child->_displayObject->get_parent() != nullptr)
-                        ((CanvasItem*)child->_displayObject)->set_z_index((int)i);
+                    GObject* c = _children.at(i).ptr();
+                    if (c->_displayObject->get_parent() != nullptr)
+                        ((CanvasItem*)c->_displayObject)->set_z_index((int)i);
                 }
             }
             else if (_childrenRenderOrder == ChildrenRenderOrder::DESCENT)
             {
                 ssize_t index = (std::find_if(_children.begin(), _children.end(), [&](const Ref<GObject>& r) { return r.ptr() == child; }) - _children.begin());
                 _container->add_child(child->_displayObject, (int)(cnt - 1 - index));
-                for (ssize_t i = 0; i < index; i++)
+                size_t cnt = _children.size();
+                for (ssize_t i = index; i >= 0; i--)
                 {
-                    child = _children.at(i).ptr();
-                    if (child->_displayObject->get_parent() != nullptr)
-                        ((CanvasItem*)child->_displayObject)->set_z_index((int)(cnt - 1 - i));
+                    GObject* c = _children.at(i).ptr();
+                    if (c->_displayObject->get_parent() != nullptr)
+                        ((CanvasItem*)c->_displayObject)->set_z_index((int)(cnt - 1 - i));
                 }
             }
             else
