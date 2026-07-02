@@ -1,6 +1,7 @@
 extends GWindow
 
 func _init() -> void:
+	setupDisplay()
 	setOnInitCallback(_on_init)
 	setOnShownCallback(_on_shown)
 

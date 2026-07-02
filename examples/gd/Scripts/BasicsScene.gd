@@ -86,6 +86,9 @@ func _play_text(obj: Object) -> void:
 func _play_popup(obj: Object) -> void:
 	if _pm == null:
 		_pm = GPopupMenu.create()
+		if _pm == null:
+			push_error("BasicsScene: GPopupMenu.create failed")
+			return
 		_pm.addItem("Item 1")
 		_pm.addItem("Item 2")
 		_pm.addItem("Item 3")
