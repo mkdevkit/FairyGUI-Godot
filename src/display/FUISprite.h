@@ -2,6 +2,7 @@
 #define __FUISPRITE_H__
 
 #include "FairyGUIMacros.h"
+#include <functional>
 
 NS_FGUI_BEGIN
 
@@ -60,6 +61,8 @@ public:
     void setRotated(bool v) { _rotated = v; }
     bool isRotated() const { return _rotated; }
     static void clearStaticRefs() { _empty.unref(); }
+
+    std::function<void(float)> _processCallback;
 
     static void _bind_methods();
     void _draw();

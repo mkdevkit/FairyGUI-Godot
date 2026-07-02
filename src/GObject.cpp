@@ -84,8 +84,8 @@ bool GObject::init()
 
     if (_displayObject != nullptr)
     {
-        ((Node2D*)_displayObject)->set_position(_size * Vector2(0, -1)); // GODOT_ADAPT: anchor->offset
-        // _displayObject->setOnEnterCallback([this]() { GObject::onEnter(); });
+        _displayObject->connect("tree_entered", callable_mp(this, &GObject::_enter_tree), CONNECT_REFERENCE_COUNTED);
+        _displayObject->connect("tree_exiting", callable_mp(this, &GObject::_exit_tree), CONNECT_REFERENCE_COUNTED);
     }
     return true;
 }
@@ -259,9 +259,7 @@ void GObject::setPivot(float xv, float yv, bool asAnchor)
     {
         _pivot = Vector2(xv, yv);
         _pivotAsAnchor = asAnchor;
-        if (_displayObject != nullptr)
-            ((Node2D*)_displayObject)->set_position(Vector2(_pivot.x, 1 - _pivot.y) * _size * Vector2(1,-1)); // GODOT_ADAPT: anchor->offset
-        handlePositionChanged(); 
+        handlePositionChanged();
     }
 }
 

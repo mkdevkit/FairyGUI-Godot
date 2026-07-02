@@ -109,6 +109,12 @@ void FUISprite::_notification(int p_what)
         _draw();
         return;
     }
+    if (p_what == NOTIFICATION_PROCESS)
+    {
+        if (_processCallback)
+            _processCallback(get_process_delta_time());
+        return;
+    }
     if (p_what == NOTIFICATION_ENTER_TREE)
         queue_redraw();
     else if (p_what == NOTIFICATION_ENTER_CANVAS)

@@ -207,14 +207,9 @@ void GGraph::drawPolygon(int lineSize, const Color& lineColor, const Color& fill
         _polygonPoints = new std::vector<Vector2>();
     else
         _polygonPoints->clear();
-    float h = getHeight();
-    _polygonPointOffset = h;
+    _polygonPointOffset = getHeight();
     for (int i = 0; i < count; i++)
-    {
-        Vector2 pt = *(points + i);
-        pt.y = h - pt.y;
-        _polygonPoints->push_back(*(points + i));
-    }
+        _polygonPoints->push_back(points[i]);
     updateShape();
 }
 
@@ -305,7 +300,7 @@ void GGraph::updateShape()
                 dist = 1;
 
             float xv = radius + radius * dist * cos(angle);
-            float yv = h - (radius + radius * dist * sin(angle));
+            float yv = radius + radius * dist * sin(angle);
             _polygonPoints->push_back(Vector2(xv, yv));
 
             angle += deltaAngle;
@@ -359,15 +354,7 @@ void GGraph::handleSizeChanged()
 
     if (_type == 3 || _type == 4)
     {
-        float h = getHeight();
-        int count = (int)_polygonPoints->size();
-        for (int i = 0; i < count; i++)
-        {
-            Vector2 pt = (*_polygonPoints)[i];
-            pt.y = h - (_polygonPointOffset - pt.y);
-            (*_polygonPoints)[i] = pt;
-        }
-        _polygonPointOffset = h;
+        _polygonPointOffset = getHeight();
     }
 
     updateShape();
@@ -396,12 +383,11 @@ void GGraph::setup_beforeAdd(ByteBuffer* buffer, int beginPos)
         {
             int cnt = buffer->readShort() / 2;
             _polygonPoints = new std::vector<Vector2>(cnt);
-            float h = getHeight();
-            _polygonPointOffset = h;
+            _polygonPointOffset = getHeight();
             for (int i = 0; i < cnt; i++)
             {
                 float f1 = buffer->readFloat();
-                float f2 = h - buffer->readFloat();
+                float f2 = buffer->readFloat();
                 (*_polygonPoints)[i] = Vector2(f1, f2);
             }
         }

@@ -27,7 +27,7 @@ GearLook::~GearLook()
 
 void GearLook::init()
 {
-    _default = GearLookValue(_owner->getAlpha(), ((Node2D*)_owner->displayObject())->get_rotation(),
+    _default = GearLookValue(_owner->getAlpha(), _owner->getRotation(),
                              _owner->isGrayed(), _owner->isTouchable());
     _storage.clear();
 }
@@ -74,13 +74,13 @@ void GearLook::apply()
         }
 
         bool a = gv.alpha != _owner->getAlpha();
-        bool b = gv.rotation != ((Node2D*)_owner->displayObject())->get_rotation();
+        bool b = gv.rotation != _owner->getRotation();
         if (a || b)
         {
             if (_owner->checkGearController(0, _controller))
                 _tweenConfig->_displayLockToken = _owner->addDisplayLock();
 
-            _tweenConfig->_tweener = GTween::to(Vector2(_owner->getAlpha(), ((Node2D*)_owner->displayObject())->get_rotation()), Vector2(gv.alpha, gv.rotation), _tweenConfig->duration)
+            _tweenConfig->_tweener = GTween::to(Vector2(_owner->getAlpha(), _owner->getRotation()), Vector2(gv.alpha, gv.rotation), _tweenConfig->duration)
                                          ->setDelay(_tweenConfig->delay)
                                          ->setEase(_tweenConfig->easeType)
                                          ->setTargetAny(this);
@@ -93,7 +93,7 @@ void GearLook::apply()
     {
         _owner->_gearLocked = true;
         _owner->setAlpha(gv.alpha);
-        ((Node2D*)_owner->displayObject())->set_rotation(gv.rotation);
+        _owner->setRotation(gv.rotation);
         _owner->setGrayed(gv.grayed);
         _owner->setTouchable(gv.touchable);
         _owner->_gearLocked = false;
@@ -107,7 +107,7 @@ void GearLook::onTweenUpdate(GTweener* tweener)
     if ((flag & 1) != 0)
         _owner->setAlpha(_tweenConfig->_tweener->value.x);
     if ((flag & 2) != 0)
-        ((Node2D*)_owner->displayObject())->set_rotation(_tweenConfig->_tweener->value.y);
+        _owner->setRotation(_tweenConfig->_tweener->value.y);
     _owner->_gearLocked = false;
 }
 
@@ -124,7 +124,7 @@ void GearLook::onTweenComplete()
 
 void GearLook::updateState()
 {
-    _storage[_controller->getSelectedPageId()] = GearLookValue(_owner->getAlpha(), ((Node2D*)_owner->displayObject())->get_rotation(),
+    _storage[_controller->getSelectedPageId()] = GearLookValue(_owner->getAlpha(), _owner->getRotation(),
                                                                _owner->isGrayed(), _owner->isTouchable());
 }
 

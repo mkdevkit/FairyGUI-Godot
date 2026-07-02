@@ -16,7 +16,7 @@ GearSize::~GearSize()
 void GearSize::init()
 {
     _default = Vector4(_owner->getWidth(), _owner->getHeight(),
-                    ((Node2D*)_owner->displayObject())->get_scale().x, ((Node2D*)_owner->displayObject())->get_scale().y);
+                    _owner->getScaleX(), _owner->getScaleY());
     _storage.clear();
 }
 
@@ -58,13 +58,13 @@ void GearSize::apply()
         }
 
         bool a = gv.x != _owner->getWidth() || gv.y != _owner->getHeight();
-        bool b = gv.z != ((Node2D*)_owner->displayObject())->get_scale().x || gv.w != ((Node2D*)_owner->displayObject())->get_scale().y;
+        bool b = gv.z != _owner->getScaleX() || gv.w != _owner->getScaleY();
         if (a || b)
         {
             if (_owner->checkGearController(0, _controller))
                 _tweenConfig->_displayLockToken = _owner->addDisplayLock();
 
-            _tweenConfig->_tweener = GTween::to(Vector4(_owner->getWidth(), _owner->getHeight(), ((Node2D*)_owner->displayObject())->get_scale().x, ((Node2D*)_owner->displayObject())->get_scale().y), gv, _tweenConfig->duration)
+            _tweenConfig->_tweener = GTween::to(Vector4(_owner->getWidth(), _owner->getHeight(), _owner->getScaleX(), _owner->getScaleY()), gv, _tweenConfig->duration)
                                          ->setDelay(_tweenConfig->delay)
                                          ->setEase(_tweenConfig->easeType)
                                          ->setTargetAny(this);
@@ -77,7 +77,7 @@ void GearSize::apply()
     {
         _owner->_gearLocked = true;
         _owner->setSize(gv.x, gv.y, _owner->checkGearController(1, _controller));
-        ((Node2D*)_owner->displayObject())->set_scale(Vector2(gv.z, gv.w));
+        _owner->setScale(gv.z, gv.w);
         _owner->_gearLocked = false;
     }
 }
@@ -89,7 +89,7 @@ void GearSize::onTweenUpdate(GTweener* tweener)
     if ((flag & 1) != 0)
         _owner->setSize(tweener->value.x, tweener->value.y, _owner->checkGearController(1, _controller));
     if ((flag & 2) != 0)
-        ((Node2D*)_owner->displayObject())->set_scale(Vector2(tweener->value.z, tweener->value.w));
+        _owner->setScale(tweener->value.z, tweener->value.w);
     _owner->_gearLocked = false;
 }
 
@@ -107,7 +107,7 @@ void GearSize::onTweenComplete()
 void GearSize::updateState()
 {
     _storage[_controller->getSelectedPageId()] = Vector4(_owner->getWidth(), _owner->getHeight(),
-                                                      ((Node2D*)_owner->displayObject())->get_scale().x, ((Node2D*)_owner->displayObject())->get_scale().y);
+                                                      _owner->getScaleX(), _owner->getScaleY());
 }
 
 void GearSize::updateFromRelations(float dx, float dy)

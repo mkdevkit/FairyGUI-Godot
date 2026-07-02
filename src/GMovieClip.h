@@ -44,7 +44,6 @@ public:
         std::function<void()> completeCallback = nullptr);
 
     virtual void constructFromResource() override;
-    void _process(double delta);
 
     virtual Variant getProp(ObjectPropID propId) override;
     virtual void setProp(ObjectPropID propId, const Variant& value) override;

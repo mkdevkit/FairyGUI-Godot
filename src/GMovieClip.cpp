@@ -60,6 +60,11 @@ void GMovieClip::handleInit()
 {
     _content = FUISprite::create();
     _displayObject = _content;
+    _content->_processCallback = [this](float dt) {
+        if (_playing)
+            advance(dt);
+    };
+    _content->set_process(_playing);
 }
 
 void GMovieClip::setPlaySettings(int start, int end, int times, int endAt, std::function<void()> completeCallback)
@@ -95,7 +100,8 @@ void GMovieClip::setPlaying(bool value)
     if (_playing != value)
     {
         _playing = value;
-        // set_process(_playing);
+        if (_content)
+            _content->set_process(_playing);
     }
 }
 
@@ -371,12 +377,6 @@ void GMovieClip::setup_beforeAdd(ByteBuffer* buffer, int beginPos)
     setFlip((FlipType)buffer->readByte());
     setFrame(buffer->readInt());
     setPlaying(buffer->readBool());
-}
-
-void GMovieClip::_process(double delta)
-{
-    if (_playing && _movieclipData)
-        advance((float)delta);
 }
 
 void GMovieClip::setTimeScale(float value)
