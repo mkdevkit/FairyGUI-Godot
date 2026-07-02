@@ -1,6 +1,8 @@
 #include "GComboBox.h"
+#include "GList.h"
 #include "GRoot.h"
 #include "PackageItem.h"
+#include "ScrollPane.h"
 #include "UIConfig.h"
 #include "utils/ByteBuffer.h"
 #include "utils/ToolSet.h"
@@ -200,7 +202,11 @@ void GComboBox::showDropdown()
 
     GRoot::getInstance()->togglePopup(_dropdown, this, popupDirection);
     if (_dropdown->getParent() != nullptr)
+    {
         setState(GButton::DOWN);
+        if (ScrollPane* sp = _list->getScrollPane())
+            sp->syncOverlayZOrder();
+    }
 }
 
 void GComboBox::renderDropdownList()

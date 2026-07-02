@@ -33,6 +33,7 @@ public:
     GComponent* getFooter() const { return _footer.ptr(); }
     GScrollBar* getVtScrollBar() const { return _vtScrollBar.ptr(); }
     GScrollBar* getHzScrollBar() const { return _hzScrollBar.ptr(); }
+    void syncOverlayZOrder();
 
     static void _bind_methods();
 

@@ -21,16 +21,22 @@ public:
     static void clean();
     static void killAll(bool completed = false);
     static void init();
+    static void beginCallback(GTweener* tweener);
+    static void endCallback();
+    static bool isUpdating() { return _updating; }
+    static void flushPendingTweeners();
 
 private:
     static void flushKilledTweeners();
     static void reset();
 
-    static GTweener** _activeTweens;
-    static std::vector<GTweener*> _tweenerPool;
+    static Ref<GTweener>* _activeTweens;
+    static std::vector<Ref<GTweener>> _tweenerPool;
     static int _totalActiveTweens;
     static int _arrayLength;
     static bool _inited;
+    static bool _updating;
+    static GTweener* _executingTweener;
 };
 
 NS_FGUI_END

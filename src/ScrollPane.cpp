@@ -288,7 +288,43 @@ void ScrollPane::setup(ByteBuffer* buffer)
     if (_header != nullptr || _footer != nullptr)
         _refreshBarAxis = (_scrollType == ScrollType::BOTH || _scrollType == ScrollType::VERTICAL) ? 1 : 0;
 
+    syncOverlayZOrder();
     setSize(_owner->getWidth(), _owner->getHeight());
+}
+
+void ScrollPane::syncOverlayZOrder()
+{
+    if (!_owner)
+        return;
+
+    Node* ownerDisplay = _owner->displayObject();
+    if (!ownerDisplay)
+        return;
+
+    const int kContentZ = 0;
+    const int kOverlayZ = 100;
+
+    if (_maskContainer && _maskContainer->get_parent() == ownerDisplay)
+    {
+        ownerDisplay->move_child(_maskContainer, 0);
+        _maskContainer->set_z_index(kContentZ);
+    }
+
+    auto raiseOverlay = [&](GObject* obj) {
+        if (obj == nullptr)
+            return;
+        Node* node = obj->displayObject();
+        if (node == nullptr || node->get_parent() != ownerDisplay)
+            return;
+        ownerDisplay->move_child(node, ownerDisplay->get_child_count() - 1);
+        if (CanvasItem* ci = Object::cast_to<CanvasItem>(node))
+            ci->set_z_index(kOverlayZ);
+    };
+
+    raiseOverlay(_header.ptr());
+    raiseOverlay(_footer.ptr());
+    raiseOverlay(_vtScrollBar.ptr());
+    raiseOverlay(_hzScrollBar.ptr());
 }
 
 void ScrollPane::setScrollStep(float value)
@@ -901,6 +937,8 @@ void ScrollPane::handleSizeChanged()
     updateScrollBarPos();
     if (_pageMode)
         updatePageController();
+
+    syncOverlayZOrder();
 }
 
 GObject* ScrollPane::hitTest(const Vector2& pt, const Camera2D* camera)

@@ -15,11 +15,18 @@
 NS_FGUI_BEGIN
 using namespace std;
 
-static void set_display_child_z_order(GObject* child, int z)
+static int get_display_child_z_order(GObject* child, int siblingIndex)
+{
+    if (child->getSortingOrder() != 0)
+        return child->getSortingOrder();
+    return siblingIndex;
+}
+
+static void set_display_child_z_order(GObject* child, int siblingIndex)
 {
     Node* display = child->displayObject();
     if (display != nullptr && display->get_parent() != nullptr)
-        Object::cast_to<CanvasItem>(display)->set_z_index(z);
+        Object::cast_to<CanvasItem>(display)->set_z_index(get_display_child_z_order(child, siblingIndex));
 }
 
 void GComponent::ensure_display_child_added(FUIInnerContainer* container, GObject* child)
@@ -321,7 +328,7 @@ int GComponent::moveChild(GObject* child, int oldIndex, int index)
             {
                 GObject* g = _children.at(i).ptr();
                 if (g->_displayObject->get_parent() != nullptr)
-                    ((CanvasItem*)g->_displayObject)->set_z_index(i);
+                    set_display_child_z_order(g, i);
             }
         }
         else if (_childrenRenderOrder == ChildrenRenderOrder::DESCENT)
@@ -332,7 +339,7 @@ int GComponent::moveChild(GObject* child, int oldIndex, int index)
             {
                 GObject* g = _children.at(i).ptr();
                 if (g->_displayObject->get_parent() != nullptr)
-                    ((CanvasItem*)g->_displayObject)->set_z_index(cnt - 1 - i);
+                    set_display_child_z_order(g, cnt - 1 - i);
             }
         }
         else

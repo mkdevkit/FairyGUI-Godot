@@ -430,7 +430,13 @@ void GRoot::bringPopupToFront(GObject* popup)
 
 void GRoot::showPopup(GObject* popup, GObject* target, PopupDirection dir)
 {
-    if (!_popupStack.empty())
+    if (!popup)
+        return;
+
+    // Close other popups when showing a new one (e.g. switching ComboBox dropdowns).
+    if (popup->getParent() != this && !_popupStack.empty())
+        hidePopup();
+    else if (!_popupStack.empty())
         hidePopup(popup);
 
     _popupStack.push_back(WeakPtr(popup));
@@ -467,6 +473,11 @@ void GRoot::showPopup(GObject* popup, GObject* target, PopupDirection dir)
 
     Vector2 pos = getPoupPosition(popup, target, dir);
     popup->setPosition(pos.x, pos.y);
+
+    bringPopupToFront(popup);
+    syncNativeChildrenZOrder();
+    if (GComponent* com = dynamic_cast<GComponent*>(popup))
+        com->refreshDisplayListRecursive();
 }
 
 void GRoot::togglePopup(GObject* popup)

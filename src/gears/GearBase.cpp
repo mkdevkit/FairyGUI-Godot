@@ -74,7 +74,13 @@ GearBase::GearBase(GObject* owner) : _owner(owner), _tweenConfig(nullptr)
 
 GearBase::~GearBase()
 {
+    if (_tweenConfig && _tweenConfig->_tweener)
+        _tweenConfig->_tweener = nullptr;
+
     TweenManager::killTweensAny(this, false);
+    if (!TweenManager::isUpdating())
+        TweenManager::flushPendingTweeners();
+
     FGUI_DELETE(_tweenConfig);
 }
 

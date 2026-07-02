@@ -91,6 +91,8 @@ private:
     void clearScriptBindings();
     static void abandonVariant(Variant& value);
     static void abandonCallable(Callable& callable, ObjectID& id);
+    static void abandonCallback(GTweenCallback& callback);
+    static void abandonCallback0(GTweenCallback0& callback);
     void callScriptOnStart(GTweener* tweener);
     void callScriptOnUpdate(GTweener* tweener);
     void callScriptOnComplete();

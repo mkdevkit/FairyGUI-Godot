@@ -2,11 +2,28 @@
 #include "GTweener.h"
 
 NS_FGUI_BEGIN
-GTweener** TweenManager::_activeTweens = nullptr;
-std::vector<GTweener*> TweenManager::_tweenerPool;
+Ref<GTweener>* TweenManager::_activeTweens = nullptr;
+std::vector<Ref<GTweener>> TweenManager::_tweenerPool;
 int TweenManager::_totalActiveTweens = 0;
 int TweenManager::_arrayLength = 0;
 bool TweenManager::_inited = false;
+bool TweenManager::_updating = false;
+GTweener* TweenManager::_executingTweener = nullptr;
+
+void TweenManager::beginCallback(GTweener* tweener)
+{
+    _executingTweener = tweener;
+}
+
+void TweenManager::endCallback()
+{
+    _executingTweener = nullptr;
+}
+
+void TweenManager::flushPendingTweeners()
+{
+    flushKilledTweeners();
+}
 
 class TweenEngine
 {
@@ -20,29 +37,33 @@ static TweenEngine tweenEngine;
 
 void TweenManager::flushKilledTweeners()
 {
+    if (_updating)
+        return;
+
     int cnt = _totalActiveTweens;
     int freePosStart = -1;
     for (int i = 0; i < cnt; i++)
     {
-        GTweener* tweener = _activeTweens[i];
-        if (tweener == nullptr)
+        Ref<GTweener>& tweenerRef = _activeTweens[i];
+        if (tweenerRef.is_null())
         {
             if (freePosStart == -1)
                 freePosStart = i;
         }
-        else if (tweener->_killed)
+        else if (tweenerRef->_killed)
         {
+            GTweener* tweener = tweenerRef.ptr();
             tweener->_reset();
-            _tweenerPool.push_back(tweener);
-            _activeTweens[i] = nullptr;
+            _tweenerPool.push_back(tweenerRef);
+            tweenerRef = Ref<GTweener>();
 
             if (freePosStart == -1)
                 freePosStart = i;
         }
         else if (freePosStart != -1)
         {
-            _activeTweens[freePosStart] = tweener;
-            _activeTweens[i] = nullptr;
+            _activeTweens[freePosStart] = tweenerRef;
+            tweenerRef = Ref<GTweener>();
             freePosStart++;
         }
     }
@@ -65,25 +86,28 @@ GTweener* TweenManager::createTween()
     if (!_inited)
         init();
 
-    GTweener* tweener;
+    Ref<GTweener> tweenerRef;
     int cnt = (int)_tweenerPool.size();
     if (cnt > 0)
     {
-        tweener = _tweenerPool[cnt - 1];
+        tweenerRef = _tweenerPool[cnt - 1];
         _tweenerPool.pop_back();
     }
     else
-        tweener = memnew(GTweener);
+        tweenerRef = Ref<GTweener>(memnew(GTweener));
+
+    GTweener* tweener = tweenerRef.ptr();
     tweener->_reset();
     tweener->_init();
-    _activeTweens[_totalActiveTweens++] = tweener;
+    _activeTweens[_totalActiveTweens++] = tweenerRef;
 
     if (_totalActiveTweens == _arrayLength)
     {
         int newLen = _arrayLength + ceil(_arrayLength * 0.5f);
-        GTweener** newArray = new GTweener*[newLen];
-        memcpy(newArray, _activeTweens, _arrayLength * sizeof(GTweener*));
-        delete _activeTweens;
+        Ref<GTweener>* newArray = new Ref<GTweener>[newLen];
+        for (int i = 0; i < _arrayLength; i++)
+            newArray[i] = _activeTweens[i];
+        delete[] _activeTweens;
         _activeTweens = newArray;
         _arrayLength = newLen;
     }
@@ -99,7 +123,7 @@ bool TweenManager::isTweening(RefCounted* target, TweenPropType propType)
     bool anyType = propType == TweenPropType::None;
     for (int i = 0; i < _totalActiveTweens; i++)
     {
-        GTweener* tweener = _activeTweens[i];
+        GTweener* tweener = _activeTweens[i].ptr();
         if (tweener != nullptr && tweener->_target == target && !tweener->_killed && (anyType || tweener->_propType == propType))
             return true;
     }
@@ -117,16 +141,13 @@ bool TweenManager::killTweens(RefCounted* target, TweenPropType propType, bool c
     bool anyType = propType == TweenPropType::None;
     for (int i = 0; i < cnt; i++)
     {
-        GTweener* tweener = _activeTweens[i];
-        if (tweener != nullptr && tweener->_target == target && !tweener->_killed && (anyType || tweener->_propType == propType))
+        GTweener* tweener = _activeTweens[i].ptr();
+        if (tweener != nullptr && tweener->_target == target && !tweener->_killed && tweener != _executingTweener && (anyType || tweener->_propType == propType))
         {
             tweener->kill(completed);
             flag = true;
         }
     }
-
-    if (flag)
-        flushKilledTweeners();
 
     return flag;
 }
@@ -140,16 +161,13 @@ bool TweenManager::killTweensAny(void* target, bool completed)
     int cnt = _totalActiveTweens;
     for (int i = 0; i < cnt; i++)
     {
-        GTweener* tweener = _activeTweens[i];
-        if (tweener != nullptr && tweener->_target == target && !tweener->_killed)
+        GTweener* tweener = _activeTweens[i].ptr();
+        if (tweener != nullptr && tweener->_target == target && !tweener->_killed && tweener != _executingTweener)
         {
             tweener->kill(completed);
             flag = true;
         }
     }
-
-    if (flag)
-        flushKilledTweeners();
 
     return flag;
 }
@@ -163,7 +181,7 @@ GTweener* TweenManager::getTween(RefCounted* target, TweenPropType propType)
     bool anyType = propType == TweenPropType::None;
     for (int i = 0; i < cnt; i++)
     {
-        GTweener* tweener = _activeTweens[i];
+        GTweener* tweener = _activeTweens[i].ptr();
         if (tweener != nullptr && tweener->_target == target && !tweener->_killed && (anyType || tweener->_propType == propType))
         {
             return tweener;
@@ -175,11 +193,14 @@ GTweener* TweenManager::getTween(RefCounted* target, TweenPropType propType)
 
 void TweenManager::update(float dt)
 {
+    _updating = true;
+
     int cnt = _totalActiveTweens;
     int freePosStart = -1;
     for (int i = 0; i < cnt; i++)
     {
-        GTweener* tweener = _activeTweens[i];
+        Ref<GTweener>& tweenerRef = _activeTweens[i];
+        GTweener* tweener = tweenerRef.ptr();
         if (tweener == nullptr)
         {
             if (freePosStart == -1)
@@ -191,8 +212,8 @@ void TweenManager::update(float dt)
                 tweener->_killed = true;
 
             tweener->_reset();
-            _tweenerPool.push_back(tweener);
-            _activeTweens[i] = nullptr;
+            _tweenerPool.push_back(tweenerRef);
+            tweenerRef = Ref<GTweener>();
 
             if (freePosStart == -1)
                 freePosStart = i;
@@ -204,8 +225,8 @@ void TweenManager::update(float dt)
 
             if (freePosStart != -1)
             {
-                _activeTweens[freePosStart] = tweener;
-                _activeTweens[i] = nullptr;
+                _activeTweens[freePosStart] = tweenerRef;
+                tweenerRef = Ref<GTweener>();
                 freePosStart++;
             }
         }
@@ -213,7 +234,7 @@ void TweenManager::update(float dt)
 
     if (freePosStart >= 0)
     {
-        if (_totalActiveTweens != cnt) //new tweens added
+        if (_totalActiveTweens != cnt)
         {
             int j = cnt;
             cnt = _totalActiveTweens - cnt;
@@ -222,14 +243,20 @@ void TweenManager::update(float dt)
         }
         _totalActiveTweens = freePosStart;
     }
+
+    _updating = false;
+    flushKilledTweeners();
 }
 
 void TweenManager::clean()
 {
     killAll(true);
 
-    for (auto it = _tweenerPool.begin(); it != _tweenerPool.end(); it++)
-        (*it)->kill(true);
+    for (Ref<GTweener>& tweenerRef : _tweenerPool)
+    {
+        if (GTweener* tweener = tweenerRef.ptr())
+            tweener->kill(true);
+    }
     _tweenerPool.clear();
 }
 
@@ -241,7 +268,7 @@ void TweenManager::killAll(bool completed)
     int cnt = _totalActiveTweens;
     for (int i = 0; i < cnt; i++)
     {
-        GTweener* tweener = _activeTweens[i];
+        GTweener* tweener = _activeTweens[i].ptr();
         if (tweener != nullptr && !tweener->_killed)
             tweener->kill(completed);
     }
@@ -256,11 +283,8 @@ void TweenManager::init()
     if (_activeTweens == nullptr)
     {
         _arrayLength = 30;
-        _activeTweens = new GTweener*[_arrayLength];
+        _activeTweens = new Ref<GTweener>[_arrayLength];
     }
-
-    // TweenManager::update(dt) is called externally by the main loop
-    _inited = true;
 }
 
 void TweenManager::reset()
@@ -268,12 +292,12 @@ void TweenManager::reset()
     int cnt = _totalActiveTweens;
     for (int i = 0; i < cnt; i++)
     {
-        GTweener* tweener = _activeTweens[i];
-        if (tweener != nullptr)
+        Ref<GTweener>& tweenerRef = _activeTweens[i];
+        if (GTweener* tweener = tweenerRef.ptr())
         {
             tweener->_reset();
-            _tweenerPool.push_back(tweener);
-            _activeTweens[i] = nullptr;
+            _tweenerPool.push_back(tweenerRef);
+            tweenerRef = Ref<GTweener>();
         }
     }
 

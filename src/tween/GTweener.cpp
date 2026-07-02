@@ -2,6 +2,7 @@
 #include "EaseManager.h"
 #include "GObject.h"
 #include "GPath.h"
+#include "TweenManager.h"
 #include <cstdlib>
 #include <cstring>
 #include <new>
@@ -309,64 +310,29 @@ void GTweener::_init()
 
 void GTweener::abandonVariant(Variant& value)
 {
-    bool abandon = false;
-    switch (value.get_type())
-    {
-    case Variant::OBJECT:
-    {
-        Object* obj = value;
-        if (obj != nullptr && !ObjectDB::get_instance(obj->get_instance_id()))
-            abandon = true;
-        break;
-    }
-    case Variant::CALLABLE:
-    {
-        Callable callable = value;
-        if (callable.is_valid())
-        {
-            Object* obj = callable.get_object();
-            if (obj != nullptr && !ObjectDB::get_instance(obj->get_instance_id()))
-                abandon = true;
-        }
-        break;
-    }
-    default:
-        break;
-    }
-
-    if (abandon)
-    {
-        memset(static_cast<void*>(&value), 0, sizeof(Variant));
-        new (&value) Variant();
-    }
-    else
-    {
-        value = Variant();
-    }
+    // Never run ~Variant() or operator=; the stored value may hold dangling refs.
+    memset(static_cast<void*>(&value), 0, sizeof(Variant));
+    new (&value) Variant();
 }
 
 void GTweener::abandonCallable(Callable& callable, ObjectID& id)
 {
-    bool abandon = false;
-    if (id.is_valid() && !ObjectDB::get_instance(id))
-        abandon = true;
-    else if (callable.is_valid())
-    {
-        Object* obj = callable.get_object();
-        if (obj != nullptr && !ObjectDB::get_instance(obj->get_instance_id()))
-            abandon = true;
-    }
-
-    if (abandon)
-    {
-        memset(static_cast<void*>(&callable), 0, sizeof(Callable));
-        new (&callable) Callable();
-    }
-    else
-    {
-        callable = Callable();
-    }
+    // Never run ~Callable() or operator=; unref on stale internals will crash.
+    memset(static_cast<void*>(&callable), 0, sizeof(Callable));
+    new (&callable) Callable();
     id = ObjectID();
+}
+
+void GTweener::abandonCallback(GTweenCallback& callback)
+{
+    memset(static_cast<void*>(&callback), 0, sizeof(GTweenCallback));
+    new (&callback) GTweenCallback();
+}
+
+void GTweener::abandonCallback0(GTweenCallback0& callback)
+{
+    memset(static_cast<void*>(&callback), 0, sizeof(GTweenCallback0));
+    new (&callback) GTweenCallback0();
 }
 
 void GTweener::clearScriptBindings()
@@ -399,10 +365,10 @@ void GTweener::_reset()
     clearRefTarget();
     _target = nullptr;
     _path = nullptr;
-    _onStart = nullptr;
-    _onUpdate = nullptr;
-    _onComplete = nullptr;
-    _onComplete0 = nullptr;
+    abandonCallback(_onStart);
+    abandonCallback(_onUpdate);
+    abandonCallback(_onComplete);
+    abandonCallback0(_onComplete0);
     clearScriptBindings();
     abandonVariant(_userData);
 }
@@ -568,22 +534,28 @@ void GTweener::update()
 
 void GTweener::callStartCallback()
 {
+    TweenManager::beginCallback(this);
     if (_onStart != nullptr)
         _onStart(this);
+    TweenManager::endCallback();
 }
 
 void GTweener::callUpdateCallback()
 {
+    TweenManager::beginCallback(this);
     if (_onUpdate != nullptr)
         _onUpdate(this);
+    TweenManager::endCallback();
 }
 
 void GTweener::callCompleteCallback()
 {
+    TweenManager::beginCallback(this);
     if (_onComplete != nullptr)
         _onComplete(this);
     if (_onComplete0 != nullptr)
         _onComplete0();
+    TweenManager::endCallback();
 }
 
 Ref<GTweener> GTweener::gd_setDelay(float value)
