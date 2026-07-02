@@ -6,9 +6,9 @@ var _demo_container: Object
 var _cc: Object
 var _demo_objects: Dictionary = {}
 
-var _win_a: Object = null
-var _win_b: Object = null
-var _pm: Object = null
+var _win_a: Window1 = null
+var _win_b: Window2 = null
+var _pm: GPopupMenu = null
 
 var _popup_com: Object = null
 var _progress_running: bool = false
@@ -20,10 +20,6 @@ func continue_init() -> void:
 	UIConfigHelper.getInstance().setHorizontalScrollBar("ui://Basics/ScrollBar_HZ")
 	UIConfigHelper.getInstance().setTooltipsWin("ui://Basics/WindowFrame")
 	UIConfigHelper.getInstance().setPopupMenu("ui://Basics/PopupMenu")
-
-	var factory = UIObjectFactoryHelper.getInstance()
-	factory.setPackageItemExtension("ui://Basics/WindowA", func(): return GWindow.create())
-	factory.setPackageItemExtension("ui://Basics/WindowB", func(): return GWindow.create())
 
 	UIPackage.addPackage("res://Resources/UI/Basics")
 	_view = UIPackage.createObject("Basics", "Main")
@@ -94,47 +90,44 @@ func _play_popup(obj: Object) -> void:
 		_pm.addItem("Item 2")
 		_pm.addItem("Item 3")
 		_pm.addItem("Item 4")
-		_pm.addSeperator()
-		_pm.addItem("Item 5")
-		_pm.addItem("Item 6")
+
+	if _popup_com == null:
+		_popup_com = UIPackage.createObject("Basics", "Component12")
+		_popup_com.center()
 
 	var n0 = obj.getChild("n0")
 	if n0 != null:
 		n0.addClickListener(func():
-			_pm.showMenuAt(n0, 0)
+			_pm.showMenuAt(n0, 2)
 		)
 
 	var n1 = obj.getChild("n1")
 	if n1 != null:
 		n1.addClickListener(func():
-			var popup = UIPackage.createObject("Basics", "Component12")
-			if popup != null:
-				popup.center()
-				_groot.showPopupSimple(popup)
+			_groot.showPopupSimple(_popup_com)
 		)
 
 	obj.addEventListener(UIEventDispatcher.RIGHTCLICK, func():
-		_groot.hidePopup()
+		_pm.show()
 	)
 
 func _play_window(obj: Object) -> void:
+	if _win_a != null:
+		return
+
+	_win_a = Window1.new()
+	_win_b = Window2.new()
+
 	var n0 = obj.getChild("n0")
 	if n0 != null:
 		n0.addClickListener(func():
-			var win = UIPackage.createObject("Basics", "WindowA")
-			_win_a = win
-			win.show()
+			_win_a.show()
 		)
+
 	var n1 = obj.getChild("n1")
 	if n1 != null:
 		n1.addClickListener(func():
-			var win = UIPackage.createObject("Basics", "WindowB")
-			_win_b = win
-			_win_b.onShownCallback = func():
-				var trans = _win_b.getTransition("t1")
-				if trans != null:
-					trans.play(1, 0, Callable())
-			win.show()
+			_win_b.show()
 		)
 
 func _play_depth(obj: Object) -> void:

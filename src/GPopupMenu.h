@@ -19,14 +19,15 @@ class GPopupMenu : public RefCounted
 public:
     static Ref<GPopupMenu> create(const std::string& resourceURL);
     static Ref<GPopupMenu> create() { return create(""); }
+    static GPopupMenu* gd_create();
 
     GPopupMenu();
     virtual ~GPopupMenu();
 
     static void _bind_methods();
 
-    GButton* addItem(const std::string& caption, EventCallback callback);
-    GButton* addItemAt(const std::string& caption, int index, EventCallback callback);
+    GButton* addItem(const std::string& caption, EventCallback callback = nullptr);
+    GButton* addItemAt(const std::string& caption, int index, EventCallback callback = nullptr);
     void addSeperator();
     const std::string& getItemName(int index) const;
     void setItemText(const std::string& name, const std::string& caption);

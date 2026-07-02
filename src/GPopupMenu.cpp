@@ -14,6 +14,12 @@ Ref<GPopupMenu> GPopupMenu::create(const std::string & resourceURL)
     return Ref<GPopupMenu>();
 }
 
+GPopupMenu* GPopupMenu::gd_create()
+{
+    Ref<GPopupMenu> ref = create();
+    return ref.is_valid() ? ref.ptr() : nullptr;
+}
+
 GPopupMenu::GPopupMenu() :
     _contentPane(nullptr),
     _list(nullptr)
@@ -228,7 +234,7 @@ void GPopupMenu::onEnter(EventContext * context)
 
 void GPopupMenu::_bind_methods()
 {
-    ClassDB::bind_static_method(get_class_static(), D_METHOD("create"), &GPopupMenu::create);
+    ClassDB::bind_static_method(get_class_static(), D_METHOD("create"), &GPopupMenu::gd_create);
 
     ClassDB::bind_method(D_METHOD("addItem", "caption"), &GPopupMenu::gd_addItem);
     ClassDB::bind_method(D_METHOD("addSeperator"), &GPopupMenu::addSeperator);
