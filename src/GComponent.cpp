@@ -1122,9 +1122,15 @@ GObject* GComponent::hitTest(const Vector2& worldPoint, const Camera2D* camera)
 
 void GComponent::applyPivotOffset()
 {
-    // Match Cocos: inner container only carries margin; component pivot is on the outer display node.
+    // Match FUISprite: computeDisplayPosition() shifts the outer node by pivot when
+    // !pivotAsAnchor; inner content must be shifted back so (x,y) stays top-left.
+    // When pivotAsAnchor, the outer node sits on the anchor and the same offset applies.
     if (_container)
-        _container->set_position(Vector2(_margin.left, _margin.top));
+    {
+        _container->set_position(Vector2(
+                _margin.left - _size.width * _pivot.x,
+                _margin.top - _size.height * _pivot.y));
+    }
 }
 
 void GComponent::setupOverflow(OverflowType overflow)
@@ -1135,7 +1141,7 @@ void GComponent::setupOverflow(OverflowType overflow)
         ((FUIContainer*)_displayObject)->setClippingRegion(Rect(_margin.left, _margin.top, _size.width - _margin.left - _margin.right, _size.height - _margin.top - _margin.bottom));
     }
 
-    _container->set_position(Vector2(_margin.left, _margin.top));
+    applyPivotOffset();
 }
 
 void GComponent::setupScroll(ByteBuffer* buffer)

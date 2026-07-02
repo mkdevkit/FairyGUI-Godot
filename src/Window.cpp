@@ -116,6 +116,7 @@ void GWindow::setContentPane(GComponent* value)
         if (_contentPane != nullptr)
         {
             _contentPaneRef = Ref<GComponent>(_contentPane);
+            _contentPane->setPosition(0, 0);
             addChild(Ref<GObject>(_contentPaneRef));
             setSize(_contentPane->getWidth(), _contentPane->getHeight());
             _contentPane->addRelation(this, RelationType::Size);
