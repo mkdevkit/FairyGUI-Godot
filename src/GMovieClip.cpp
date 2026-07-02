@@ -83,6 +83,7 @@ void GMovieClip::setFrame(int value)
 {
     if (_playAction)
         _playAction->setFrame(value);
+    syncContentSize();
 }
 
 float GMovieClip::getTimeScale() const
@@ -138,6 +139,20 @@ void GMovieClip::handleGrayedChanged()
 
     if (_content)
         ((FUISprite*)_content)->setGrayed(_finalGrayed);
+}
+
+void GMovieClip::syncContentSize()
+{
+    if (!_content || sourceSize.width <= 0 || sourceSize.height <= 0)
+        return;
+    // _sizeImplType=1 scales the node; FUISprite must draw at sourceSize (like GImage/GLoader).
+    _content->set_content_size(sourceSize);
+}
+
+void GMovieClip::handleSizeChanged()
+{
+    GObject::handleSizeChanged();
+    syncContentSize();
 }
 
 Variant GMovieClip::getProp(ObjectPropID propId)
@@ -196,6 +211,7 @@ void GMovieClip::constructFromResource()
         _playAction->setAnimation(contentItem->movieclip, contentItem->repeatDelay, contentItem->swing);
 
     setSize(sourceSize.x, sourceSize.y);
+    syncContentSize();
 }
 
 void GMovieClip::setup_beforeAdd(ByteBuffer* buffer, int beginPos)

@@ -52,8 +52,10 @@ protected:
     virtual void handleInit() override;
     virtual void setup_beforeAdd(ByteBuffer* buffer, int beginPos) override;
     virtual void handleGrayedChanged() override;
+    virtual void handleSizeChanged() override;
 
 private:
+    void syncContentSize();
     FUISprite* _content;
     ActionMovieClip* _playAction;
     bool _playing;

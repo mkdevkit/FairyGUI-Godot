@@ -297,6 +297,9 @@ void GGraph::drawRegularPolygon(int lineSize, const Color& lineColor, const Colo
 
 void GGraph::updateShape()
 {
+    if (!_shape)
+        return;
+
     _shape->clear();
     if (_type == 0)
     {
@@ -483,7 +486,8 @@ void GGraph::handleSizeChanged()
         }
     }
 
-    updateShape();
+    if (_type != 0)
+        updateShape();
 }
 
 void GGraph::setup_beforeAdd(ByteBuffer* buffer, int beginPos)

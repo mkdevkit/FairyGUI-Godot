@@ -1,4 +1,5 @@
 #include "GRoot.h"
+#include "GGraph.h"
 #include "UIConfig.h"
 #include "UIPackage.h"
 #include "display/FUIContainer.h"
@@ -99,10 +100,9 @@ GRoot::~GRoot()
             memdelete(_defaultTooltipWin);
         _defaultTooltipWin = nullptr;
     }
-    if (_modalLayer)
+    if (_modalLayerRef.is_valid())
     {
-        if (!_modalLayer->displayObject()->is_inside_tree())
-            memdelete(_modalLayer);
+        _modalLayerRef = Ref<GGraph>();
         _modalLayer = nullptr;
     }
 
@@ -268,7 +268,11 @@ GGraph* GRoot::getModalLayer()
 
 void GRoot::createModalLayer()
 {
-    _modalLayer = GGraph::create().ptr();
+    _modalLayerRef = GGraph::create();
+    _modalLayer = _modalLayerRef.ptr();
+    if (!_modalLayer)
+        return;
+
     _modalLayer->drawRect(getWidth(), getHeight(), 0, Color(1.0f, 1.0f, 1.0f, 1.0f), UIConfig::modalLayerColor);
     _modalLayer->addRelation(this, RelationType::Size);
 }
@@ -277,6 +281,9 @@ void GRoot::adjustModalLayer()
 {
     if (_modalLayer == nullptr)
         createModalLayer();
+
+    if (_modalLayer == nullptr)
+        return;
 
     int cnt = numChildren();
 
