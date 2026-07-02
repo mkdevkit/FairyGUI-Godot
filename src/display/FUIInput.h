@@ -4,6 +4,9 @@
 #include "FairyGUIMacros.h"
 #include "TextFormat.h"
 #include "core/input/input_event.h"
+#include "scene/gui/control.h"
+
+class LineEdit;
 
 NS_FGUI_BEGIN
 
@@ -23,16 +26,16 @@ public:
     void gd_setText(const String& value);
     String gd_getText() const;
 
-    void setMaxLength(int value) { _maxLength = value; }
+    void setMaxLength(int value);
     int getMaxLength() const { return _maxLength; }
 
-    void setPassword(bool value) { _password = value; }
+    void setPassword(bool value);
     bool isPassword() const { return _password; }
 
-    void setSingleLine(bool value) { _singleLine = value; }
+    void setSingleLine(bool value);
     bool isSingleLine() const { return _singleLine; }
 
-    void setEditable(bool value) { _editable = value; }
+    void setEditable(bool value);
     bool isEditable() const { return _editable; }
 
     void setInputRestrict(const std::string& value) { _inputRestrict = value; }
@@ -41,7 +44,7 @@ public:
     void gd_setInputRestrict(const String& value);
     String gd_getInputRestrict() const;
 
-    void setPlaceHolder(const std::string& value) { _placeHolder = value; }
+    void setPlaceHolder(const std::string& value);
     const std::string& getPlaceHolder() const { return _placeHolder; }
     void gd_setPlaceHolder(const String& value);
 
@@ -62,9 +65,11 @@ public:
     static void _bind_methods();
     void _gui_input(const Ref<::InputEvent>& event);
 
-protected:
-
 private:
+    void _on_line_edit_changed(const String& text);
+    void _on_line_edit_submitted(const String& text);
+
+    ::LineEdit* _lineEdit;
     std::string _text;
     int _maxLength;
     bool _password;

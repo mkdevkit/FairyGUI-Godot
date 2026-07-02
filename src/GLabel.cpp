@@ -164,8 +164,24 @@ void GLabel::setup_afterAdd(ByteBuffer* buffer, int beginPos)
 
     if (buffer->readBool())
     {
-        // GODOT_ADAPT: GTextInput not yet ported, skip its data
-        buffer->skip(13);
+        GTextInput* input = dynamic_cast<GTextInput*>(getTextField());
+        if (input)
+        {
+            if ((str = buffer->readSP()))
+                input->setPrompt(*str);
+            if ((str = buffer->readSP()))
+                input->setRestrict(*str);
+            iv = buffer->readInt();
+            if (iv != 0)
+                input->setMaxLength(iv);
+            iv = buffer->readInt();
+            if (iv != 0)
+                input->setKeyboardType(iv);
+            if (buffer->readBool())
+                input->setPassword(true);
+        }
+        else
+            buffer->skip(13);
     }
 }
 

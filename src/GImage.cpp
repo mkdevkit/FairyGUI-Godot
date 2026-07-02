@@ -138,6 +138,7 @@ void GImage::constructFromResource()
 
     _content->set_region_rect(contentItem->imageFrame.region);
     ((FUISprite*)_content)->setRotated(contentItem->imageFrame.rotated);
+    ((FUISprite*)_content)->setImageFrameInfo(contentItem->imageFrame.originalSize, contentItem->imageFrame.offset);
     _content->set_content_size(Vector2(getWidth(), getHeight()));
     _content->setTexture(contentItem->texture);
 

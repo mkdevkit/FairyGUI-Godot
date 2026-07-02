@@ -1,5 +1,6 @@
 #include "HtmlObject.h"
 #include "HtmlElement.h"
+#include "GTextInput.h"
 #include "display/FUIRichText.h"
 #include "utils/ToolSet.h"
 #include "UIPackage.h"
@@ -178,8 +179,11 @@ void HtmlObject::createInput()
     if (width == 0)
     {
         width = _element->space;
-        // GODOT_ADAPT: _owner->getContentSize() replaced with default size
-        float ownerWidth = 300.0f;
+        float ownerWidth = _owner->getDimensions().x;
+        if (ownerWidth <= 0)
+            ownerWidth = _owner->get_content_size().x;
+        if (ownerWidth <= 0)
+            ownerWidth = 300.0f;
         if (width > (int)(ownerWidth / 2) || width < 100)
             width = (int)(ownerWidth / 2);
     }
@@ -195,10 +199,7 @@ void HtmlObject::createInput()
     {
         GTextInput* input = dynamic_cast<GTextInput*>(label->getTextField());
         if (input != nullptr)
-        {
-            // GODOT_ADAPT: GTextInput not yet ported
-            // input->setPassword(type == "password");
-        }
+            input->setPassword(type == "password");
     }
 }
 

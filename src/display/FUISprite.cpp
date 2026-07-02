@@ -18,7 +18,8 @@ FUISprite::FUISprite() :
     _scaleByTile(false),
     _grayed(false),
     _rotated(false),
-    _scale9Enabled(false)
+    _scale9Enabled(false),
+    _trimOffset()
 {
     set_centered(false); // FairyGUI uses top-left origin, NOT center origin
     item_rect_changed(); // enable NOTIFICATION_DRAW for Node2D
@@ -134,19 +135,59 @@ void FUISprite::clearContent()
     queue_redraw();
 }
 
+void FUISprite::setImageFrameInfo(const Vector2& originalSize, const Vector2& trimOffset)
+{
+    _originalContentSize = originalSize;
+    _trimOffset = trimOffset;
+}
+
 void FUISprite::setScale9Grid(const Rect2& value)
 {
-    if (value.size.x == 0 || value.size.y == 0)
+    if (value.size.x == 0 && value.size.y == 0)
     {
         _scale9Enabled = false;
         return;
     }
 
-    _scale9Enabled = true;
-    // GODOT_TODO: convert Scale9Grid insets from untrimmed space to trimmed space
-    // (cocos does this with _originalContentSize / _rect / _unflippedOffsetPositionFromCenter)
-    _scale9Grid = value;
+    Rect2 insets = value;
+    Vector2 trimmedSize = get_region_rect().size;
+    if (trimmedSize.x <= 0 || trimmedSize.y <= 0)
+    {
+        if (_realTexture.is_valid())
+            trimmedSize = _realTexture->get_size();
+    }
 
+    if (_originalContentSize.x <= 0 || _originalContentSize.y <= 0)
+        _originalContentSize = trimmedSize;
+
+    if (insets.position.x == 0 && insets.position.y == 0 && insets.size.x == 0 && insets.size.y == 0)
+    {
+        insets = Rect2(
+            _originalContentSize.x / 3.0f,
+            _originalContentSize.y / 3.0f,
+            _originalContentSize.x / 3.0f,
+            _originalContentSize.y / 3.0f);
+    }
+
+    if (insets.position.x > _originalContentSize.x)
+        insets.position.x = 0;
+    if (insets.position.y > _originalContentSize.y)
+        insets.position.y = 0;
+    if (insets.size.x > _originalContentSize.x)
+        insets.size.x = 1;
+    if (insets.size.y > _originalContentSize.y)
+        insets.size.y = 1;
+
+    insets.position.x -= (_originalContentSize.x - trimmedSize.x) / 2 + _trimOffset.x;
+    insets.position.y -= (_originalContentSize.y - trimmedSize.y) / 2 - _trimOffset.y;
+
+    float x1 = MAX(insets.position.x, 0.0f);
+    float y1 = MAX(insets.position.y, 0.0f);
+    float x2 = MIN(insets.position.x + insets.size.x, trimmedSize.x);
+    float y2 = MIN(insets.position.y + insets.size.y, trimmedSize.y);
+
+    _scale9Grid = Rect2(x1, y1, x2 - x1, y2 - y1);
+    _scale9Enabled = _scale9Grid.size.x > 0 && _scale9Grid.size.y > 0;
     queue_redraw();
 }
 

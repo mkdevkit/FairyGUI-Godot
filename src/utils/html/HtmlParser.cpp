@@ -1,6 +1,7 @@
 #include "HtmlParser.h"
 #include "HtmlElement.h"
 #include "utils/ToolSet.h"
+#include "core/io/xml_parser.h"
 
 #include <sstream>
 #include <vector>
@@ -306,13 +307,72 @@ void HtmlParser::parse(const std::string& source, const TextFormat& format, std:
     _ignoreWhiteSpace = false;
     _textFormatStackTop = 0;
     _skipText = 0;
+    _textBlock.clear();
+    _linkStack.clear();
+    _currentSelect = nullptr;
 
-    // GODOT_ADAPT: SAXParser is a cocos class, needs Godot XML parser replacement
-    // TODO: Implement HTML parsing using Godot's XMLParser or a custom parser
-    // string xmlText = "<dummy>" + source + "</dummy>";
-    // SAXParser parser;
-    // parser.setDelegator(this);
-    // parser.parseIntrusive(&xmlText.front(), xmlText.length());
+    if (source.empty())
+        return;
+
+    String xmlText = "<dummy>" + String(source.c_str()) + "</dummy>";
+    Ref<XMLParser> parser;
+    parser.instantiate();
+    if (parser->open_buffer(xmlText.to_utf8_buffer()) != OK)
+    {
+        HtmlElement* element = new HtmlElement(HtmlElement::Type::TEXT);
+        element->format = _format;
+        element->text = source;
+        elements.push_back(element);
+        return;
+    }
+
+    while (true)
+    {
+        Error err = parser->read();
+        if (err != OK)
+            break;
+
+        switch (parser->get_node_type())
+        {
+        case XMLParser::NODE_ELEMENT:
+        {
+            String nodeName = parser->get_node_name();
+            std::vector<std::string> attrKeys;
+            std::vector<std::string> attrValues;
+            std::vector<const char*> attrPtrs;
+            for (int i = 0; i < parser->get_attribute_count(); i++)
+            {
+                attrKeys.push_back(std::string(parser->get_attribute_name(i).utf8().get_data()));
+                attrValues.push_back(std::string(parser->get_attribute_value(i).utf8().get_data()));
+            }
+            for (size_t i = 0; i < attrKeys.size(); i++)
+            {
+                attrPtrs.push_back(attrKeys[i].c_str());
+                attrPtrs.push_back(attrValues[i].c_str());
+            }
+            attrPtrs.push_back(nullptr);
+            startElement(nullptr, nodeName.utf8().get_data(), attrPtrs.data());
+            if (parser->is_empty())
+                endElement(nullptr, nodeName.utf8().get_data());
+            break;
+        }
+        case XMLParser::NODE_ELEMENT_END:
+            endElement(nullptr, parser->get_node_name().utf8().get_data());
+            break;
+        case XMLParser::NODE_TEXT:
+        {
+            String data = parser->get_node_data();
+            std::string text = data.utf8().get_data();
+            if (!text.empty())
+                textHandler(nullptr, text.c_str(), text.length());
+            break;
+        }
+        default:
+            break;
+        }
+    }
+
+    finishTextBlock();
 }
 
 NS_FGUI_END

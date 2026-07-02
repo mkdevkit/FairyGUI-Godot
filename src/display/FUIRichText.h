@@ -22,7 +22,7 @@ public:
 
     void setDimensions(float width, float height);
     Vector2 getDimensions() const { return Vector2(_dimensionsX, _dimensionsY); }
-    virtual Vector2 get_content_size() const { return Vector2(_dimensionsX, _dimensionsY); }
+    virtual Vector2 get_content_size() const;
 
     void setText(const std::string& value);
 
@@ -53,7 +53,7 @@ private:
     void formatText();
     void formarRenderers();
     void handleTextRenderer(HtmlElement* element, const std::string& text);
-    void handleRichRenderer(HtmlElement* element);
+    void handleRichRenderer(HtmlElement* element, HtmlObject* obj);
     void addNewLine();
     int findSplitPositionForWord(Node* label, const std::string& text);
     void doHorizontalAlignment(const std::vector<Node*>& row, float rowWidth);
@@ -69,8 +69,15 @@ private:
     TextFormat _textFormat;
     float _dimensionsX;
     float _dimensionsY;
+    float _contentWidth;
+    float _contentHeight;
     int _overflow;
     bool _dirty;
+
+    std::vector<std::vector<Node*>> _renderers;
+    float _leftSpaceWidth;
+    float _textRectWidth;
+    int _numLines;
 };
 
 NS_FGUI_END

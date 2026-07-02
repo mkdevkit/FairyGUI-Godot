@@ -32,6 +32,7 @@ public:
     void setColor(const Color& c) { set_modulate(c); }
     void setRegion(const Rect2& r) { set_region_rect(r); }
     Rect2 getRegion() const { return get_region_rect(); }
+    void setImageFrameInfo(const Vector2& originalSize, const Vector2& trimOffset);
     void setRegionEnabled(bool v) { set_region_enabled(v); }
     bool isRegionEnabled() const { return is_region_enabled(); }
     void setTexture(const Ref<Texture2D>& t);
@@ -94,6 +95,7 @@ private:
     bool _scale9Enabled;
     Rect2 _scale9Grid;
     Vector2 _originalContentSize;
+    Vector2 _trimOffset;
     Vector2 _contentSize;
 
     // Fill mode vertex data (for radial)

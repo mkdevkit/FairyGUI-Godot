@@ -37,19 +37,19 @@ void TweenPropTypeUtils::setProps(GObject * target, TweenPropType propType, cons
         break;
 
     case TweenPropType::ScaleX:
-        ((Node2D*)target->displayObject())->set_scale(Vector2(value.x, ((Node2D*)target->displayObject())->get_scale().y));
+        target->setScaleX(value.x);
         break;
 
     case TweenPropType::ScaleY:
-        ((Node2D*)target->displayObject())->set_scale(Vector2(((Node2D*)target->displayObject())->get_scale().x, value.x));
+        target->setScaleY(value.x);
         break;
 
     case TweenPropType::Scale:
-        ((Node2D*)target->displayObject())->set_scale(Vector2(value.x, value.y));
+        target->setScale(value.x, value.y);
         break;
 
     case TweenPropType::Rotation:
-        ((Node2D*)target->displayObject())->set_rotation(value.x);
+        target->setRotation(value.x);
         break;
 
     case TweenPropType::Alpha:
@@ -97,8 +97,16 @@ void TweenPropTypeUtils::setProps(Node * target, TweenPropType propType, const T
         break;
 
     case TweenPropType::Alpha:
-        // GODOT_ADAPT: setOpacity not on Node, skip
+    {
+        CanvasItem* ci = Object::cast_to<CanvasItem>(target);
+        if (ci)
+        {
+            Color c = ci->get_modulate();
+            c.a = value.x;
+            ci->set_modulate(c);
+        }
         break;
+    }
 
     default:
         break;

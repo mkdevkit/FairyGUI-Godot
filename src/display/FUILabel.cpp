@@ -17,6 +17,8 @@ FUILabel::FUILabel() :
     _bmFontCanTint(false),
     _textFormat(new TextFormat()),
     _grayed(false),
+    _wrapEnabled(false),
+    _hasUnderlineColor(false),
     _bmFontSize(0),
     _bmfontScale(1.0f),
     _contentSize(0, 0)
@@ -162,7 +164,9 @@ void FUILabel::setGrayed(bool value)
 
 void FUILabel::setUnderlineColor(const Color& value)
 {
-    // GODOT_TODO: implement underline color
+    _underlineColor = value;
+    _hasUnderlineColor = true;
+    queue_redraw();
 }
 
 void FUILabel::updateBMFontScale()
@@ -265,7 +269,8 @@ void FUILabel::_draw()
     if (_textFormat->underline)
     {
         float textWidth = getTextWidth();
-        draw_line(offset + Vector2(0, fontSize + 1), offset + Vector2(textWidth, fontSize + 1), textColor);
+        Color lineColor = _hasUnderlineColor ? _underlineColor : textColor;
+        draw_line(offset + Vector2(0, fontSize + 1), offset + Vector2(textWidth, fontSize + 1), lineColor);
     }
 }
 

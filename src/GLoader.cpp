@@ -217,6 +217,7 @@ void GLoader::loadFromPackage()
             _contentStatus = 1;
             _content->set_region_rect(_contentItem->imageFrame.region);
             ((FUISprite*)_content)->setRotated(_contentItem->imageFrame.rotated);
+            ((FUISprite*)_content)->setImageFrameInfo(_contentItem->imageFrame.originalSize, _contentItem->imageFrame.offset);
             _content->set_content_size(_sourceSize);
             _content->setTexture(_contentItem->texture);
             if (_contentItem->hasScale9Grid)
@@ -297,6 +298,7 @@ void GLoader::onExternalLoadSuccess(ImageFrame* spriteFrame)
 {
     _contentStatus = 4;
     _content->set_region_rect(Rect2(Vector2(), spriteFrame->texture->get_size()));
+    ((FUISprite*)_content)->setImageFrameInfo(spriteFrame->originalSize, spriteFrame->offset);
     _content->setTexture(spriteFrame->texture);
     _sourceSize = spriteFrame->region.size;
     updateLayout();

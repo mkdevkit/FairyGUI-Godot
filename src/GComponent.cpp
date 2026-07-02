@@ -1156,8 +1156,7 @@ void GComponent::constructFromResource(std::vector<GObject*>* objectPool, int po
     if (!contentItem->translated)
     {
         contentItem->translated = true;
-        // GODOT_ADAPT: TranslationHelper not yet ported
-        // TranslationHelper::translateComponent(contentItem);
+        TranslationHelper::translateComponent(contentItem);
     }
 
     ByteBuffer* buffer = contentItem->rawData;

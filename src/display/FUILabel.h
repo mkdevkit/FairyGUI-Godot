@@ -62,6 +62,8 @@ private:
     float _fontSize;
     bool _grayed;
     bool _wrapEnabled;
+    Color _underlineColor;
+    bool _hasUnderlineColor;
 
     // BM Font
     std::string _bmFontPath;
