@@ -176,15 +176,19 @@ void GRoot::showWindow(GWindow* win)
     if (!win)
         return;
 
-    // Popups/windows must sit above normal UI (sortingOrder=0). When GRoot has other
-    // sorting children (e.g. demo CloseButton at 100000), addChildAt caps normal children
-    // to index 0 and they render behind full-screen content.
+    if (!win->displayObject())
+        win->init();
+
+    // Load content before attaching to GRoot so size/layout are valid for display.
+    win->initWindow();
+
     static const int kPopupWindowSortingOrder = 50000;
     if (win->getSortingOrder() < kPopupWindowSortingOrder)
         win->setSortingOrder(kPopupWindowSortingOrder);
 
     Ref<GObject> ref(win);
     addChild(ref);
+    syncNativeChildrenZOrder();
     win->center();
     bringToFront(win);
     adjustModalLayer();
@@ -205,7 +209,22 @@ void GRoot::hideWindowImmediately(GWindow* win)
 
 void GRoot::bringToFront(GWindow* win)
 {
+    static const int kOverlayBaseOrder = 50000;
+    static const int kOverlayMaxOrder = 99999;
+
+    int maxOrder = kOverlayBaseOrder - 1;
     int cnt = numChildren();
+    for (int i = 0; i < cnt; i++)
+    {
+        GObject* g = getChildAt(i);
+        if (g != win && dynamic_cast<GWindow*>(g))
+            maxOrder = std::max(maxOrder, g->getSortingOrder());
+    }
+
+    int newOrder = std::min(maxOrder + 1, kOverlayMaxOrder);
+    if (win->getSortingOrder() < newOrder)
+        win->setSortingOrder(newOrder);
+
     int i;
     if (_modalLayer && _modalLayer->getParent() != nullptr && !win->isModal())
         i = getChildIndex(_modalLayer) - 1;
@@ -221,7 +240,7 @@ void GRoot::bringToFront(GWindow* win)
             break;
     }
 
-    if (i >= 0)
+    if (i >= 0 && win->getSortingOrder() == 0)
         setChildIndex(win, i);
 }
 
@@ -413,7 +432,9 @@ void GRoot::showPopup(GObject* popup, GObject* target, PopupDirection dir)
     if (popup->getSortingOrder() < kPopupWindowSortingOrder)
         popup->setSortingOrder(kPopupWindowSortingOrder);
 
+    popup->setVisible(true);
     addChild(Ref<GObject>(popup));
+    syncNativeChildrenZOrder();
     adjustModalLayer();
 
     if (dynamic_cast<GWindow*>(popup) && target == nullptr && dir == PopupDirection::AUTO)

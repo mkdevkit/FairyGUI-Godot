@@ -32,5 +32,15 @@ func _add_close_button() -> void:
 	close_btn.addClickListener(_on_close)
 	_groot.addChild(close_btn)
 
+func _cleanup_groot_overlays() -> void:
+	if _groot == null:
+		return
+	if DragDropManagerHelper.getInstance().isDragging():
+		DragDropManagerHelper.getInstance().cancel()
+	_groot.hideTooltips()
+	_groot.hidePopup()
+	_groot.closeAllWindows()
+
 func _on_close() -> void:
+	_cleanup_groot_overlays()
 	get_tree().change_scene_to_file("res://gd/Scenes/MainMenu.tscn")

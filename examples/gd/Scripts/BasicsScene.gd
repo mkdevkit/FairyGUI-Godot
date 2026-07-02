@@ -39,11 +39,13 @@ func continue_init() -> void:
 			obj.addClickListener(_run_demo)
 
 func _on_click_back() -> void:
+	_cleanup_groot_overlays()
 	_cc.setSelectedIndex(0)
 	_back_btn.setVisible(false)
 	_progress_running = false
 
 func _run_demo() -> void:
+	_cleanup_groot_overlays()
 	var sender = _groot.getTouchTarget()
 	if sender == null:
 		return

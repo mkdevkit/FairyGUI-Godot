@@ -203,7 +203,17 @@ int GPopupMenu::getItemCount() const
 
 void GPopupMenu::show(GObject * target, PopupDirection dir)
 {
+    if (_list != nullptr)
+    {
+        _list->resizeToFit(INT_MAX, 10);
+        _list->setSelectedIndex(-1);
+    }
+    if (_contentPane != nullptr)
+        _contentPane->setVisible(true);
+
     GRoot* r = target != nullptr ? target->getRoot() : GRoot::getInstance();
+    if (r == nullptr)
+        return;
     r->showPopup(_contentPane, dynamic_cast<GRoot*>(target) ? nullptr : target, dir);
 }
 

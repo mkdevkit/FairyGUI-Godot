@@ -160,6 +160,7 @@ void GComponent::removeChildAt(int index)
     }
 
     _children.erase(_children.begin() + index);
+    syncNativeChildrenZOrder();
     setBoundsChangedFlag();
 }
 
@@ -781,6 +782,38 @@ void GComponent::childStateChanged(GObject* child)
                 CALL_LATER(GComponent, buildNativeDisplayList);
             }
         }
+    }
+}
+
+void GComponent::syncNativeChildrenZOrder()
+{
+    int cnt = (int)_children.size();
+    if (cnt == 0)
+        return;
+
+    switch (_childrenRenderOrder)
+    {
+    case ChildrenRenderOrder::ASCENT:
+        for (int i = 0; i < cnt; i++)
+        {
+            GObject* child = _children.at(i).ptr();
+            if (child->_displayObject != nullptr && child != _maskOwner && child->internalVisible()
+                    && child->_displayObject->get_parent() != nullptr)
+                set_display_child_z_order(child, i);
+        }
+        break;
+    case ChildrenRenderOrder::DESCENT:
+        for (int i = 0; i < cnt; i++)
+        {
+            GObject* child = _children.at(i).ptr();
+            if (child->_displayObject != nullptr && child != _maskOwner && child->internalVisible()
+                    && child->_displayObject->get_parent() != nullptr)
+                set_display_child_z_order(child, cnt - 1 - i);
+        }
+        break;
+    case ChildrenRenderOrder::ARCH:
+        CALL_LATER(GComponent, buildNativeDisplayList);
+        break;
     }
 }
 

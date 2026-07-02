@@ -143,6 +143,7 @@ protected:
 
     void setupOverflow(OverflowType overflow);
     void setupScroll(ByteBuffer* buffer);
+    void syncNativeChildrenZOrder();
 
     std::vector<Ref<GObject>> _children;
     std::vector<Ref<GController>> _controllers;
