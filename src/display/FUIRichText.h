@@ -44,6 +44,11 @@ public:
 
     const char* hitTestLink(const Vector2& worldPoint);
 
+    bool isAnchorTextUnderline() const { return _parseOptions.linkUnderline; }
+    void setAnchorTextUnderline(bool enable);
+    Color getAnchorFontColor() const { return _parseOptions.linkColor; }
+    void setAnchorFontColor(const Color& color);
+
     static void _bind_methods();
     void _ready();
 

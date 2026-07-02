@@ -25,6 +25,8 @@ public:
     virtual TextFormat* getTextFormat() const override { return _input->getTextFormat(); }
     virtual void applyTextFormat() override;
 
+    virtual Vector2 getTextSize() override;
+
     void setPrompt(const std::string& value);
     void gd_setPrompt(const String& value) { setPrompt(value.utf8().get_data()); }
     void setPassword(bool value);

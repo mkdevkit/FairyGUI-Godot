@@ -156,15 +156,6 @@ ScrollPane::~ScrollPane()
 {
     _deferredCallsCancelled = true;
 
-    if (_hzScrollBar.is_valid());
-        // _hzScrollBar->unref(); // TODO
-    if (_vtScrollBar.is_valid());
-        // _vtScrollBar->unref(); // TODO
-    if (_header.is_valid());
-        // _header->unref(); // TODO
-    if (_footer.is_valid());
-        // _footer->unref(); // TODO
-
     if (_draggingPane == this)
         _draggingPane = nullptr;
 }

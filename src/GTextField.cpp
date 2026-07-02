@@ -292,25 +292,8 @@ void GBasicTextField::applyTextFormat()
 void GBasicTextField::setAutoSize(AutoSizeType value)
 {
     _autoSize = value;
-    switch (value)
-    {
-    case AutoSizeType::NONE:
-        // setOverflow not available on FUILabel
-        break;
-    case AutoSizeType::BOTH:
-        // setOverflow not available on FUILabel
-        break;
-    case AutoSizeType::HEIGHT:
-        // setOverflow not available on FUILabel
-        break;
-    case AutoSizeType::SHRINK:
-        // setOverflow not available on FUILabel
-        break;
-    }
-
-    if (_autoSize == AutoSizeType::BOTH) ;
-    else if (_autoSize == AutoSizeType::HEIGHT) ;
-        // GODOT_ADAPT: set_size not available on FUILabel
+    if (_label)
+        _label->_contentSize = Vector2(_size.width, _size.height);
 
     if (!_underConstruct)
         updateSize();
@@ -402,8 +385,7 @@ void GBasicTextField::_bind_methods()
 
 Vector2 GTextField::getTextSize()
 {
-    // GODOT_ADAPT: return default size - subclasses should override
-    return Vector2(0, 0);
+    return Vector2(_size.width, _size.height);
 }
 
 void GTextField::_bind_methods()

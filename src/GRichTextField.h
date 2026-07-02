@@ -28,7 +28,14 @@ public:
     virtual TextFormat* getTextFormat() const override { return _richText->getTextFormat(); }
     virtual void applyTextFormat() override;
 
+    virtual Vector2 getTextSize() override;
+
     HtmlObject* getControl(const std::string& name) const;
+
+    bool isAnchorTextUnderline() const;
+    void setAnchorTextUnderline(bool value);
+    Color getAnchorFontColor() const;
+    void setAnchorFontColor(const Color& value);
 
     virtual GObject* hitTest(const Vector2& worldPoint, const Camera2D* camera) override;
 protected:

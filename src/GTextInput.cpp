@@ -29,6 +29,10 @@ void GTextInput::handleInit()
     _input = FUIInput::create();
     _displayObject = _input;
     _input->setSubmittedCallback([this]() { onTextSubmitted(); });
+    _input->setTextChangedCallback([this]() {
+        editBoxTextChanged(_input->getText());
+        dispatchEvent(UIEventType::Changed);
+    });
 
     addEventListener(UIEventType::TouchEnd, [this](EventContext*) {
         _input->openKeyboard();
@@ -54,6 +58,11 @@ void GTextInput::setSingleLine(bool value)
 void GTextInput::applyTextFormat()
 {
     _input->applyTextFormat();
+}
+
+Vector2 GTextInput::getTextSize()
+{
+    return Vector2(_size.width, _size.height);
 }
 
 void GTextInput::setPrompt(const std::string& value)

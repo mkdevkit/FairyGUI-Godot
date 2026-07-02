@@ -112,6 +112,31 @@ HtmlObject* GRichTextField::getControl(const std::string& name) const
     return _richText->getControl(name);
 }
 
+Vector2 GRichTextField::getTextSize()
+{
+    return _richText->get_content_size();
+}
+
+bool GRichTextField::isAnchorTextUnderline() const
+{
+    return _richText->isAnchorTextUnderline();
+}
+
+void GRichTextField::setAnchorTextUnderline(bool value)
+{
+    _richText->setAnchorTextUnderline(value);
+}
+
+Color GRichTextField::getAnchorFontColor() const
+{
+    return _richText->getAnchorFontColor();
+}
+
+void GRichTextField::setAnchorFontColor(const Color& value)
+{
+    _richText->setAnchorFontColor(value);
+}
+
 void GRichTextField::handleSizeChanged()
 {
     if (_updatingSize)

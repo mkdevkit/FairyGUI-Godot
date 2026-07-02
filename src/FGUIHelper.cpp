@@ -2,6 +2,7 @@
 #include "GRoot.h"
 #include "UIPackage.h"
 #include "TranslationHelper.h"
+#include "utils/html/HtmlObject.h"
 #include "core/io/file_access.h"
 
 NS_FGUI_BEGIN
@@ -50,6 +51,21 @@ void FGUIHelper::loadTranslationFromXML(const String& xml)
         TranslationHelper::loadFromXML((const char*)bytes.ptr(), bytes.size());
 }
 
+void FGUIHelper::setHtmlButtonResource(const String& url)
+{
+    HtmlObject::buttonResource = url.utf8().get_data();
+}
+
+void FGUIHelper::setHtmlInputResource(const String& url)
+{
+    HtmlObject::inputResource = url.utf8().get_data();
+}
+
+void FGUIHelper::setHtmlSelectResource(const String& url)
+{
+    HtmlObject::selectResource = url.utf8().get_data();
+}
+
 void FGUIHelper::_bind_methods()
 {
     ClassDB::bind_static_method(get_class_static(), D_METHOD("getInstance"), &FGUIHelper::getInstance);
@@ -59,6 +75,9 @@ void FGUIHelper::_bind_methods()
     ClassDB::bind_method(D_METHOD("addPackage", "path"), &FGUIHelper::addPackage);
     ClassDB::bind_method(D_METHOD("loadTranslation", "xml_path"), &FGUIHelper::loadTranslation);
     ClassDB::bind_method(D_METHOD("loadTranslationFromXML", "xml"), &FGUIHelper::loadTranslationFromXML);
+    ClassDB::bind_method(D_METHOD("setHtmlButtonResource", "url"), &FGUIHelper::setHtmlButtonResource);
+    ClassDB::bind_method(D_METHOD("setHtmlInputResource", "url"), &FGUIHelper::setHtmlInputResource);
+    ClassDB::bind_method(D_METHOD("setHtmlSelectResource", "url"), &FGUIHelper::setHtmlSelectResource);
 }
 
 NS_FGUI_END

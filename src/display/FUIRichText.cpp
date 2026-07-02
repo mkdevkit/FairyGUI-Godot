@@ -178,6 +178,11 @@ void FUIRichText::_bind_methods()
 
     ClassDB::bind_method(D_METHOD("getControl", "name"), &FUIRichText::gd_getControl);
     ClassDB::bind_method(D_METHOD("hitTestLink", "world_point"), &FUIRichText::gd_hitTestLink);
+
+    ClassDB::bind_method(D_METHOD("isAnchorTextUnderline"), &FUIRichText::isAnchorTextUnderline);
+    ClassDB::bind_method(D_METHOD("setAnchorTextUnderline", "enable"), &FUIRichText::setAnchorTextUnderline);
+    ClassDB::bind_method(D_METHOD("getAnchorFontColor"), &FUIRichText::getAnchorFontColor);
+    ClassDB::bind_method(D_METHOD("setAnchorFontColor", "color"), &FUIRichText::setAnchorFontColor);
 }
 
 FUIRichText* FUIRichText::create()
@@ -230,6 +235,26 @@ void FUIRichText::setOverflow(int overflow)
     {
         _overflow = overflow;
         _dirty = true;
+    }
+}
+
+void FUIRichText::setAnchorTextUnderline(bool enable)
+{
+    if (_parseOptions.linkUnderline != enable)
+    {
+        _parseOptions.linkUnderline = enable;
+        _dirty = true;
+        formatText();
+    }
+}
+
+void FUIRichText::setAnchorFontColor(const Color& color)
+{
+    if (_parseOptions.linkColor != color)
+    {
+        _parseOptions.linkColor = color;
+        _dirty = true;
+        formatText();
     }
 }
 

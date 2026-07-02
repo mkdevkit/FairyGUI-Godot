@@ -62,6 +62,7 @@ public:
     void applyTextFormat();
     void openKeyboard();
     void setSubmittedCallback(const std::function<void()>& callback) { _submittedCallback = callback; }
+    void setTextChangedCallback(const std::function<void()>& callback) { _textChangedCallback = callback; }
 
     TextFormat* getTextFormat() const { return _textFormat; }
 
@@ -92,6 +93,7 @@ private:
     bool _focused;
     TextFormat* _textFormat;
     std::function<void()> _submittedCallback;
+    std::function<void()> _textChangedCallback;
 };
 
 NS_FGUI_END

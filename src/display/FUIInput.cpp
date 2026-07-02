@@ -636,6 +636,10 @@ void FUIInput::_on_line_edit_changed(const String& text)
 
     }
 
+    if (_textChangedCallback)
+
+        _textChangedCallback();
+
 }
 
 

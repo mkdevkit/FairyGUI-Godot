@@ -1,6 +1,11 @@
 #include "HtmlObject.h"
 #include "HtmlElement.h"
 #include "GTextInput.h"
+#include "GButton.h"
+#include "GComboBox.h"
+#include "GLabel.h"
+#include "GComponent.h"
+#include "GLoader.h"
 #include "display/FUIRichText.h"
 #include "utils/ToolSet.h"
 #include "UIPackage.h"
@@ -141,10 +146,7 @@ void HtmlObject::createButton()
     if (!buttonResource.empty())
         _ui = getObjectPool().getObject(buttonResource);
     else
-    {
-        _ui = GComponent::create();
-        // CCLOGWARN("Set HtmlObject.buttonResource first");
-    }
+        _ui = GButton::create();
 
     int width = _element->getInt("width", _ui->sourceSize.width);
     int height = _element->getInt("height", _ui->sourceSize.height);
@@ -164,10 +166,7 @@ void HtmlObject::createInput()
     if (!inputResource.empty())
         _ui = getObjectPool().getObject(inputResource);
     else
-    {
-        _ui = GComponent::create();
-        // CCLOGWARN("Set HtmlObject.inputResource first");
-    }
+        _ui = GTextInput::create();
 
     string type = _element->getString("type");
     transform(type.begin(), type.end(), type.begin(), ::tolower);
@@ -194,13 +193,12 @@ void HtmlObject::createInput()
     _ui->setSize(width, height);
     _ui->setText(_element->getString("value"));
 
-    GLabel *label = dynamic_cast<GLabel*>(_ui.ptr());
+    GLabel* label = dynamic_cast<GLabel*>(_ui.ptr());
+    GTextInput* input = dynamic_cast<GTextInput*>(_ui.ptr());
     if (label != nullptr)
-    {
-        GTextInput* input = dynamic_cast<GTextInput*>(label->getTextField());
-        if (input != nullptr)
-            input->setPassword(type == "password");
-    }
+        input = dynamic_cast<GTextInput*>(label->getTextField());
+    if (input != nullptr)
+        input->setPassword(type == "password");
 }
 
 void HtmlObject::createSelect()
@@ -208,10 +206,7 @@ void HtmlObject::createSelect()
     if (!selectResource.empty())
         _ui = getObjectPool().getObject(selectResource);
     else
-    {
-        _ui = GComponent::create();
-        // CCLOGWARN("Set HtmlObject.selectResource first");
-    }
+        _ui = GComboBox::create();
 
     int width = _element->getInt("width", _ui->sourceSize.width);
     int height = _element->getInt("height", _ui->sourceSize.height);

@@ -210,6 +210,12 @@ void FUIContainer::unhandled_input(const Ref<::InputEvent>& event)
     Ref<InputEventScreenTouch> st = event;
     if (st.is_valid())
     {
+        if (st->is_canceled())
+        {
+            ip->onTouchCancel(st->get_position(), st->get_index());
+            mark_input_handled(this);
+            return;
+        }
         if (st->is_pressed())
             ip->onTouchBegin(st->get_position(), st->get_index());
         else
@@ -229,6 +235,11 @@ void FUIContainer::unhandled_input(const Ref<::InputEvent>& event)
     Ref<InputEventMouseButton> mb = event;
     if (mb.is_valid()) {
         int btn = (int)mb->get_button_index();
+        if (mb->is_canceled() && btn == (int)MouseButton::LEFT) {
+            ip->onTouchCancel(mb->get_position(), 0);
+            mark_input_handled(this);
+            return;
+        }
         if (mb->is_pressed()) {
             if (btn == (int)MouseButton::WHEEL_UP) {
                 ip->onMouseScroll(mb->get_position(), 1);
