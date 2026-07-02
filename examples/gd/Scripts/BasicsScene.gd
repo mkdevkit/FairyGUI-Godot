@@ -21,6 +21,10 @@ func continue_init() -> void:
 	UIConfigHelper.getInstance().setTooltipsWin("ui://Basics/WindowFrame")
 	UIConfigHelper.getInstance().setPopupMenu("ui://Basics/PopupMenu")
 
+	var factory = UIObjectFactoryHelper.getInstance()
+	factory.setPackageItemExtension("ui://Basics/WindowA", func(): return GWindow.create())
+	factory.setPackageItemExtension("ui://Basics/WindowB", func(): return GWindow.create())
+
 	UIPackage.addPackage("res://Resources/UI/Basics")
 	_view = UIPackage.createObject("Basics", "Main")
 	_groot.addChild(_view)
@@ -85,15 +89,30 @@ func _play_text(obj: Object) -> void:
 
 func _play_popup(obj: Object) -> void:
 	if _pm == null:
-		_pm = obj.getChild("n0")
+		_pm = GPopupMenu.create()
+		_pm.addItem("Item 1")
+		_pm.addItem("Item 2")
+		_pm.addItem("Item 3")
+		_pm.addItem("Item 4")
+		_pm.addSeperator()
+		_pm.addItem("Item 5")
+		_pm.addItem("Item 6")
+
 	var n0 = obj.getChild("n0")
 	if n0 != null:
 		n0.addClickListener(func():
+			_pm.showMenuAt(n0, 0)
+		)
+
+	var n1 = obj.getChild("n1")
+	if n1 != null:
+		n1.addClickListener(func():
 			var popup = UIPackage.createObject("Basics", "Component12")
 			if popup != null:
 				popup.center()
-				_groot.showWindow(popup)
+				_groot.showPopupSimple(popup)
 		)
+
 	obj.addEventListener(UIEventDispatcher.RIGHTCLICK, func():
 		_groot.hidePopup()
 	)

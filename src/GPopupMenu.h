@@ -49,6 +49,7 @@ public:
     bool gd_isItemChecked(const String& name);
     bool gd_removeItem(const String& name);
     void gd_showMenuAt(GObject* target, int dir);
+    GButton* gd_addItem(const String& caption);
     GComponent* getContentPane() const { return _contentPane; }
     GList* getList() const { return _list; }
     void show() { show(nullptr, PopupDirection::AUTO); }

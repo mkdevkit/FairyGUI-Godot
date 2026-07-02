@@ -177,6 +177,7 @@ void GRoot::showWindow(GWindow* win)
         return;
     Ref<GObject> ref(win);
     addChild(ref);
+    win->center();
     adjustModalLayer();
 }
 

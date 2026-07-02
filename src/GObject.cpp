@@ -836,23 +836,7 @@ Vector2 GObject::computeDisplayPosition() const
         pt.x += _size.width * _pivot.x;
         pt.y += _size.height * _pivot.y;
     }
-    if (_alignToBL)
-    {
-        float parentH = 0;
-        if (_parent != nullptr)
-            parentH = _parent->getSize().height;
-        else if (_displayObject)
-        {
-            Node* pn = _displayObject->get_parent();
-            if (pn)
-            {
-                FUIContainer* fc = Object::cast_to<FUIContainer>(pn);
-                if (fc && fc->gOwner)
-                    parentH = fc->gOwner->getSize().height;
-            }
-        }
-        pt.y = parentH - pt.y;
-    }
+    // FairyGUI + Godot are both Y-down; do not apply Cocos bottom-left flip here.
     if (_pixelSnapping)
     {
         pt.x = (int)pt.x;

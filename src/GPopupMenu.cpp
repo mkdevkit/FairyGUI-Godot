@@ -228,6 +228,9 @@ void GPopupMenu::onEnter(EventContext * context)
 
 void GPopupMenu::_bind_methods()
 {
+    ClassDB::bind_static_method(get_class_static(), D_METHOD("create"), &GPopupMenu::create);
+
+    ClassDB::bind_method(D_METHOD("addItem", "caption"), &GPopupMenu::gd_addItem);
     ClassDB::bind_method(D_METHOD("addSeperator"), &GPopupMenu::addSeperator);
     ClassDB::bind_method(D_METHOD("clearItems"), &GPopupMenu::clearItems);
     ClassDB::bind_method(D_METHOD("getItemCount"), &GPopupMenu::getItemCount);
@@ -248,6 +251,8 @@ void GPopupMenu::_bind_methods()
 }
 
 void GPopupMenu::gd_showMenuAt(GObject* target, int dir) { show(target, static_cast<PopupDirection>(dir)); }
+
+GButton* GPopupMenu::gd_addItem(const String& caption) { return addItem(caption.utf8().get_data()); }
 
 String GPopupMenu::gd_getItemName(int index) const { return String(getItemName(index).c_str()); }
 void GPopupMenu::gd_setItemText(const String& name, const String& caption) { setItemText(name.utf8().get_data(), caption.utf8().get_data()); }
