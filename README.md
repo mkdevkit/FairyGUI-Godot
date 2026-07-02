@@ -108,7 +108,7 @@ modules/fairygui/
 
 ## Dependencies
 
-This module depends on the **spine_godot** module, also located under `modules/`.
+This module optionally depends on the **spine_godot** module (also under `modules/`) for `GLoader3D` Spine animation support. When `spine_godot` is not enabled, fairygui still builds; `GLoader3D` compiles with `SPINE_GODOT_DISABLED` and skips Spine loading at runtime.
 
 ### Spine Runtime (spine_godot)
 
@@ -164,24 +164,41 @@ GLoader3D requires spine_godot headers via:
 
 FairyGUI is compiled as a **built-in Godot module** — no separate build step required.
 
-Build Godot with the fairygui module:
+Run from the Godot source root (`D:\Source\godot` or your clone path):
+
+**With Spine support** (recommended if you use `GLoader3D`):
 
 ```sh
-scons platform=windows target=editor dev_build=yes
-or for debug
-scons platform=windows vsproj=yes dev_build=yes arch=x86_64 vulkan=no opengl3=yes csharp=no
+scons module_fairygui_enabled=yes module_spine_godot_enabled=yes -j8
+```
+
+**Without Spine** (fairygui only; `GLoader3D` Spine loading is disabled):
+
+```sh
+scons module_fairygui_enabled=yes -j8
+```
+
+You can combine these flags with other SCons options, for example:
+
+```sh
+scons platform=windows target=editor dev_build=yes module_fairygui_enabled=yes module_spine_godot_enabled=yes -j8
+```
+
+Or for a Visual Studio project (debug):
+
+```sh
+scons platform=windows vsproj=yes dev_build=yes arch=x86_64 vulkan=no opengl3=yes csharp=no module_fairygui_enabled=yes module_spine_godot_enabled=yes
 ```
 
 The module is auto-detected by Godot's build system via `config.py`.
 
 The `SCsub` adds include paths for:
 - `src/` and all subdirectories (event, display, gears, tween, utils, utils/html, controller_action)
-- `modules/spine_godot/` (Spine wrapper headers)
-- `modules/spine_godot/spine-cpp/include` (Spine C++ runtime headers)
+- `modules/spine_godot/` and `modules/spine_godot/spine-cpp/include` (only when `module_spine_godot_enabled=yes`)
 
 ### Spine Runtime Integration
 
-Spine support is handled by the `spine_godot` module (`modules/spine_godot/`).
+When `module_spine_godot_enabled=yes`, Spine support is provided by the `spine_godot` module (`modules/spine_godot/`).
 
 - `spine-cpp/` contains the upstream Spine C++ runtime from [EsotericSoftware/spine-runtimes](https://github.com/EsotericSoftware/spine-runtimes)
 - The `spine_godot` SCsub compiles both `spine-cpp/src/spine/*.cpp` and its own `*.cpp` files

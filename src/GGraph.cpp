@@ -233,6 +233,7 @@ void GGraph::drawRegularPolygon(int lineSize, const Color& lineColor, const Colo
     }
     else if (_distances != nullptr)
         _distances->clear();
+    updateShape();
 }
 
 void GGraph::updateShape()
@@ -352,9 +353,15 @@ void GGraph::handleSizeChanged()
 {
     GObject::handleSizeChanged();
 
-    if (_type == 3 || _type == 4)
+    if ((_type == 3 || _type == 4) && _polygonPoints != nullptr && _polygonPointOffset > 0)
     {
-        _polygonPointOffset = getHeight();
+        float ratio = getHeight() / _polygonPointOffset;
+        if (ratio != 1.0f)
+        {
+            for (size_t i = 0; i < _polygonPoints->size(); i++)
+                (*_polygonPoints)[i].y *= ratio;
+            _polygonPointOffset = getHeight();
+        }
     }
 
     updateShape();

@@ -55,19 +55,6 @@ static Ref<ShaderMaterial> create_mask_material(float threshold, bool inverted)
     return mat;
 }
 
-static void apply_mask_material_recursive(Node* node, float threshold, bool inverted)
-{
-    if (CanvasItem* ci = Object::cast_to<CanvasItem>(node))
-    {
-        if (threshold < 1.0f || inverted)
-            ci->set_material(create_mask_material(threshold, inverted));
-        else
-            ci->set_material(Ref<Material>());
-    }
-    for (int i = 0; i < node->get_child_count(); i++)
-        apply_mask_material_recursive(node->get_child(i), threshold, inverted);
-}
-
 FUIContainer::FUIContainer() :
     _clippingEnabled(false),
     _stencil(nullptr),
@@ -159,6 +146,14 @@ void FUIContainer::_drawStencilSilhouette()
     if (tex.is_null())
         return;
 
+    Ref<Material> prevMat = get_material();
+    Ref<ShaderMaterial> maskMat;
+    if (_alphaThreshold < 1.0f || _inverted)
+    {
+        maskMat = create_mask_material(_alphaThreshold, _inverted);
+        set_material(maskMat);
+    }
+
     Transform2D xf = get_global_transform().affine_inverse() * sp->get_global_transform();
     draw_set_transform_matrix(xf);
 
@@ -173,6 +168,9 @@ void FUIContainer::_drawStencilSilhouette()
     draw_texture_rect_region(tex, Rect2(Vector2(), size), texRect, Color(1, 1, 1, 1));
 
     draw_set_transform_matrix(Transform2D());
+
+    if (maskMat.is_valid())
+        set_material(prevMat);
 }
 
 void FUIContainer::_draw()
@@ -187,8 +185,6 @@ void FUIContainer::applyStencilEffects()
 {
     if (!_stencil)
         return;
-
-    apply_mask_material_recursive(_stencil, _alphaThreshold, _inverted);
 
     if (CanvasItem* ci = Object::cast_to<CanvasItem>(_stencil))
         ci->set_visible(false);

@@ -106,7 +106,7 @@ modules/fairygui/
 
 ## 依赖
 
-本模块依赖 **spine_godot** 模块，位于 `modules/spine_godot/`。
+本模块**可选**依赖 **spine_godot** 模块（位于 `modules/spine_godot/`），用于 `GLoader3D` 的 Spine 骨骼动画。未启用 `spine_godot` 时 fairygui 仍可正常编译；此时会定义 `SPINE_GODOT_DISABLED`，`GLoader3D` 在运行时会跳过 Spine 加载。
 
 ### Spine 运行时 (spine_godot)
 
@@ -162,24 +162,41 @@ GLoader3D 通过以下方式引用 spine_godot 头文件：
 
 FairyGUI 作为 **Godot 内置模块**编译 — 无需独立构建步骤。
 
-构建含 fairygui 模块的 Godot：
+在 Godot 源码根目录（如 `D:\Source\godot`）执行：
+
+**启用 Spine 支持**（使用 `GLoader3D` 时推荐）：
 
 ```sh
-scons platform=windows target=editor dev_build=yes
-or for debug
-scons platform=windows vsproj=yes dev_build=yes arch=x86_64 vulkan=no opengl3=yes csharp=no
+scons module_fairygui_enabled=yes module_spine_godot_enabled=yes -j8
+```
+
+**不启用 Spine**（仅编译 fairygui；`GLoader3D` 的 Spine 功能被禁用）：
+
+```sh
+scons module_fairygui_enabled=yes -j8
+```
+
+可与其它 SCons 参数组合，例如：
+
+```sh
+scons platform=windows target=editor dev_build=yes module_fairygui_enabled=yes module_spine_godot_enabled=yes -j8
+```
+
+或生成 Visual Studio 工程（调试）：
+
+```sh
+scons platform=windows vsproj=yes dev_build=yes arch=x86_64 vulkan=no opengl3=yes csharp=no module_fairygui_enabled=yes module_spine_godot_enabled=yes
 ```
 
 Godot 构建系统通过 `config.py` 自动发现模块。
 
 `SCsub` 添加的包含路径：
 - `src/` 及其所有子目录 (event, display, gears, tween, utils, utils/html, controller_action)
-- `modules/spine_godot/` (Spine 封装头文件)
-- `modules/spine_godot/spine-cpp/include` (Spine C++ 运行时头文件)
+- `modules/spine_godot/` 与 `modules/spine_godot/spine-cpp/include`（仅在 `module_spine_godot_enabled=yes` 时）
 
 ### Spine 运行时集成
 
-Spine 支持由 `spine_godot` 模块 (`modules/spine_godot/`) 处理。
+当 `module_spine_godot_enabled=yes` 时，Spine 支持由 `spine_godot` 模块（`modules/spine_godot/`）提供。
 
 - `spine-cpp/` 包含来自 [EsotericSoftware/spine-runtimes](https://github.com/EsotericSoftware/spine-runtimes) 的上游 Spine C++ 运行时
 - `spine_godot` 的 SCsub 同时编译 `spine-cpp/src/spine/*.cpp` 和自己的 `*.cpp` 文件
