@@ -17,7 +17,10 @@ Ref<GPopupMenu> GPopupMenu::create(const std::string & resourceURL)
 GPopupMenu* GPopupMenu::gd_create()
 {
     Ref<GPopupMenu> ref = create();
-    return ref.is_valid() ? ref.ptr() : nullptr;
+    if (ref.is_null())
+        return nullptr;
+    ref->reference(); // keep alive for GDScript (same as UIPackage::gd_createObjectFromURL)
+    return ref.ptr();
 }
 
 GPopupMenu::GPopupMenu() :
@@ -38,21 +41,22 @@ bool GPopupMenu::init(const std::string & resourceURL)
     {
         url = UIConfig::popupMenu;
         if (url.empty())
-        {
-            // CCLOGWARN("FairyGUI: UIConfig.popupMenu not defined");
             return false;
-        }
     }
 
     Ref<GObject> obj = UIPackage::createObjectFromURL(url);
-    _contentPaneRef = Object::cast_to<GComponent>(obj.ptr());
-    if (_contentPaneRef.is_null())
+    if (obj.is_null())
         return false;
 
-    _contentPane = _contentPaneRef.ptr();
+    GComponent* comp = dynamic_cast<GComponent*>(obj.ptr());
+    if (comp == nullptr)
+        return false;
+
+    _contentPaneRef = Ref<GComponent>(comp);
+    _contentPane = comp;
     _contentPane->addEventListener(UIEventType::Enter, [this](EventContext* ctx) { GPopupMenu::onEnter(ctx); });
 
-    _list = _contentPane->getChild("list")->as<GList>();
+    _list = dynamic_cast<GList*>(_contentPane->getChild("list"));
     if (_list == nullptr)
         return false;
 

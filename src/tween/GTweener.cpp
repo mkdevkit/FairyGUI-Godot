@@ -5,6 +5,22 @@
 #include <cstdlib>
 
 NS_FGUI_BEGIN
+
+static void clear_ref_target_safe(Ref<RefCounted>& ref)
+{
+    if (ref.is_null())
+        return;
+
+    Object* obj = Object::cast_to<Object>(ref.ptr());
+    if (obj && ObjectDB::get_instance(obj->get_instance_id()))
+        ref = Ref<RefCounted>();
+    else
+    {
+        // Target already freed; do not unref a dangling pointer.
+        RefCounted** pref = reinterpret_cast<RefCounted**>(&ref);
+        *pref = nullptr;
+    }
+}
 GTweener::GTweener() : _target(nullptr),
                        _refTarget(nullptr),
                        _userData(),
@@ -77,7 +93,7 @@ GTweener* GTweener::setSnapping(bool value)
 
 GTweener* GTweener::setTargetAny(void* value)
 {
-    _refTarget = nullptr;
+    clear_ref_target_safe(_refTarget);
     _target = value;
     return this;
 }
@@ -89,7 +105,9 @@ GTweener* GTweener::setTarget(RefCounted* value)
 
 GTweener* GTweener::setTarget(RefCounted* target, TweenPropType propType)
 {
-    _refTarget = target;
+    clear_ref_target_safe(_refTarget);
+    if (target != nullptr)
+        _refTarget = Ref<RefCounted>(target);
     _target = target;
     _propType = propType;
     return this;
@@ -275,8 +293,8 @@ void GTweener::_init()
 
 void GTweener::_reset()
 {
+    clear_ref_target_safe(_refTarget);
     _target = nullptr;
-    _refTarget = nullptr;
     _userData = Variant();
     _path = nullptr;
     _onStart = _onUpdate = _onComplete = nullptr;
@@ -422,17 +440,18 @@ void GTweener::update()
         value.d = value.x;
     }
 
-    if (_refTarget.is_valid() && _propType != TweenPropType::None)
+    if (!_refTarget.is_null() && _propType != TweenPropType::None)
     {
-        GObject* gobj = dynamic_cast<GObject*>(_refTarget.ptr());
-        if (gobj != nullptr)
-            TweenPropTypeUtils::setProps(gobj, _propType, value);
-        else
+        Object* obj = Object::cast_to<Object>(_refTarget.ptr());
+        if (obj && ObjectDB::get_instance(obj->get_instance_id()))
         {
-            Node* node = dynamic_cast<Node*>(_refTarget.ptr());
-            if (node != nullptr)
+            if (GObject* gobj = dynamic_cast<GObject*>(_refTarget.ptr()))
+                TweenPropTypeUtils::setProps(gobj, _propType, value);
+            else if (Node* node = dynamic_cast<Node*>(_refTarget.ptr()))
                 TweenPropTypeUtils::setProps(node, _propType, value);
         }
+        else
+            _killed = true;
     }
 
     callUpdateCallback();

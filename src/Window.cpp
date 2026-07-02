@@ -136,7 +136,10 @@ void GWindow::setContentPane(GComponent* value)
 GWindow* GWindow::gd_create()
 {
     Ref<GWindow> ref = GWindow::create();
-    return ref.is_valid() ? ref.ptr() : nullptr;
+    if (ref.is_null())
+        return nullptr;
+    ref->reference();
+    return ref.ptr();
 }
 
 void GWindow::setCloseButton(GObject * value)

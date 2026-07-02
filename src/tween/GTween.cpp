@@ -82,4 +82,9 @@ void GTween::clean()
     TweenManager::clean();
 }
 
+void GTween::killAll(bool complete)
+{
+    TweenManager::killAll(complete);
+}
+
 NS_FGUI_END

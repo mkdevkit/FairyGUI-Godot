@@ -18,6 +18,7 @@ public:
     static GTweener* getTween(RefCounted* target, TweenPropType propType);
     static void update(float dt);
     static void clean();
+    static void killAll(bool completed = false);
     static void init();
 
 private:

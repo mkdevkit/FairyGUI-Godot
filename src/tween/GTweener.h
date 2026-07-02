@@ -47,6 +47,7 @@ public:
     float getNormalizedTime() const { return _normalizedTime; }
     bool isCompleted() const { return _ended != 0; }
     bool allCompleted() const { return _ended == 1; }
+    bool isKilled() const { return _killed; }
     GTweener* setPaused(bool paused);
     void seek(float time);
     void kill(bool complete = false);

@@ -38,6 +38,7 @@ func _cleanup_groot_overlays() -> void:
 		return
 	if DragDropManagerHelper.getInstance().isDragging():
 		DragDropManagerHelper.getInstance().cancel()
+	GTweenHelper.getInstance().killAll(true)
 	_groot.hideTooltips()
 	_groot.hidePopup()
 	_groot.closeAllWindows()

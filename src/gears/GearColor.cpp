@@ -45,6 +45,8 @@ void GearColor::addStatus(const std::string& pageId, ByteBuffer* buffer)
 
 void GearColor::apply()
 {
+    validateStoredTweener();
+
     GearColorValue gv;
     auto it = _storage.find(_controller->getSelectedPageId());
     if (it != _storage.end())

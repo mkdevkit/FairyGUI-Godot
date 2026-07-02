@@ -29,6 +29,7 @@ public:
     static GTweener* getTween(RefCounted* target);
     static GTweener* getTween(RefCounted* target, TweenPropType propType);
     static void clean();
+    static void killAll(bool completed = false);
 };
 
 NS_FGUI_END

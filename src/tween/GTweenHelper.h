@@ -34,6 +34,7 @@ public:
     bool isTweening(RefCounted* target);
     void kill(RefCounted* target, bool complete);
     void clean();
+    void killAll(bool complete = false);
 
     static void _bind_methods();
 

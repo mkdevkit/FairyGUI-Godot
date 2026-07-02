@@ -36,6 +36,8 @@ void GearSize::addStatus(const std::string& pageId, ByteBuffer* buffer)
 
 void GearSize::apply()
 {
+    validateStoredTweener();
+
     Vector4 gv;
     auto it = _storage.find(_controller->getSelectedPageId());
     if (it != _storage.end())

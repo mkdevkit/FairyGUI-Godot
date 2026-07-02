@@ -48,6 +48,8 @@ void GearLook::addStatus(const std::string& pageId, ByteBuffer* buffer)
 
 void GearLook::apply()
 {
+    validateStoredTweener();
+
     GearLookValue gv;
     auto it = _storage.find(_controller->getSelectedPageId());
     if (it != _storage.end())

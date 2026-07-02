@@ -49,6 +49,7 @@ public:
 protected:
     virtual void addStatus(const std::string& pageId, ByteBuffer* buffer);
     virtual void init();
+    void validateStoredTweener();
 
     GObject* _owner;
     GController* _controller;

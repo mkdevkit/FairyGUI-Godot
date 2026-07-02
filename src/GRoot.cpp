@@ -3,6 +3,7 @@
 #include "UIConfig.h"
 #include "UIPackage.h"
 #include "display/FUIContainer.h"
+#include "tween/GTween.h"
 #include "tween/TweenManager.h"
 #include "core/object/class_db.h"
 
@@ -182,7 +183,7 @@ void GRoot::showWindow(GWindow* win)
 
     Ref<GObject> ref(win);
     addChild(ref);
-    win->refreshDisplayList();
+    win->refreshDisplayListRecursive();
     syncNativeChildrenZOrder();
     win->center();
     bringToFront(win);
@@ -196,7 +197,10 @@ void GRoot::hideWindow(GWindow* win)
 
 void GRoot::hideWindowImmediately(GWindow* win)
 {
-    if (win->getParent() == this)
+    if (win)
+        GTween::kill(win, true);
+
+    if (win && win->getParent() == this)
         removeChild(win);
 
     adjustModalLayer();
@@ -430,7 +434,7 @@ void GRoot::showPopup(GObject* popup, GObject* target, PopupDirection dir)
     popup->setVisible(true);
     addChild(Ref<GObject>(popup));
     if (GComponent* com = dynamic_cast<GComponent*>(popup))
-        com->refreshDisplayList();
+        com->refreshDisplayListRecursive();
     syncNativeChildrenZOrder();
     adjustModalLayer();
 

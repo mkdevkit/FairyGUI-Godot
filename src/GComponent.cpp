@@ -822,6 +822,16 @@ void GComponent::refreshDisplayList()
     buildNativeDisplayList();
 }
 
+void GComponent::refreshDisplayListRecursive()
+{
+    buildNativeDisplayList();
+    for (const auto& child : _children)
+    {
+        if (GComponent* com = dynamic_cast<GComponent*>(child.ptr()))
+            com->refreshDisplayListRecursive();
+    }
+}
+
 void GComponent::childSortingOrderChanged(GObject* child, int oldValue, int newValue)
 {
     if (newValue == 0)

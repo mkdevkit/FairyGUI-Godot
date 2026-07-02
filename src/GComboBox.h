@@ -60,7 +60,7 @@ public:
     std::vector<std::string>& getIcons() { return _icons; }
     std::vector<std::string>& getValues() { return _values; }
     
-    GObject* getDropdown() const { return _dropdown; }
+    GComponent* getDropdown() const { return _dropdown; }
 
     void refresh();
 
@@ -85,6 +85,7 @@ protected:
     void showDropdown();
     void renderDropdownList();
 
+    Ref<GComponent> _dropdownRef;
     GComponent* _dropdown;
     GObject* _titleObject;
     GObject* _iconObject;

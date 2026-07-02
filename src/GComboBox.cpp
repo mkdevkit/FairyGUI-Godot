@@ -187,11 +187,16 @@ void GComboBox::updateDropdownList()
 
 void GComboBox::showDropdown()
 {
+    if (_dropdown == nullptr || _list == nullptr)
+        return;
+
     updateDropdownList();
     if (_list->getSelectionMode() == ListSelectionMode::SINGLE)
         _list->setSelectedIndex(-1);
+    _dropdown->setVisible(true);
     _dropdown->setWidth(_size.width);
     _list->ensureBoundsCorrect();
+    _dropdown->refreshDisplayListRecursive();
 
     GRoot::getInstance()->togglePopup(_dropdown, this, popupDirection);
     if (_dropdown->getParent() != nullptr)
@@ -299,8 +304,13 @@ void GComboBox::constructExtension(ByteBuffer* buffer)
     const std::string& dropdown = buffer->readS();
     if (!dropdown.empty())
     {
-        _dropdown = Object::cast_to<GComponent>(UIPackage::createObjectFromURL(dropdown).ptr());
-        // CCASSERT(_dropdown != nullptr, "FairyGUI: should be a component.")
+        Ref<GObject> obj = UIPackage::createObjectFromURL(dropdown);
+        GComponent* comp = dynamic_cast<GComponent*>(obj.ptr());
+        if (comp == nullptr)
+            return;
+
+        _dropdownRef = Ref<GComponent>(comp);
+        _dropdown = comp;
 
         _list = dynamic_cast<GList*>(_dropdown->getChild("list"));
         if (_list == nullptr)

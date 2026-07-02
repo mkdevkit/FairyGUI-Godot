@@ -49,6 +49,8 @@ void GearXY::addExtStatus(const std::string& pageId, ByteBuffer* buffer)
 
 void GearXY::apply()
 {
+    validateStoredTweener();
+
     Vector4 gv;
     auto it = _storage.find(_controller->getSelectedPageId());
     if (it != _storage.end())

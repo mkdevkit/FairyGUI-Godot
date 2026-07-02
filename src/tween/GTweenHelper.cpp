@@ -110,6 +110,11 @@ void GTweenHelper::clean()
     GTween::clean();
 }
 
+void GTweenHelper::killAll(bool complete)
+{
+    GTween::killAll(complete);
+}
+
 void GTweenHelper::_bind_methods()
 {
     ClassDB::bind_static_method(get_class_static(), D_METHOD("getInstance"), &GTweenHelper::getInstance);
@@ -125,6 +130,7 @@ void GTweenHelper::_bind_methods()
     ClassDB::bind_method(D_METHOD("isTweening", "target"), &GTweenHelper::isTweening);
     ClassDB::bind_method(D_METHOD("kill", "target", "complete"), &GTweenHelper::kill, DEFVAL(false));
     ClassDB::bind_method(D_METHOD("clean"), &GTweenHelper::clean);
+    ClassDB::bind_method(D_METHOD("killAll", "complete"), &GTweenHelper::killAll, DEFVAL(false));
 }
 
 NS_FGUI_END
