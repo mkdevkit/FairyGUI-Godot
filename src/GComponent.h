@@ -111,6 +111,7 @@ public:
 
     void setBoundsChangedFlag();
     void ensureBoundsCorrect();
+    void refreshDisplayList();
 
     virtual GObject* hitTest(const Vector2& worldPoint, const Camera2D* camera) override;
     virtual Vector2 getSnappingPosition(const Vector2& pt);

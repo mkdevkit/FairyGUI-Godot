@@ -40,6 +40,20 @@ func _cleanup_groot_overlays() -> void:
 	_groot.hideTooltips()
 	_groot.hidePopup()
 	_groot.closeAllWindows()
+	# Remove any overlay nodes still parented to GRoot (popups, drag agent, etc.).
+	var i = _groot.numChildren() - 1
+	while i >= 0:
+		var child = _groot.getChildAt(i)
+		if child == _view:
+			i -= 1
+			continue
+		if child.getSortingOrder() >= 100000:
+			i -= 1
+			continue
+		if child.getSortingOrder() >= 50000:
+			_groot.removeChildAt(i)
+		else:
+			i -= 1
 
 func _on_close() -> void:
 	_cleanup_groot_overlays()

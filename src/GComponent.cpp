@@ -817,6 +817,11 @@ void GComponent::syncNativeChildrenZOrder()
     }
 }
 
+void GComponent::refreshDisplayList()
+{
+    buildNativeDisplayList();
+}
+
 void GComponent::childSortingOrderChanged(GObject* child, int oldValue, int newValue)
 {
     if (newValue == 0)

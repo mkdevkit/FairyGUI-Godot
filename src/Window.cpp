@@ -257,6 +257,9 @@ bool GWindow::closeModalWait(int requestingCmd)
 
 void GWindow::initWindow()
 {
+    if (!_displayObject)
+        init();
+
     if (_inited || _loading)
         return;
 

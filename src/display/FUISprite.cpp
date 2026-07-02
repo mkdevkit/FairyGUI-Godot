@@ -660,6 +660,24 @@ void FUISprite::_draw()
     }
 }
 
+static void draw_tile_region(CanvasItem* item, const Ref<Texture2D>& tex,
+        const Vector2& dst, float rw, float rh, const Rect2& src, const Color& modulate,
+        bool flipH, bool flipV)
+{
+    if (!flipH && !flipV)
+    {
+        item->draw_texture_rect_region(tex, Rect2(dst.x, dst.y, rw, rh), src, modulate);
+        return;
+    }
+
+    const Vector2 scale(flipH ? -1.0f : 1.0f, flipV ? -1.0f : 1.0f);
+    const float localX = flipH ? -rw : 0.0f;
+    const float localY = flipV ? -rh : 0.0f;
+    item->draw_set_transform(dst, 0.0f, scale);
+    item->draw_texture_rect_region(tex, Rect2(localX, localY, rw, rh), src, modulate);
+    item->draw_set_transform(Vector2(), 0.0f, Vector2(1.0f, 1.0f));
+}
+
 void FUISprite::drawTile()
 {
     if (_realTexture.is_null())
@@ -675,20 +693,12 @@ void FUISprite::drawTile()
     if (displaySize.x <= 0.0f || displaySize.y <= 0.0f)
         return;
 
-    const Vector2 drawOrigin = get_offset();
+    const Vector2 topLeft = get_offset();
     const Color modulate = get_modulate();
     const bool flipH = is_flipped_h();
     const bool flipV = is_flipped_v();
     const float tw = tileSrc.size.x;
     const float th = tileSrc.size.y;
-
-    // Flip the whole tiled area once (Cocos flips the sprite, not each repeat).
-    // Per-tile flip breaks partial edge tiles — wrong half of the source is shown.
-    const Vector2 areaCenter = drawOrigin + displaySize * 0.5f;
-    if (flipH || flipV)
-        draw_set_transform(areaCenter, 0.0f, Vector2(flipH ? -1.0f : 1.0f, flipV ? -1.0f : 1.0f));
-
-    const Vector2 localOrigin(-displaySize.x * 0.5f, -displaySize.y * 0.5f);
     const float endX = displaySize.x;
     const float endY = displaySize.y;
 
@@ -700,17 +710,15 @@ void FUISprite::drawTile()
         while (x < endX)
         {
             const float rw = MIN(tw, endX - x);
-            const Rect2 src(tileSrc.position.x, tileSrc.position.y, rw, rh);
-            draw_texture_rect_region(_realTexture,
-                Rect2(localOrigin.x + x, localOrigin.y + y, rw, rh),
-                src, modulate);
+            const float srcX = (flipH && rw < tw) ? tileSrc.position.x + tw - rw : tileSrc.position.x;
+            const float srcY = (flipV && rh < th) ? tileSrc.position.y + th - rh : tileSrc.position.y;
+            const Rect2 src(srcX, srcY, rw, rh);
+            draw_tile_region(this, _realTexture,
+                topLeft + Vector2(x, y), rw, rh, src, modulate, flipH, flipV);
             x += tw;
         }
         y += th;
     }
-
-    if (flipH || flipV)
-        draw_set_transform(Vector2(), 0.0f, Vector2(1.0f, 1.0f));
 }
 
 void FUISprite::drawScale9()

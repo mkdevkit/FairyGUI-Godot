@@ -176,18 +176,13 @@ void GRoot::showWindow(GWindow* win)
     if (!win)
         return;
 
-    if (!win->displayObject())
-        win->init();
-
-    // Load content before attaching to GRoot so size/layout are valid for display.
-    win->initWindow();
-
     static const int kPopupWindowSortingOrder = 50000;
     if (win->getSortingOrder() < kPopupWindowSortingOrder)
         win->setSortingOrder(kPopupWindowSortingOrder);
 
     Ref<GObject> ref(win);
     addChild(ref);
+    win->refreshDisplayList();
     syncNativeChildrenZOrder();
     win->center();
     bringToFront(win);
@@ -434,6 +429,8 @@ void GRoot::showPopup(GObject* popup, GObject* target, PopupDirection dir)
 
     popup->setVisible(true);
     addChild(Ref<GObject>(popup));
+    if (GComponent* com = dynamic_cast<GComponent*>(popup))
+        com->refreshDisplayList();
     syncNativeChildrenZOrder();
     adjustModalLayer();
 
@@ -483,6 +480,7 @@ void GRoot::hidePopup(GObject* popup)
             closePopup(it.ptr());
         _popupStack.clear();
     }
+    adjustModalLayer();
 }
 
 void GRoot::closePopup(GObject* target)

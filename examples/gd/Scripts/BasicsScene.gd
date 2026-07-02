@@ -40,6 +40,7 @@ func continue_init() -> void:
 
 func _on_click_back() -> void:
 	_cleanup_groot_overlays()
+	_demo_container.removeChildren()
 	_cc.setSelectedIndex(0)
 	_back_btn.setVisible(false)
 	_progress_running = false
