@@ -6,9 +6,9 @@ var _demo_container: Object
 var _cc: Object
 var _demo_objects: Dictionary = {}
 
-var _win_a: Window1 = null
-var _win_b: Window2 = null
-var _pm: GPopupMenu = null
+var _win_a: Object = null
+var _win_b: Object = null
+var _pm: Object = null
 
 var _popup_com: Object = null
 var _progress_running: bool = false
@@ -115,8 +115,13 @@ func _play_window(obj: Object) -> void:
 	if _win_a != null:
 		return
 
-	_win_a = Window1.new()
-	_win_b = Window2.new()
+	var window1_script = load("res://gd/Scripts/Window1.gd")
+	var window2_script = load("res://gd/Scripts/Window2.gd")
+	if window1_script == null or window2_script == null:
+		return
+
+	_win_a = window1_script.new()
+	_win_b = window2_script.new()
 
 	var n0 = obj.getChild("n0")
 	if n0 != null:

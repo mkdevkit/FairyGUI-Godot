@@ -1,8 +1,6 @@
 extends GWindow
-class_name Window1
 
 func _init() -> void:
-	init()
 	setOnInitCallback(_on_init)
 	setOnShownCallback(_on_shown)
 
