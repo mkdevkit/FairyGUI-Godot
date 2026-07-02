@@ -2,6 +2,7 @@ extends GWindow
 class_name Window2
 
 func _init() -> void:
+	init()
 	setOnInitCallback(_on_init)
 	setDoShowAnimationCallback(_do_show_animation)
 	setDoHideAnimationCallback(_do_hide_animation)

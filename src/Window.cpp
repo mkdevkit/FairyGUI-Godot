@@ -166,6 +166,8 @@ void GWindow::setDragArea(GObject * value)
 
 void GWindow::show()
 {
+    if (!_displayObject)
+        init();
     GRoot::getInstance()->showWindow(this);
 }
 
