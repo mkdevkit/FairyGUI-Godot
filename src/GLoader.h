@@ -5,38 +5,12 @@
 #include "FairyGUIMacros.h"
 #include "GObject.h"
 #include "PackageItem.h"
+#include "ActionMovieClip.h"
 
 NS_FGUI_BEGIN
 
 class GComponent;
 class FUISprite;
-
-class ActionMovieClip
-{
-public:
-    ActionMovieClip();
-    ~ActionMovieClip() = default;
-
-    static ActionMovieClip* create(MovieClipData* md, float repeatDelay = 0);
-
-    void setSprite(FUISprite* sprite) { _sprite = sprite; }
-    void setAnimation(MovieClipData* md, float repeatDelay = 0);
-    void setTimeScale(float ts) { _timeScale = ts; }
-    float getTimeScale() const { return _timeScale; }
-    void setFrame(int f);
-    void advance(float dt);
-
-private:
-    void drawFrame();
-
-    FUISprite* _sprite;
-    MovieClipData* _md;
-    float _timeScale;
-    float _repeatDelay;
-    int _frame;
-    int _displayFrame;
-    float _frameElapsed;
-};
 
 class GLoader : public GObject
 {

@@ -8,6 +8,7 @@
 #include "godot_types.h"
 #include "event/InputProcessor.h"
 #include "scene/main/scene_tree.h"
+#include "scene/audio/audio_stream_player.h"
 
 NS_FGUI_BEGIN
 
@@ -127,6 +128,11 @@ private:
 
     static bool _soundEnabled;
     static float _soundVolumeScale;
+
+    static constexpr int SOUND_POOL_MAX = 8;
+    AudioStreamPlayer* _soundPlayers[SOUND_POOL_MAX];
+    int _soundPlayerCount;
+    int _soundPoolIndex;
 
     Vector2 _designResolution;
     ScreenMatchMode _screenMatchMode;

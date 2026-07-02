@@ -77,8 +77,12 @@ GRoot::GRoot()
       _tooltipWin(nullptr),
       _defaultTooltipWin(nullptr),
       _hasDesignResolution(false),
-      _viewportSizeConnected(false)
+      _viewportSizeConnected(false),
+      _soundPlayerCount(0),
+      _soundPoolIndex(0)
 {
+    for (int i = 0; i < SOUND_POOL_MAX; i++)
+        _soundPlayers[i] = nullptr;
 }
 
 GRoot::~GRoot()
@@ -600,23 +604,50 @@ void GRoot::playSound(const std::string& url, float volumeScale)
         return;
 
     PackageItem* pi = UIPackage::getItemByURL(url);
-    if (pi)
+    if (!pi)
+        return;
+
+    Ref<AudioStream> stream = ResourceLoader::load(String(pi->file.c_str()));
+    if (!stream.is_valid())
+        return;
+
+    AudioStreamPlayer* player = nullptr;
+    for (int i = 0; i < _soundPlayerCount; i++)
     {
-        Ref<AudioStream> stream = ResourceLoader::load(String(pi->file.c_str()));
-        if (stream.is_valid())
+        if (_soundPlayers[i] && !_soundPlayers[i]->is_playing())
         {
-            AudioStreamPlayer* player = memnew(AudioStreamPlayer);
-            player->set_stream(stream);
-            float db = _soundVolumeScale * volumeScale;
-            if (db > 0.0f)
-                player->set_volume_db(Math::linear_to_db(db));
-            else
-                player->set_volume_db(-80.0f);
-            _displayObject->add_child(player);
-            player->play();
-            player->connect("finished", Callable(player, "queue_free"));
+            player = _soundPlayers[i];
+            break;
         }
     }
+
+    if (player == nullptr)
+    {
+        if (_soundPlayerCount < SOUND_POOL_MAX)
+        {
+            player = memnew(AudioStreamPlayer);
+            _displayObject->add_child(player);
+            _soundPlayers[_soundPlayerCount++] = player;
+        }
+        else
+        {
+            player = _soundPlayers[_soundPoolIndex % SOUND_POOL_MAX];
+            _soundPoolIndex++;
+            if (player)
+                player->stop();
+        }
+    }
+
+    if (player == nullptr)
+        return;
+
+    player->set_stream(stream);
+    float db = _soundVolumeScale * volumeScale;
+    if (db > 0.0f)
+        player->set_volume_db(Math::linear_to_db(db));
+    else
+        player->set_volume_db(-80.0f);
+    player->play();
 }
 
 void GRoot::setSoundEnabled(bool value)
