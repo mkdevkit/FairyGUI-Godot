@@ -11,6 +11,7 @@
 #include "gears/GearText.h"
 #include "gears/GearXY.h"
 #include "tween/GTweener.h"
+#include "tween/TweenManager.h"
 #include "utils/ByteBuffer.h"
 #include "utils/ToolSet.h"
 
@@ -73,19 +74,18 @@ GearBase::GearBase(GObject* owner) : _owner(owner), _tweenConfig(nullptr)
 
 GearBase::~GearBase()
 {
-    if (_tweenConfig && _tweenConfig->_tweener)
-    {
-        if (!_tweenConfig->_tweener->isKilled())
-            _tweenConfig->_tweener->kill();
-        _tweenConfig->_tweener = nullptr;
-    }
+    TweenManager::killTweensAny(this, false);
     FGUI_DELETE(_tweenConfig);
 }
 
 void GearBase::validateStoredTweener()
 {
-    if (_tweenConfig && _tweenConfig->_tweener && _tweenConfig->_tweener->isKilled())
-        _tweenConfig->_tweener = nullptr;
+    if (_tweenConfig && _tweenConfig->_tweener)
+    {
+        GTweener* tweener = _tweenConfig->_tweener;
+        if (tweener->isKilled() || tweener->getTarget() != this)
+            _tweenConfig->_tweener = nullptr;
+    }
 }
 
 void GearBase::setController(GController* value)

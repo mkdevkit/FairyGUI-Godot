@@ -88,10 +88,19 @@ private:
     void callStartCallback();
     void callUpdateCallback();
     void callCompleteCallback();
+    void clearScriptBindings();
+    static void abandonVariant(Variant& value);
+    static void abandonCallable(Callable& callable, ObjectID& id);
+    void callScriptOnStart(GTweener* tweener);
+    void callScriptOnUpdate(GTweener* tweener);
+    void callScriptOnComplete();
 
 private:
+    void clearRefTarget();
+
     void* _target;
     Ref<RefCounted> _refTarget;
+    ObjectID _refTargetId;
     TweenPropType _propType;
     bool _killed;
     bool _paused;
@@ -114,6 +123,13 @@ private:
     GTweenCallback _onStart;
     GTweenCallback _onComplete;
     GTweenCallback0 _onComplete0;
+
+    Callable _scriptOnStart;
+    Callable _scriptOnUpdate;
+    Callable _scriptOnComplete;
+    ObjectID _scriptOnStartId;
+    ObjectID _scriptOnUpdateId;
+    ObjectID _scriptOnCompleteId;
 
     bool _started;
     int _ended;

@@ -8,6 +8,8 @@
 #include "display/FUISprite.h"
 #include "gears/GearDisplay.h"
 #include "gears/GearDisplay2.h"
+#include "tween/GTween.h"
+#include "tween/GTweener.h"
 #include "utils/ByteBuffer.h"
 #include "utils/ToolSet.h"
 #include "utils/WeakPtr.h"
@@ -66,6 +68,7 @@ GObject::GObject() : _scale{1, 1},
 
 GObject::~GObject()
 {
+    GTween::kill(this, false);
     removeFromParent();
 
     if (_displayObject)
@@ -281,6 +284,16 @@ void GObject::setScale(float xv, float yv)
 
         updateGear(2);
     }
+}
+
+GTweener* GObject::tweenScale(const Vector2& endValue, float duration)
+{
+    return GTween::to(_scale, endValue, duration)->setTarget(this, TweenPropType::Scale);
+}
+
+Ref<GTweener> GObject::gd_tweenScale(const Vector2& endValue, float duration)
+{
+    return Ref<GTweener>(tweenScale(endValue, duration));
 }
 
 void GObject::setSkewX(float value)
@@ -500,6 +513,10 @@ Vector2 GObject::localToGlobal(const Vector2& pt)
         pt2.x += _size.width * _pivot.x;
         pt2.y += _size.height * _pivot.y;
     }
+    else if (_pivot.x != 0.0f || _pivot.y != 0.0f)
+    {
+        pt2 += computeContentPivotOffset();
+    }
     // FairyGUI + Godot both Y-down: no Y flip (Cocos had: pt2.y = _size.height - pt2.y)
     pt2 = ((CanvasItem*)_displayObject)->get_global_transform_with_canvas().xform(pt2);
     return GRoot::getInstance()->worldToRoot(pt2);
@@ -521,13 +538,20 @@ Vector2 GObject::globalToLocal(const Vector2& pt)
 {
     Vector2 pt2 = GRoot::getInstance()->rootToWorld(pt);
     pt2 = ((CanvasItem*)_displayObject)->get_global_transform_with_canvas().affine_inverse().xform(pt2);
-    // FairyGUI + Godot both Y-down: no Y flip (Cocos had: pt2.y = _size.height - pt2.y)
+    return displayLocalToLogical(pt2);
+}
+
+Vector2 GObject::displayLocalToLogical(const Vector2& displayLocal) const
+{
     if (_pivotAsAnchor)
     {
-        pt2.x -= _size.width * _pivot.x;
-        pt2.y -= _size.height * _pivot.y;
+        return Vector2(
+                displayLocal.x - _size.width * _pivot.x,
+                displayLocal.y - _size.height * _pivot.y);
     }
-    return pt2;
+    if (_pivot.x != 0.0f || _pivot.y != 0.0f)
+        return displayLocal - computeContentPivotOffset();
+    return displayLocal;
 }
 
 Rect2 GObject::globalToLocal(const Rect2& rect)
@@ -1310,6 +1334,7 @@ void GObject::_bind_methods()
     ClassDB::bind_method(D_METHOD("getScaleX"), &GObject::getScaleX);
     ClassDB::bind_method(D_METHOD("setScaleY", "value"), &GObject::setScaleY);
     ClassDB::bind_method(D_METHOD("getScaleY"), &GObject::getScaleY);
+    ClassDB::bind_method(D_METHOD("tweenScale", "end_value", "duration"), &GObject::gd_tweenScale);
 
     ClassDB::bind_method(D_METHOD("setSkewX", "value"), &GObject::setSkewX);
     ClassDB::bind_method(D_METHOD("getSkewX"), &GObject::getSkewX);

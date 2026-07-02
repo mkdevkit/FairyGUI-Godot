@@ -108,6 +108,7 @@ private:
     void onInitWithParent(Node* parent, int zOrder, bool deferAdd = false);
     void createModalLayer();
     void adjustModalLayer();
+    void bringPopupToFront(GObject* popup);
     void closePopup(GObject* target);
     void checkPopups();
     void onTouchEvent(int eventType);

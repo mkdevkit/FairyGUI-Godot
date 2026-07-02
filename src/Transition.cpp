@@ -3,6 +3,7 @@
 #include "GRoot.h"
 #include "tween/GPath.h"
 #include "tween/GTween.h"
+#include "tween/TweenManager.h"
 #include "utils/ByteBuffer.h"
 #include "utils/ToolSet.h"
 
@@ -238,11 +239,7 @@ TransitionItem::TransitionItem(TransitionActionType aType)
 
 TransitionItem::~TransitionItem()
 {
-    if (tweener != nullptr)
-    {
-        tweener->kill();
-        tweener = nullptr;
-    }
+    TweenManager::killTweensAny(this, false);
 
     target = nullptr;
     hook = nullptr;

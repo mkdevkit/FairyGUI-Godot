@@ -38,6 +38,10 @@ func continue_init() -> void:
 			obj.addClickListener(_run_demo)
 
 func _on_click_back() -> void:
+	if _win_b != null and _win_b.isShowing():
+		_win_b.hideImmediately()
+	if _win_a != null and _win_a.isShowing():
+		_win_a.hideImmediately()
 	_cleanup_groot_overlays()
 	_demo_container.removeChildren()
 	_cc.setSelectedIndex(0)

@@ -198,7 +198,10 @@ void GRoot::hideWindow(GWindow* win)
 void GRoot::hideWindowImmediately(GWindow* win)
 {
     if (win)
-        GTween::kill(win, true);
+    {
+        GTween::kill(win, false);
+        win->setVisible(false);
+    }
 
     if (win && win->getParent() == this)
         removeChild(win);
@@ -403,6 +406,28 @@ void GRoot::showPopup(GObject* popup)
     showPopup(popup, nullptr, PopupDirection::AUTO);
 }
 
+void GRoot::bringPopupToFront(GObject* popup)
+{
+    if (!popup)
+        return;
+
+    static const int kOverlayBaseOrder = 50000;
+    static const int kOverlayMaxOrder = 99999;
+
+    int maxOrder = kOverlayBaseOrder - 1;
+    const int cnt = numChildren();
+    for (int i = 0; i < cnt; i++)
+    {
+        GObject* g = getChildAt(i);
+        if (g != popup)
+            maxOrder = std::max(maxOrder, g->getSortingOrder());
+    }
+
+    const int newOrder = std::min(maxOrder + 1, kOverlayMaxOrder);
+    if (popup->getSortingOrder() < newOrder)
+        popup->setSortingOrder(newOrder);
+}
+
 void GRoot::showPopup(GObject* popup, GObject* target, PopupDirection dir)
 {
     if (!_popupStack.empty())
@@ -412,19 +437,17 @@ void GRoot::showPopup(GObject* popup, GObject* target, PopupDirection dir)
 
     if (target != nullptr)
     {
+        int inheritedOrder = 0;
         GObject* p = target;
         while (p != nullptr)
         {
+            inheritedOrder = std::max(inheritedOrder, p->getSortingOrder());
             if (p->getParent() == this)
-            {
-                if (popup->getSortingOrder() < p->getSortingOrder())
-                {
-                    popup->setSortingOrder(p->getSortingOrder());
-                }
                 break;
-            }
             p = p->getParent();
         }
+        if (popup->getSortingOrder() < inheritedOrder)
+            popup->setSortingOrder(inheritedOrder);
     }
 
     static const int kPopupWindowSortingOrder = 50000;
@@ -433,6 +456,7 @@ void GRoot::showPopup(GObject* popup, GObject* target, PopupDirection dir)
 
     popup->setVisible(true);
     addChild(Ref<GObject>(popup));
+    bringPopupToFront(popup);
     if (GComponent* com = dynamic_cast<GComponent*>(popup))
         com->refreshDisplayListRecursive();
     syncNativeChildrenZOrder();

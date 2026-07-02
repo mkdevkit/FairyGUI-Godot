@@ -18,6 +18,48 @@ public:
 };
 static TweenEngine tweenEngine;
 
+void TweenManager::flushKilledTweeners()
+{
+    int cnt = _totalActiveTweens;
+    int freePosStart = -1;
+    for (int i = 0; i < cnt; i++)
+    {
+        GTweener* tweener = _activeTweens[i];
+        if (tweener == nullptr)
+        {
+            if (freePosStart == -1)
+                freePosStart = i;
+        }
+        else if (tweener->_killed)
+        {
+            tweener->_reset();
+            _tweenerPool.push_back(tweener);
+            _activeTweens[i] = nullptr;
+
+            if (freePosStart == -1)
+                freePosStart = i;
+        }
+        else if (freePosStart != -1)
+        {
+            _activeTweens[freePosStart] = tweener;
+            _activeTweens[i] = nullptr;
+            freePosStart++;
+        }
+    }
+
+    if (freePosStart >= 0)
+    {
+        if (_totalActiveTweens != cnt)
+        {
+            int j = cnt;
+            cnt = _totalActiveTweens - cnt;
+            for (int i = 0; i < cnt; i++)
+                _activeTweens[freePosStart++] = _activeTweens[j++];
+        }
+        _totalActiveTweens = freePosStart;
+    }
+}
+
 GTweener* TweenManager::createTween()
 {
     if (!_inited)
@@ -83,6 +125,32 @@ bool TweenManager::killTweens(RefCounted* target, TweenPropType propType, bool c
         }
     }
 
+    if (flag)
+        flushKilledTweeners();
+
+    return flag;
+}
+
+bool TweenManager::killTweensAny(void* target, bool completed)
+{
+    if (target == nullptr)
+        return false;
+
+    bool flag = false;
+    int cnt = _totalActiveTweens;
+    for (int i = 0; i < cnt; i++)
+    {
+        GTweener* tweener = _activeTweens[i];
+        if (tweener != nullptr && tweener->_target == target && !tweener->_killed)
+        {
+            tweener->kill(completed);
+            flag = true;
+        }
+    }
+
+    if (flag)
+        flushKilledTweeners();
+
     return flag;
 }
 
@@ -117,8 +185,11 @@ void TweenManager::update(float dt)
             if (freePosStart == -1)
                 freePosStart = i;
         }
-        else if (tweener->_killed)
+        else if (tweener->_killed || (tweener->_refTargetId.is_valid() && !ObjectDB::get_instance(tweener->_refTargetId)))
         {
+            if (!tweener->_killed)
+                tweener->_killed = true;
+
             tweener->_reset();
             _tweenerPool.push_back(tweener);
             _activeTweens[i] = nullptr;
@@ -128,16 +199,7 @@ void TweenManager::update(float dt)
         }
         else
         {
-            if (!tweener->_refTarget.is_null())
-            {
-                Object* obj = Object::cast_to<Object>(tweener->_refTarget.ptr());
-                if (!obj || !ObjectDB::get_instance(obj->get_instance_id()))
-                    tweener->_killed = true;
-                else if (tweener->_refTarget->get_reference_count() == 1)
-                    tweener->_killed = true;
-            }
-
-            if (!tweener->_killed && !tweener->_paused)
+            if (!tweener->_paused)
                 tweener->_update(dt);
 
             if (freePosStart != -1)
@@ -183,6 +245,8 @@ void TweenManager::killAll(bool completed)
         if (tweener != nullptr && !tweener->_killed)
             tweener->kill(completed);
     }
+
+    flushKilledTweeners();
 }
 
 void TweenManager::init()

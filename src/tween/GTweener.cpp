@@ -3,31 +3,43 @@
 #include "GObject.h"
 #include "GPath.h"
 #include <cstdlib>
+#include <cstring>
+#include <new>
 
 NS_FGUI_BEGIN
 
-static void clear_ref_target_safe(Ref<RefCounted>& ref)
+void GTweener::clearRefTarget()
 {
-    if (ref.is_null())
-        return;
-
-    Object* obj = Object::cast_to<Object>(ref.ptr());
-    if (obj && ObjectDB::get_instance(obj->get_instance_id()))
-        ref = Ref<RefCounted>();
-    else
+    if (_refTargetId.is_valid())
     {
-        // Target already freed; do not unref a dangling pointer.
-        RefCounted** pref = reinterpret_cast<RefCounted**>(&ref);
+        if (ObjectDB::get_instance(_refTargetId))
+            _refTarget = Ref<RefCounted>();
+        else
+        {
+            // Target already freed; do not dereference a stale Ref.
+            RefCounted** pref = reinterpret_cast<RefCounted**>(&_refTarget);
+            *pref = nullptr;
+        }
+        _refTargetId = ObjectID();
+    }
+    else if (!_refTarget.is_null())
+    {
+        RefCounted** pref = reinterpret_cast<RefCounted**>(&_refTarget);
         *pref = nullptr;
     }
 }
+
 GTweener::GTweener() : _target(nullptr),
                        _refTarget(nullptr),
+                       _refTargetId(),
                        _userData(),
                        _onStart(nullptr),
                        _onUpdate(nullptr),
                        _onComplete(nullptr),
                        _onComplete0(nullptr),
+                       _scriptOnStartId(),
+                       _scriptOnUpdateId(),
+                       _scriptOnCompleteId(),
                        _path(nullptr)
 {
 }
@@ -93,7 +105,7 @@ GTweener* GTweener::setSnapping(bool value)
 
 GTweener* GTweener::setTargetAny(void* value)
 {
-    clear_ref_target_safe(_refTarget);
+    clearRefTarget();
     _target = value;
     return this;
 }
@@ -105,11 +117,15 @@ GTweener* GTweener::setTarget(RefCounted* value)
 
 GTweener* GTweener::setTarget(RefCounted* target, TweenPropType propType)
 {
-    clear_ref_target_safe(_refTarget);
-    if (target != nullptr)
-        _refTarget = Ref<RefCounted>(target);
+    clearRefTarget();
     _target = target;
     _propType = propType;
+    if (target != nullptr)
+    {
+        if (Object* obj = Object::cast_to<Object>(target))
+            _refTargetId = obj->get_instance_id();
+        _refTarget = Ref<RefCounted>(target);
+    }
     return this;
 }
 
@@ -291,14 +307,104 @@ void GTweener::_init()
     deltaValue.setZero();
 }
 
+void GTweener::abandonVariant(Variant& value)
+{
+    bool abandon = false;
+    switch (value.get_type())
+    {
+    case Variant::OBJECT:
+    {
+        Object* obj = value;
+        if (obj != nullptr && !ObjectDB::get_instance(obj->get_instance_id()))
+            abandon = true;
+        break;
+    }
+    case Variant::CALLABLE:
+    {
+        Callable callable = value;
+        if (callable.is_valid())
+        {
+            Object* obj = callable.get_object();
+            if (obj != nullptr && !ObjectDB::get_instance(obj->get_instance_id()))
+                abandon = true;
+        }
+        break;
+    }
+    default:
+        break;
+    }
+
+    if (abandon)
+    {
+        memset(static_cast<void*>(&value), 0, sizeof(Variant));
+        new (&value) Variant();
+    }
+    else
+    {
+        value = Variant();
+    }
+}
+
+void GTweener::abandonCallable(Callable& callable, ObjectID& id)
+{
+    bool abandon = false;
+    if (id.is_valid() && !ObjectDB::get_instance(id))
+        abandon = true;
+    else if (callable.is_valid())
+    {
+        Object* obj = callable.get_object();
+        if (obj != nullptr && !ObjectDB::get_instance(obj->get_instance_id()))
+            abandon = true;
+    }
+
+    if (abandon)
+    {
+        memset(static_cast<void*>(&callable), 0, sizeof(Callable));
+        new (&callable) Callable();
+    }
+    else
+    {
+        callable = Callable();
+    }
+    id = ObjectID();
+}
+
+void GTweener::clearScriptBindings()
+{
+    abandonCallable(_scriptOnStart, _scriptOnStartId);
+    abandonCallable(_scriptOnUpdate, _scriptOnUpdateId);
+    abandonCallable(_scriptOnComplete, _scriptOnCompleteId);
+}
+
+void GTweener::callScriptOnStart(GTweener* tweener)
+{
+    if (_scriptOnStartId.is_valid() && ObjectDB::get_instance(_scriptOnStartId))
+        _scriptOnStart.call(tweener);
+}
+
+void GTweener::callScriptOnUpdate(GTweener* tweener)
+{
+    if (_scriptOnUpdateId.is_valid() && ObjectDB::get_instance(_scriptOnUpdateId))
+        _scriptOnUpdate.call(tweener);
+}
+
+void GTweener::callScriptOnComplete()
+{
+    if (_scriptOnCompleteId.is_valid() && ObjectDB::get_instance(_scriptOnCompleteId))
+        _scriptOnComplete.call();
+}
+
 void GTweener::_reset()
 {
-    clear_ref_target_safe(_refTarget);
+    clearRefTarget();
     _target = nullptr;
-    _userData = Variant();
     _path = nullptr;
-    _onStart = _onUpdate = _onComplete = nullptr;
+    _onStart = nullptr;
+    _onUpdate = nullptr;
+    _onComplete = nullptr;
     _onComplete0 = nullptr;
+    clearScriptBindings();
+    abandonVariant(_userData);
 }
 
 void GTweener::_update(float dt)
@@ -440,18 +546,21 @@ void GTweener::update()
         value.d = value.x;
     }
 
-    if (!_refTarget.is_null() && _propType != TweenPropType::None)
+    if (_refTargetId.is_valid() && _propType != TweenPropType::None)
     {
-        Object* obj = Object::cast_to<Object>(_refTarget.ptr());
-        if (obj && ObjectDB::get_instance(obj->get_instance_id()))
+        Object* obj = ObjectDB::get_instance(_refTargetId);
+        if (!obj)
         {
-            if (GObject* gobj = dynamic_cast<GObject*>(_refTarget.ptr()))
-                TweenPropTypeUtils::setProps(gobj, _propType, value);
-            else if (Node* node = dynamic_cast<Node*>(_refTarget.ptr()))
-                TweenPropTypeUtils::setProps(node, _propType, value);
-        }
-        else
             _killed = true;
+        }
+        else if (GObject* gobj = Object::cast_to<GObject>(obj))
+        {
+            TweenPropTypeUtils::setProps(gobj, _propType, value);
+        }
+        else if (Node* node = Object::cast_to<Node>(obj))
+        {
+            TweenPropTypeUtils::setProps(node, _propType, value);
+        }
     }
 
     callUpdateCallback();
@@ -509,24 +618,51 @@ Ref<GTweener> GTweener::gd_setPaused(bool paused)
 
 Ref<GTweener> GTweener::gd_onUpdate(const Callable& callable)
 {
-    onUpdate([callable](GTweener* tweener) {
-        callable.call(tweener);
+    _scriptOnUpdate = callable;
+    if (callable.is_valid())
+    {
+        Object* obj = callable.get_object();
+        _scriptOnUpdateId = obj ? obj->get_instance_id() : ObjectID();
+    }
+    else
+        _scriptOnUpdateId = ObjectID();
+
+    onUpdate([this](GTweener* tweener) {
+        callScriptOnUpdate(tweener);
     });
     return Ref<GTweener>(this);
 }
 
 Ref<GTweener> GTweener::gd_onStart(const Callable& callable)
 {
-    onStart([callable](GTweener* tweener) {
-        callable.call(tweener);
+    _scriptOnStart = callable;
+    if (callable.is_valid())
+    {
+        Object* obj = callable.get_object();
+        _scriptOnStartId = obj ? obj->get_instance_id() : ObjectID();
+    }
+    else
+        _scriptOnStartId = ObjectID();
+
+    onStart([this](GTweener* tweener) {
+        callScriptOnStart(tweener);
     });
     return Ref<GTweener>(this);
 }
 
 Ref<GTweener> GTweener::gd_onComplete(const Callable& callable)
 {
-    onComplete([callable]() {
-        callable.call();
+    _scriptOnComplete = callable;
+    if (callable.is_valid())
+    {
+        Object* obj = callable.get_object();
+        _scriptOnCompleteId = obj ? obj->get_instance_id() : ObjectID();
+    }
+    else
+        _scriptOnCompleteId = ObjectID();
+
+    onComplete([this]() {
+        callScriptOnComplete();
     });
     return Ref<GTweener>(this);
 }

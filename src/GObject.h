@@ -16,6 +16,7 @@ class ByteBuffer;
 class GRoot;
 class PackageItem;
 class GTreeNode;
+class GTweener;
 
 class GObject : public UIEventDispatcher
 {
@@ -67,6 +68,8 @@ public:
     void setScaleY(float value) { setScale(_scale.x, value); }
     const Vector2& getScale() const { return _scale; }
     void setScale(float xv, float yv);
+    GTweener* tweenScale(const Vector2& endValue, float duration);
+    Ref<GTweener> gd_tweenScale(const Vector2& endValue, float duration);
 
     float getSkewX() const { return _skewX; }
     void setSkewX(float value);
@@ -201,6 +204,7 @@ protected:
     Vector2 computeDisplayPosition() const;
     Vector2 computeContentPivotOffset() const;
     Vector2 computeDisplayScale() const;
+    Vector2 displayLocalToLogical(const Vector2& displayLocal) const;
     virtual void applyPivotOffset();
     void rebuildSkewedTransform();
     virtual void handleControllerChanged(GController* c);

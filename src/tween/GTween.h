@@ -23,6 +23,7 @@ public:
     static GTweener* shake(const Vector2& startValue, float amplitude, float duration);
     static bool isTweening(RefCounted* target);
     static bool isTweening(RefCounted* target, TweenPropType propType);
+    static void kill(void* target, bool complete = false);
     static void kill(RefCounted* target);
     static void kill(RefCounted* target, bool complete);
     static void kill(RefCounted* target, TweenPropType propType, bool complete);

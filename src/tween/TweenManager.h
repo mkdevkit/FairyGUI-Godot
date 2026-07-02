@@ -15,6 +15,7 @@ public:
     static GTweener* createTween();
     static bool isTweening(RefCounted* target, TweenPropType propType);
     static bool killTweens(RefCounted* target, TweenPropType propType, bool completed);
+    static bool killTweensAny(void* target, bool completed);
     static GTweener* getTween(RefCounted* target, TweenPropType propType);
     static void update(float dt);
     static void clean();
@@ -22,6 +23,7 @@ public:
     static void init();
 
 private:
+    static void flushKilledTweeners();
     static void reset();
 
     static GTweener** _activeTweens;

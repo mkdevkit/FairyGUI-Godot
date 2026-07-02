@@ -1016,8 +1016,8 @@ GObject* GComponent::hitTest(const Vector2& worldPoint, const Camera2D* camera)
     {
         Rect rect;
         rect.size = _size;
-        // Match Cocos convertToNodeSpace: canvas coords -> component display local.
-        Vector2 localPoint = ((CanvasItem*)_displayObject)->get_global_transform_with_canvas().affine_inverse().xform(worldPoint);
+        Vector2 displayLocal = ((CanvasItem*)_displayObject)->get_global_transform_with_canvas().affine_inverse().xform(worldPoint);
+        Vector2 localPoint = displayLocalToLogical(displayLocal);
         flag = rect.has_point(localPoint) ? 1 : 2;
 
         ChildHitArea* childHit = dynamic_cast<ChildHitArea*>(_hitArea);
@@ -1035,7 +1035,8 @@ GObject* GComponent::hitTest(const Vector2& worldPoint, const Camera2D* camera)
         {
             Rect rect;
             rect.size = _size;
-            Vector2 localPoint = ((CanvasItem*)_displayObject)->get_global_transform_with_canvas().affine_inverse().xform(worldPoint);
+            Vector2 displayLocal = ((CanvasItem*)_displayObject)->get_global_transform_with_canvas().affine_inverse().xform(worldPoint);
+            Vector2 localPoint = displayLocalToLogical(displayLocal);
             flag = rect.has_point(localPoint) ? 1 : 2;
 
             const Rect& clipRect = ((FUIContainer*)_displayObject)->getClippingRegion();
@@ -1118,7 +1119,9 @@ GObject* GComponent::hitTest(const Vector2& worldPoint, const Camera2D* camera)
         if (flag == 0)
         {
             rect.size = _size;
-            flag = rect.has_point(((CanvasItem*)_displayObject)->get_global_transform_with_canvas().affine_inverse().xform(worldPoint)) ? 1 : 2;
+            Vector2 displayLocal = ((CanvasItem*)_displayObject)->get_global_transform_with_canvas().affine_inverse().xform(worldPoint);
+            Vector2 localPoint = displayLocalToLogical(displayLocal);
+            flag = rect.has_point(localPoint) ? 1 : 2;
         }
 
         if (flag == 1)

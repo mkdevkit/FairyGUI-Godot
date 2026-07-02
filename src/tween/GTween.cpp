@@ -52,6 +52,11 @@ bool GTween::isTweening(RefCounted * target, TweenPropType propType)
     return TweenManager::isTweening(target, propType);
 }
 
+void GTween::kill(void* target, bool complete)
+{
+    TweenManager::killTweensAny(target, complete);
+}
+
 void GTween::kill(RefCounted * target)
 {
     TweenManager::killTweens(target, TweenPropType::None, false);
