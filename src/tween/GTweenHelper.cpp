@@ -55,6 +55,46 @@ GTweener* GTweenHelper::shake(const Vector2& start, float amplitude, float durat
     return GTween::shake(start, amplitude, duration);
 }
 
+Ref<GTweener> GTweenHelper::gd_to_float(float start, float end, float duration)
+{
+    return Ref<GTweener>(to_float(start, end, duration));
+}
+
+Ref<GTweener> GTweenHelper::gd_to_vec2(const Vector2& start, const Vector2& end, float duration)
+{
+    return Ref<GTweener>(to_vec2(start, end, duration));
+}
+
+Ref<GTweener> GTweenHelper::gd_to_vec3(const Vector3& start, const Vector3& end, float duration)
+{
+    return Ref<GTweener>(to_vec3(start, end, duration));
+}
+
+Ref<GTweener> GTweenHelper::gd_to_vec4(const Vector4& start, const Vector4& end, float duration)
+{
+    return Ref<GTweener>(to_vec4(start, end, duration));
+}
+
+Ref<GTweener> GTweenHelper::gd_to_color(const Color& start, const Color& end, float duration)
+{
+    return Ref<GTweener>(to_color(start, end, duration));
+}
+
+Ref<GTweener> GTweenHelper::gd_to_double(double start, double end, float duration)
+{
+    return Ref<GTweener>(to_double(start, end, duration));
+}
+
+Ref<GTweener> GTweenHelper::gd_delayedCall(float delay)
+{
+    return Ref<GTweener>(delayedCall(delay));
+}
+
+Ref<GTweener> GTweenHelper::gd_shake(const Vector2& start, float amplitude, float duration)
+{
+    return Ref<GTweener>(shake(start, amplitude, duration));
+}
+
 bool GTweenHelper::isTweening(RefCounted* target)
 {
     return GTween::isTweening(target);
@@ -74,14 +114,14 @@ void GTweenHelper::_bind_methods()
 {
     ClassDB::bind_static_method(get_class_static(), D_METHOD("getInstance"), &GTweenHelper::getInstance);
 
-    ClassDB::bind_method(D_METHOD("toFloat", "start", "end", "duration"), &GTweenHelper::to_float);
-    ClassDB::bind_method(D_METHOD("toVec2", "start", "end", "duration"), &GTweenHelper::to_vec2);
-    ClassDB::bind_method(D_METHOD("toVec3", "start", "end", "duration"), &GTweenHelper::to_vec3);
-    ClassDB::bind_method(D_METHOD("toVec4", "start", "end", "duration"), &GTweenHelper::to_vec4);
-    ClassDB::bind_method(D_METHOD("toColor", "start", "end", "duration"), &GTweenHelper::to_color);
-    ClassDB::bind_method(D_METHOD("toDouble", "start", "end", "duration"), &GTweenHelper::to_double);
-    ClassDB::bind_method(D_METHOD("delayedCall", "delay"), &GTweenHelper::delayedCall);
-    ClassDB::bind_method(D_METHOD("shake", "start", "amplitude", "duration"), &GTweenHelper::shake);
+    ClassDB::bind_method(D_METHOD("toFloat", "start", "end", "duration"), &GTweenHelper::gd_to_float);
+    ClassDB::bind_method(D_METHOD("toVec2", "start", "end", "duration"), &GTweenHelper::gd_to_vec2);
+    ClassDB::bind_method(D_METHOD("toVec3", "start", "end", "duration"), &GTweenHelper::gd_to_vec3);
+    ClassDB::bind_method(D_METHOD("toVec4", "start", "end", "duration"), &GTweenHelper::gd_to_vec4);
+    ClassDB::bind_method(D_METHOD("toColor", "start", "end", "duration"), &GTweenHelper::gd_to_color);
+    ClassDB::bind_method(D_METHOD("toDouble", "start", "end", "duration"), &GTweenHelper::gd_to_double);
+    ClassDB::bind_method(D_METHOD("delayedCall", "delay"), &GTweenHelper::gd_delayedCall);
+    ClassDB::bind_method(D_METHOD("shake", "start", "amplitude", "duration"), &GTweenHelper::gd_shake);
     ClassDB::bind_method(D_METHOD("isTweening", "target"), &GTweenHelper::isTweening);
     ClassDB::bind_method(D_METHOD("kill", "target", "complete"), &GTweenHelper::kill, DEFVAL(false));
     ClassDB::bind_method(D_METHOD("clean"), &GTweenHelper::clean);

@@ -60,11 +60,17 @@ public:
     static void _bind_methods();
 
     // GDScript callback setters (Callable wrappers)
-    GTweener* gd_onUpdate(const Callable& callable);
-    GTweener* gd_onStart(const Callable& callable);
-    GTweener* gd_onComplete(const Callable& callable);
-    GTweener* gd_setEase(int value);
-    GTweener* gd_setTarget(Object* target, int prop_type);
+    Ref<GTweener> gd_setDelay(float value);
+    Ref<GTweener> gd_setDuration(float value);
+    Ref<GTweener> gd_setRepeat(int repeat, bool yoyo);
+    Ref<GTweener> gd_setTimeScale(float value);
+    Ref<GTweener> gd_setSnapping(bool value);
+    Ref<GTweener> gd_setPaused(bool paused);
+    Ref<GTweener> gd_onUpdate(const Callable& callable);
+    Ref<GTweener> gd_onStart(const Callable& callable);
+    Ref<GTweener> gd_onComplete(const Callable& callable);
+    Ref<GTweener> gd_setEase(int value);
+    Ref<GTweener> gd_setTarget(Object* target, int prop_type);
 
 private:
     GTweener* _to(float start, float end, float duration);

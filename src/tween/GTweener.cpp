@@ -458,38 +458,71 @@ void GTweener::callCompleteCallback()
         _onComplete0();
 }
 
-GTweener* GTweener::gd_onUpdate(const Callable& callable)
+Ref<GTweener> GTweener::gd_setDelay(float value)
 {
-    return onUpdate([callable](GTweener* tweener) {
-        callable.call(tweener);
-    });
+    return Ref<GTweener>(setDelay(value));
 }
 
-GTweener* GTweener::gd_onStart(const Callable& callable)
+Ref<GTweener> GTweener::gd_setDuration(float value)
 {
-    return onStart([callable](GTweener* tweener) {
-        callable.call(tweener);
-    });
+    return Ref<GTweener>(setDuration(value));
 }
 
-GTweener* GTweener::gd_onComplete(const Callable& callable)
+Ref<GTweener> GTweener::gd_setRepeat(int repeat, bool yoyo)
 {
-    return onComplete([callable]() {
+    return Ref<GTweener>(setRepeat(repeat, yoyo));
+}
+
+Ref<GTweener> GTweener::gd_setTimeScale(float value)
+{
+    return Ref<GTweener>(setTimeScale(value));
+}
+
+Ref<GTweener> GTweener::gd_setSnapping(bool value)
+{
+    return Ref<GTweener>(setSnapping(value));
+}
+
+Ref<GTweener> GTweener::gd_setPaused(bool paused)
+{
+    return Ref<GTweener>(setPaused(paused));
+}
+
+Ref<GTweener> GTweener::gd_onUpdate(const Callable& callable)
+{
+    onUpdate([callable](GTweener* tweener) {
+        callable.call(tweener);
+    });
+    return Ref<GTweener>(this);
+}
+
+Ref<GTweener> GTweener::gd_onStart(const Callable& callable)
+{
+    onStart([callable](GTweener* tweener) {
+        callable.call(tweener);
+    });
+    return Ref<GTweener>(this);
+}
+
+Ref<GTweener> GTweener::gd_onComplete(const Callable& callable)
+{
+    onComplete([callable]() {
         callable.call();
     });
+    return Ref<GTweener>(this);
 }
 
-GTweener* GTweener::gd_setEase(int value)
+Ref<GTweener> GTweener::gd_setEase(int value)
 {
-    return setEase((EaseType)value);
+    return Ref<GTweener>(setEase((EaseType)value));
 }
 
-GTweener* GTweener::gd_setTarget(Object* target, int prop_type)
+Ref<GTweener> GTweener::gd_setTarget(Object* target, int prop_type)
 {
     RefCounted* ref = Object::cast_to<RefCounted>(target);
     if (ref)
-        return setTarget(ref, (TweenPropType)prop_type);
-    return this;
+        setTarget(ref, (TweenPropType)prop_type);
+    return Ref<GTweener>(this);
 }
 
 void GTweener::_bind_methods()
@@ -508,21 +541,21 @@ void GTweener::_bind_methods()
     ClassDB::bind_integer_constant(get_class_static(), "TweenPropType", "ALPHA", static_cast<int64_t>(TweenPropType::Alpha));
     ClassDB::bind_integer_constant(get_class_static(), "TweenPropType", "PROGRESS", static_cast<int64_t>(TweenPropType::Progress));
 
-    ClassDB::bind_method(D_METHOD("setDelay", "value"), &GTweener::setDelay);
+    ClassDB::bind_method(D_METHOD("setDelay", "value"), &GTweener::gd_setDelay);
     ClassDB::bind_method(D_METHOD("getDelay"), &GTweener::getDelay);
     ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "delay"), "setDelay", "getDelay");
 
-    ClassDB::bind_method(D_METHOD("setDuration", "value"), &GTweener::setDuration);
+    ClassDB::bind_method(D_METHOD("setDuration", "value"), &GTweener::gd_setDuration);
     ClassDB::bind_method(D_METHOD("getDuration"), &GTweener::getDuration);
     ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "duration"), "setDuration", "getDuration");
 
     ClassDB::bind_method(D_METHOD("setEase", "value"), &GTweener::gd_setEase);
-    ClassDB::bind_method(D_METHOD("setRepeat", "repeat", "yoyo"), &GTweener::setRepeat, DEFVAL(false));
+    ClassDB::bind_method(D_METHOD("setRepeat", "repeat", "yoyo"), &GTweener::gd_setRepeat, DEFVAL(false));
     ClassDB::bind_method(D_METHOD("getRepeat"), &GTweener::getRepeat);
-    ClassDB::bind_method(D_METHOD("setTimeScale", "value"), &GTweener::setTimeScale);
-    ClassDB::bind_method(D_METHOD("setSnapping", "value"), &GTweener::setSnapping);
+    ClassDB::bind_method(D_METHOD("setTimeScale", "value"), &GTweener::gd_setTimeScale);
+    ClassDB::bind_method(D_METHOD("setSnapping", "value"), &GTweener::gd_setSnapping);
     ClassDB::bind_method(D_METHOD("setTarget", "target", "prop_type"), &GTweener::gd_setTarget, DEFVAL((int)TweenPropType::None));
-    ClassDB::bind_method(D_METHOD("setPaused", "value"), &GTweener::setPaused);
+    ClassDB::bind_method(D_METHOD("setPaused", "value"), &GTweener::gd_setPaused);
     ClassDB::bind_method(D_METHOD("seek", "time"), &GTweener::seek);
     ClassDB::bind_method(D_METHOD("kill", "complete"), &GTweener::kill, DEFVAL(false));
     ClassDB::bind_method(D_METHOD("getNormalizedTime"), &GTweener::getNormalizedTime);

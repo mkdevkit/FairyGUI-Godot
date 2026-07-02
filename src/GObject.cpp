@@ -1304,6 +1304,8 @@ void GObject::_bind_methods()
     ClassDB::bind_method(D_METHOD("setPixelSnapping", "value"), &GObject::setPixelSnapping);
     ClassDB::bind_method(D_METHOD("isPixelSnapping"), &GObject::isPixelSnapping);
 
+    ClassDB::bind_method(D_METHOD("setScale", "x", "y"), &GObject::setScale);
+    ClassDB::bind_method(D_METHOD("getScale"), &GObject::getScale);
     ClassDB::bind_method(D_METHOD("setScaleX", "value"), &GObject::setScaleX);
     ClassDB::bind_method(D_METHOD("getScaleX"), &GObject::getScaleX);
     ClassDB::bind_method(D_METHOD("setScaleY", "value"), &GObject::setScaleY);

@@ -21,6 +21,16 @@ public:
     GTweener* to_double(double start, double end, float duration);
     GTweener* delayedCall(float delay);
     GTweener* shake(const Vector2& start, float amplitude, float duration);
+
+    // GDScript wrappers return Ref<> so method chaining works.
+    Ref<GTweener> gd_to_float(float start, float end, float duration);
+    Ref<GTweener> gd_to_vec2(const Vector2& start, const Vector2& end, float duration);
+    Ref<GTweener> gd_to_vec3(const Vector3& start, const Vector3& end, float duration);
+    Ref<GTweener> gd_to_vec4(const Vector4& start, const Vector4& end, float duration);
+    Ref<GTweener> gd_to_color(const Color& start, const Color& end, float duration);
+    Ref<GTweener> gd_to_double(double start, double end, float duration);
+    Ref<GTweener> gd_delayedCall(float delay);
+    Ref<GTweener> gd_shake(const Vector2& start, float amplitude, float duration);
     bool isTweening(RefCounted* target);
     void kill(RefCounted* target, bool complete);
     void clean();

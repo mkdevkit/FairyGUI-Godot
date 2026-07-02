@@ -27,7 +27,9 @@ func _on_shown() -> void:
 		trans.play(1, 0, Callable())
 
 func _do_hide_animation() -> void:
-	GTweenHelper.getInstance().toVec2(getScale(), Vector2(0.1, 0.1), 0.3) \
+	var helper = GTweenHelper.getInstance()
+	helper.kill(self, true)
+	helper.toVec2(getScale(), Vector2(0.1, 0.1), 0.3) \
 		.setTarget(self, GTweener.TweenPropType.SCALE) \
 		.onComplete(hideImmediately)
 
