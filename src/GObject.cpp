@@ -1363,6 +1363,8 @@ void GObject::_bind_methods()
     ClassDB::bind_method(D_METHOD("removeChild", "node"), &GObject::gd_removeChild);
 
     // GDScript extensions
+    ClassDB::bind_method(D_METHOD("setupDisplay"), &GObject::init);
+
     ClassDB::bind_method(D_METHOD("addClickListener", "callable"), &GObject::gd_addClickListener);
     ClassDB::bind_method(D_METHOD("removeClickListener"), &GObject::gd_removeClickListener);
     ClassDB::bind_method(D_METHOD("setIcon", "icon"), &GObject::gd_setIcon);

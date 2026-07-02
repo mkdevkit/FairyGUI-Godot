@@ -4,6 +4,7 @@
 #include "FairyGUIMacros.h"
 // cocos2d.h removed - see godot_types.h
 #include "event/UIEventDispatcher.h"
+#include "GComponent.h"
 
 NS_FGUI_BEGIN
 
@@ -59,6 +60,7 @@ public:
 protected:
     bool init(const std::string& resourceURL);
 
+    Ref<GComponent> _contentPaneRef;
     GComponent* _contentPane;
     GList* _list;
 

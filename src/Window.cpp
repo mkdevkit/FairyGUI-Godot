@@ -30,6 +30,8 @@ GWindow::~GWindow()
 
 void GWindow::_bind_methods()
 {
+    ClassDB::bind_static_method(get_class_static(), D_METHOD("create"), &GWindow::gd_create);
+
     ClassDB::bind_method(D_METHOD("show"), &GWindow::show);
     ClassDB::bind_method(D_METHOD("hide"), &GWindow::hide);
     ClassDB::bind_method(D_METHOD("hideImmediately"), &GWindow::hideImmediately);
@@ -108,13 +110,13 @@ void GWindow::setContentPane(GComponent* value)
         if (_contentPane != nullptr)
         {
             removeChild(_contentPane);
-
-            // // CC_SAFE_RELEASE removed - _frame managed by Godot ref counting;
+            _contentPaneRef = Ref<GComponent>();
         }
         _contentPane = value;
         if (_contentPane != nullptr)
         {
-            addChild(Ref<GObject>(_contentPane));
+            _contentPaneRef = Ref<GComponent>(_contentPane);
+            addChild(Ref<GObject>(_contentPaneRef));
             setSize(_contentPane->getWidth(), _contentPane->getHeight());
             _contentPane->addRelation(this, RelationType::Size);
             _frame = dynamic_cast<GComponent*>(_contentPane->getChild("frame"));
@@ -128,6 +130,12 @@ void GWindow::setContentPane(GComponent* value)
         else
             _frame = nullptr;
     }
+}
+
+GWindow* GWindow::gd_create()
+{
+    Ref<GWindow> ref = GWindow::create();
+    return ref.is_valid() ? ref.ptr() : nullptr;
 }
 
 void GWindow::setCloseButton(GObject * value)

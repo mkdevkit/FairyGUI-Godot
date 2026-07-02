@@ -261,8 +261,14 @@ void GList::removeChildrenToPool()
 
 void GList::removeChildrenToPool(int beginIndex, int endIndex)
 {
-    if (endIndex < 0 || endIndex >= _children.size())
+    if (_children.empty())
+        return;
+
+    if (endIndex < 0 || endIndex >= (int)_children.size())
         endIndex = (int)_children.size() - 1;
+
+    if (beginIndex > endIndex)
+        return;
 
     for (int i = beginIndex; i <= endIndex; ++i)
         removeChildToPoolAt(beginIndex);

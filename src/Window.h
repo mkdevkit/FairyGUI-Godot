@@ -25,6 +25,7 @@ public:
     virtual ~GWindow();
 
     FAIRYGUI_CREATE(GWindow)
+    static GWindow* gd_create();
 
     static void _bind_methods();
 
@@ -90,6 +91,7 @@ protected:
 
     void closeEventHandler(EventContext*context);
 
+    Ref<GComponent> _contentPaneRef;
     GComponent* _contentPane;
 
 private:

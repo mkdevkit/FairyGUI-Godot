@@ -44,10 +44,18 @@ bool GPopupMenu::init(const std::string & resourceURL)
         }
     }
 
-    _contentPane = UIPackage::createObjectFromURL(url)->as<GComponent>();
+    Ref<GObject> obj = UIPackage::createObjectFromURL(url);
+    _contentPaneRef = Object::cast_to<GComponent>(obj.ptr());
+    if (_contentPaneRef.is_null())
+        return false;
+
+    _contentPane = _contentPaneRef.ptr();
     _contentPane->addEventListener(UIEventType::Enter, [this](EventContext* ctx) { GPopupMenu::onEnter(ctx); });
 
     _list = _contentPane->getChild("list")->as<GList>();
+    if (_list == nullptr)
+        return false;
+
     _list->removeChildrenToPool();
 
     _list->addRelation(_contentPane, RelationType::Width);
