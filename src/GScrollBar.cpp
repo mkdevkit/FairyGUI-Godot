@@ -121,7 +121,7 @@ void GScrollBar::onGripTouchBegin(EventContext* context)
     _gripDragging = true;
     _target->updateScrollBarVisible();
 
-    _dragOffset = globalToLocal(context->getInput()->getPosition()) - ((Node2D*)_grip->displayObject())->get_position();
+    _dragOffset = globalToLocal(context->getInput()->getPosition()) - _grip->getPosition();
 }
 
 void GScrollBar::onGripTouchMove(EventContext* context)

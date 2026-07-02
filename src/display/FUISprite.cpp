@@ -23,6 +23,7 @@ FUISprite::FUISprite() :
     _fillAmount(0),
     _fillClockwise(false),
     _scaleByTile(false),
+    _tileDisplaySize(0, 0),
     _grayed(false),
     _rotated(false),
     _scale9Enabled(false),
@@ -371,11 +372,10 @@ void FUISprite::setTexture(const Ref<Texture2D>& t)
 
 void FUISprite::set_content_size(const Vector2& size)
 {
-    _contentSize = size;
     if (_scaleByTile)
-    {
-        set_region_rect(Rect2(Vector2(), size));
-    }
+        _tileDisplaySize = size;
+    else
+        _contentSize = size;
     queue_redraw();
 }
 
@@ -615,6 +615,12 @@ void FUISprite::_draw()
         return;
     }
 
+    if (_scaleByTile)
+    {
+        drawTile();
+        return;
+    }
+
     Vector2 origSize = _originalContentSize;
     if (origSize.x <= 0.0f || origSize.y <= 0.0f)
         origSize = contentSize;
@@ -652,6 +658,59 @@ void FUISprite::_draw()
             texRect,
             get_modulate(), flipH, flipV);
     }
+}
+
+void FUISprite::drawTile()
+{
+    if (_realTexture.is_null())
+        return;
+
+    Rect2 tileSrc = get_region_rect();
+    if (tileSrc.size.x <= 0.0f || tileSrc.size.y <= 0.0f)
+        return;
+
+    Vector2 displaySize = _tileDisplaySize;
+    if (displaySize.x <= 0.0f || displaySize.y <= 0.0f)
+        displaySize = _contentSize.x > 0.0f ? _contentSize : get_rect().size;
+    if (displaySize.x <= 0.0f || displaySize.y <= 0.0f)
+        return;
+
+    const Vector2 drawOrigin = get_offset();
+    const Color modulate = get_modulate();
+    const bool flipH = is_flipped_h();
+    const bool flipV = is_flipped_v();
+    const float tw = tileSrc.size.x;
+    const float th = tileSrc.size.y;
+
+    // Flip the whole tiled area once (Cocos flips the sprite, not each repeat).
+    // Per-tile flip breaks partial edge tiles — wrong half of the source is shown.
+    const Vector2 areaCenter = drawOrigin + displaySize * 0.5f;
+    if (flipH || flipV)
+        draw_set_transform(areaCenter, 0.0f, Vector2(flipH ? -1.0f : 1.0f, flipV ? -1.0f : 1.0f));
+
+    const Vector2 localOrigin(-displaySize.x * 0.5f, -displaySize.y * 0.5f);
+    const float endX = displaySize.x;
+    const float endY = displaySize.y;
+
+    float y = 0.0f;
+    while (y < endY)
+    {
+        const float rh = MIN(th, endY - y);
+        float x = 0.0f;
+        while (x < endX)
+        {
+            const float rw = MIN(tw, endX - x);
+            const Rect2 src(tileSrc.position.x, tileSrc.position.y, rw, rh);
+            draw_texture_rect_region(_realTexture,
+                Rect2(localOrigin.x + x, localOrigin.y + y, rw, rh),
+                src, modulate);
+            x += tw;
+        }
+        y += th;
+    }
+
+    if (flipH || flipV)
+        draw_set_transform(Vector2(), 0.0f, Vector2(1.0f, 1.0f));
 }
 
 void FUISprite::drawScale9()

@@ -77,6 +77,7 @@ private:
     void drawFillVertical();
     void drawFillRadial();
     void drawScale9();
+    void drawTile();
 
     Vector2 boundaryTexCoord(char index) const;
 
@@ -97,6 +98,7 @@ private:
     Vector2 _originalContentSize;
     Vector2 _trimOffset;
     Vector2 _contentSize;
+    Vector2 _tileDisplaySize;
 
     // Fill mode vertex data (for radial)
     std::vector<Vector2> _fillVertices;

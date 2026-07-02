@@ -480,7 +480,7 @@ void GLoader::updateLayout()
             else if (_contentItem->scaleByTile)
             {
                 _content->set_scale(Vector2(1, 1));
-                _content->set_content_size(_sourceSize);
+                _content->set_content_size(contentSize);
             }
             else
             {

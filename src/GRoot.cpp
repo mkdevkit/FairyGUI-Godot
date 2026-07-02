@@ -175,9 +175,18 @@ void GRoot::showWindow(GWindow* win)
 {
     if (!win)
         return;
+
+    // Popups/windows must sit above normal UI (sortingOrder=0). When GRoot has other
+    // sorting children (e.g. demo CloseButton at 100000), addChildAt caps normal children
+    // to index 0 and they render behind full-screen content.
+    static const int kPopupWindowSortingOrder = 50000;
+    if (win->getSortingOrder() < kPopupWindowSortingOrder)
+        win->setSortingOrder(kPopupWindowSortingOrder);
+
     Ref<GObject> ref(win);
     addChild(ref);
     win->center();
+    bringToFront(win);
     adjustModalLayer();
 }
 
@@ -399,6 +408,10 @@ void GRoot::showPopup(GObject* popup, GObject* target, PopupDirection dir)
             p = p->getParent();
         }
     }
+
+    static const int kPopupWindowSortingOrder = 50000;
+    if (popup->getSortingOrder() < kPopupWindowSortingOrder)
+        popup->setSortingOrder(kPopupWindowSortingOrder);
 
     addChild(Ref<GObject>(popup));
     adjustModalLayer();

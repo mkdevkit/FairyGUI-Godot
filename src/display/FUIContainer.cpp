@@ -238,12 +238,12 @@ void FUIContainer::unhandled_input(const Ref<::InputEvent>& event)
         }
         if (mb->is_pressed()) {
             if (btn == (int)MouseButton::WHEEL_UP) {
-                ip->onMouseScroll(mb->get_position(), 1);
+                ip->onMouseScroll(mb->get_position(), -1);
                 mark_input_handled(this);
                 return;
             }
             if (btn == (int)MouseButton::WHEEL_DOWN) {
-                ip->onMouseScroll(mb->get_position(), -1);
+                ip->onMouseScroll(mb->get_position(), 1);
                 mark_input_handled(this);
                 return;
             }
