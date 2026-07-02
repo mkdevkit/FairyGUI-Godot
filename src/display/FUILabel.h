@@ -39,6 +39,9 @@ public:
     Vector2 _contentSize;
     void setUnderlineColor(const Color& value);
 
+    void setDrawFontSize(int value) { _drawFontSize = value; queue_redraw(); }
+    int getDrawFontSize() const { return _drawFontSize > 0 ? _drawFontSize : (int)_textFormat->fontSize; }
+
     float getTextWidth() const;
     float getTextHeight() const;
 
@@ -64,6 +67,7 @@ private:
     bool _wrapEnabled;
     Color _underlineColor;
     bool _hasUnderlineColor;
+    int _drawFontSize;
 
     // BM Font
     std::string _bmFontPath;

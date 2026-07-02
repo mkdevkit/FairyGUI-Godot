@@ -28,11 +28,17 @@ void GTextInput::handleInit()
 {
     _input = FUIInput::create();
     _displayObject = _input;
-
+    _input->setSubmittedCallback([this]() { onTextSubmitted(); });
 
     addEventListener(UIEventType::TouchEnd, [this](EventContext*) {
         _input->openKeyboard();
     });
+}
+
+void GTextInput::onTextSubmitted()
+{
+    editBoxReturn();
+    dispatchEvent(UIEventType::Submit);
 }
 
 bool GTextInput::isSingleLine() const
@@ -123,7 +129,6 @@ void GTextInput::setTextFieldText()
 
 void GTextInput::editBoxReturn()
 {
-    // text submitted callback - will be handled by Godot signals in future
 }
 
 void GTextInput::editBoxTextChanged(const std::string& text)

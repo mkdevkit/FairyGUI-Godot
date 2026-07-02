@@ -88,7 +88,8 @@ ScrollPane::ScrollPane()
     _dragged(false),
     _owner(nullptr),
     _maskContainer(nullptr),
-    _container(nullptr)
+    _container(nullptr),
+    _deferredCallsCancelled(false)
 {
     _scrollStep = UIConfig::defaultScrollStep;
     _mouseWheelStep = _scrollStep * 2;
@@ -119,7 +120,8 @@ ScrollPane::ScrollPane(GComponent* owner)
     _dontClipMargin(false),
     _mouseWheelEnabled(true),
     _hover(false),
-    _dragged(false)
+    _dragged(false),
+    _deferredCallsCancelled(false)
 {
     _owner = owner;
 
@@ -152,8 +154,7 @@ ScrollPane::ScrollPane(GComponent* owner)
 
 ScrollPane::~ScrollPane()
 {
-    // CALL_PER_FRAME_CANCEL removed
-    // CALL_LATER_CANCEL removed
+    _deferredCallsCancelled = true;
 
     if (_hzScrollBar.is_valid());
         // _hzScrollBar->unref(); // TODO
@@ -947,12 +948,16 @@ void ScrollPane::posChanged(bool ani)
         _aniFlag = -1;
 
     _needRefresh = true;
-    CALL_LATER(ScrollPane, refresh);
+    _deferredCallsCancelled = false;
+    call_deferred(StringName("refresh"));
 }
 
 void ScrollPane::refresh()
 {
-    // CALL_LATER_CANCEL removed
+    if (_deferredCallsCancelled)
+        return;
+    if (_owner && _owner->isDeferredCallCancelled())
+        return;
     _needRefresh = false;
 
     if (_pageMode || _snapToItem)

@@ -19,6 +19,7 @@ FUILabel::FUILabel() :
     _grayed(false),
     _wrapEnabled(false),
     _hasUnderlineColor(false),
+    _drawFontSize(0),
     _bmFontSize(0),
     _bmfontScale(1.0f),
     _contentSize(0, 0)
@@ -179,8 +180,10 @@ float FUILabel::getTextWidth() const
     if (_text.empty()) return 0;
     if (_bmFont.is_valid())
     {
+        int fontSize = getDrawFontSize();
+        float maxWidth = (_wrapEnabled && _contentSize.x > 0) ? _contentSize.x : -1;
         Vector2 size = _bmFont->get_string_size(GObject::toGodotStr(_text),
-            HORIZONTAL_ALIGNMENT_LEFT, -1, (int)_textFormat->fontSize);
+            HORIZONTAL_ALIGNMENT_LEFT, maxWidth, fontSize);
         return size.x;
     }
     return 0;
@@ -191,11 +194,13 @@ float FUILabel::getTextHeight() const
     if (_text.empty()) return 0;
     if (_bmFont.is_valid())
     {
+        int fontSize = getDrawFontSize();
+        float maxWidth = (_wrapEnabled && _contentSize.x > 0) ? _contentSize.x : -1;
         Vector2 size = _bmFont->get_string_size(GObject::toGodotStr(_text),
-            HORIZONTAL_ALIGNMENT_LEFT, -1, (int)_textFormat->fontSize);
+            HORIZONTAL_ALIGNMENT_LEFT, maxWidth, fontSize);
         return size.y;
     }
-    return _textFormat->fontSize;
+    return getDrawFontSize();
 }
 
 void FUILabel::updateText()
@@ -222,7 +227,8 @@ void FUILabel::_draw()
     if (font.is_null()) return;
 
     Color textColor = _grayed ? toGrayed(_textFormat->color) : _textFormat->color;
-    int fontSize = (int)(_fontSize > 0 ? _fontSize : _textFormat->fontSize);
+    int fontSize = getDrawFontSize();
+    float maxWidth = (_wrapEnabled && _contentSize.x > 0) ? _contentSize.x : -1;
 
     // Compute alignment offset within content rect
     Vector2 offset;
@@ -230,8 +236,7 @@ void FUILabel::_draw()
     {
         float textW = getTextWidth();
         float textH = getTextHeight();
-        // Godot draw_string uses baseline for Y, not top. Add font ascent to position top of text.
-        float fontAscent = _bmFont.is_valid() ? _bmFont->get_ascent((int)_textFormat->fontSize) : _textFormat->fontSize * 0.8f;
+        float fontAscent = _bmFont.is_valid() ? _bmFont->get_ascent(fontSize) : fontSize * 0.8f;
         if (_textFormat->align == 1)      offset.x = (_contentSize.x - textW) * 0.5f;
         else if (_textFormat->align == 2) offset.x = _contentSize.x - textW;
         if (_textFormat->verticalAlign == 1)      offset.y = (_contentSize.y - textH) * 0.5f + fontAscent;
@@ -245,25 +250,25 @@ void FUILabel::_draw()
         Color shadowColor = _grayed ? toGrayed(_textFormat->shadowColor) : _textFormat->shadowColor;
         Vector2 shadowPos = offset + _textFormat->shadowOffset;
         draw_string(font, shadowPos, GObject::toGodotStr(_text),
-            HORIZONTAL_ALIGNMENT_LEFT, -1, fontSize, shadowColor);
+            HORIZONTAL_ALIGNMENT_LEFT, maxWidth, fontSize, shadowColor);
     }
 
     if (_textFormat->hasEffect(TextFormat::OUTLINE) && _textFormat->outlineSize > 0)
     {
         Color outlineColor = _grayed ? toGrayed(_textFormat->outlineColor) : _textFormat->outlineColor;
         draw_string_outline(font, offset, GObject::toGodotStr(_text),
-            HORIZONTAL_ALIGNMENT_LEFT, -1, fontSize, _textFormat->outlineSize, outlineColor);
+            HORIZONTAL_ALIGNMENT_LEFT, maxWidth, fontSize, _textFormat->outlineSize, outlineColor);
     }
     else if (_textFormat->hasEffect(TextFormat::GLOW))
     {
         Color glowColor = _grayed ? toGrayed(_textFormat->glowColor) : _textFormat->glowColor;
         draw_string(font, offset, GObject::toGodotStr(_text),
-            HORIZONTAL_ALIGNMENT_LEFT, -1, fontSize, glowColor);
+            HORIZONTAL_ALIGNMENT_LEFT, maxWidth, fontSize, glowColor);
     }
 
     // Main text
     draw_string(font, offset, GObject::toGodotStr(_text),
-        HORIZONTAL_ALIGNMENT_LEFT, -1, fontSize, textColor);
+        HORIZONTAL_ALIGNMENT_LEFT, maxWidth, fontSize, textColor);
 
     // Underline
     if (_textFormat->underline)

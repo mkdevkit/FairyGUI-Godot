@@ -22,7 +22,7 @@ public:
 
     virtual void setAutoSize(AutoSizeType value) override;
 
-    virtual bool isSingleLine() const override { return false; }
+    virtual bool isSingleLine() const override { return _singleLine; }
     virtual void setSingleLine(bool value) override;
 
     virtual TextFormat* getTextFormat() const override { return _richText->getTextFormat(); }
@@ -41,6 +41,7 @@ protected:
 private:
     FUIRichText* _richText;
     bool _updatingSize;
+    bool _singleLine;
 };
 
 NS_FGUI_END

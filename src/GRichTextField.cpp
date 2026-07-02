@@ -6,7 +6,8 @@
 NS_FGUI_BEGIN
 GRichTextField::GRichTextField() :
     _richText(nullptr),
-    _updatingSize(false)
+    _updatingSize(false),
+    _singleLine(false)
 {
 }
 
@@ -55,13 +56,28 @@ void GRichTextField::setAutoSize(AutoSizeType value)
 
 void GRichTextField::setSingleLine(bool value)
 {
+    if (_singleLine != value)
+    {
+        _singleLine = value;
+        setTextFieldText();
+    }
 }
 
 void GRichTextField::setTextFieldText()
 {
+    std::string text = _text;
+    if (_singleLine)
+    {
+        for (char& c : text)
+        {
+            if (c == '\n' || c == '\r')
+                c = ' ';
+        }
+    }
+
     if (_ubbEnabled)
     {
-        std::string parsedText = UBBParser::getInstance()->parse(_text.c_str());
+        std::string parsedText = UBBParser::getInstance()->parse(text.c_str());
         if (_templateVars != nullptr)
             parsedText = parseTemplate(parsedText.c_str());
         _richText->setText(parsedText);
@@ -69,9 +85,9 @@ void GRichTextField::setTextFieldText()
     else
     {
         if (_templateVars != nullptr)
-            _richText->setText(parseTemplate(_text.c_str()));
+            _richText->setText(parseTemplate(text.c_str()));
         else
-            _richText->setText(_text);
+            _richText->setText(text);
     }
 }
 

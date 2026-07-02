@@ -45,6 +45,8 @@ protected:
 
 private:
     void applyClipping();
+    void applyStencilEffects();
+    void _drawStencilSilhouette();
 
     // Rect clipping support
     bool _clippingEnabled;

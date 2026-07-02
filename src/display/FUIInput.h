@@ -5,8 +5,10 @@
 #include "TextFormat.h"
 #include "core/input/input_event.h"
 #include "scene/gui/control.h"
+#include <functional>
 
 class LineEdit;
+class TextEdit;
 
 NS_FGUI_BEGIN
 
@@ -54,11 +56,12 @@ public:
     void setPlaceholderFontSize(int value) { _placeholderFontSize = value; }
     int getPlaceholderFontSize() const { return _placeholderFontSize; }
 
-    void setKeyboardType(int value) { _keyboardType = value; }
+    void setKeyboardType(int value);
     int getKeyboardType() const { return _keyboardType; }
 
     void applyTextFormat();
     void openKeyboard();
+    void setSubmittedCallback(const std::function<void()>& callback) { _submittedCallback = callback; }
 
     TextFormat* getTextFormat() const { return _textFormat; }
 
@@ -66,10 +69,16 @@ public:
     void _gui_input(const Ref<::InputEvent>& event);
 
 private:
+    void rebuildEditor();
+    void applyEditorTheme();
+    bool isCharAllowed(char32_t ch) const;
+    std::string filterText(const std::string& value) const;
+    void syncTextFromEditor();
     void _on_line_edit_changed(const String& text);
     void _on_line_edit_submitted(const String& text);
+    void _on_text_edit_changed();
 
-    ::LineEdit* _lineEdit;
+    Control* _editor;
     std::string _text;
     int _maxLength;
     bool _password;
@@ -82,6 +91,7 @@ private:
     int _keyboardType;
     bool _focused;
     TextFormat* _textFormat;
+    std::function<void()> _submittedCallback;
 };
 
 NS_FGUI_END

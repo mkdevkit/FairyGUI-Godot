@@ -1,6 +1,7 @@
 #include "HitTest.h"
 #include "utils/ToolSet.h"
 #include "GComponent.h"
+#include "GObject.h"
 #include "utils/ByteBuffer.h"
 
 NS_FGUI_BEGIN
@@ -53,6 +54,20 @@ bool PixelHitTest::hitTest(GComponent * obj, const Vector2 & localPoint)
         return ((_data->pixels[pos2] >> pos3) & 0x1) > 0;
     else
         return false;
+}
+
+ChildHitArea::ChildHitArea(GObject* child) :
+    _child(child)
+{
+}
+
+bool ChildHitArea::hitTest(GComponent* obj, const Vector2& localPoint)
+{
+    if (_child == nullptr || obj == nullptr)
+        return false;
+
+    Vector2 globalPt = obj->localToGlobal(localPoint);
+    return _child->hitTest(globalPt, nullptr) != nullptr;
 }
 
 NS_FGUI_END

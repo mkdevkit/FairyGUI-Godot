@@ -7,6 +7,7 @@
 NS_FGUI_BEGIN
 
 class GComponent;
+class GObject;
 class ByteBuffer;
 
 class IHitTest
@@ -46,6 +47,17 @@ public:
 
 private:
     PixelHitTestData* _data;
+};
+
+class ChildHitArea : public IHitTest
+{
+public:
+    explicit ChildHitArea(GObject* child);
+
+    virtual bool hitTest(GComponent* obj, const Vector2& localPoint) override;
+
+private:
+    GObject* _child;
 };
 
 NS_FGUI_END

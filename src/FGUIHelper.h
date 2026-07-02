@@ -16,6 +16,8 @@ public:
     Object* getGRoot();
     Object* createObject(const String& pkgName, const String& resName);
     void addPackage(const String& path);
+    void loadTranslation(const String& xmlPath);
+    void loadTranslationFromXML(const String& xml);
 
     static void _bind_methods();
 

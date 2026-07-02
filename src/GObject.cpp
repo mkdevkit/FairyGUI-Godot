@@ -47,7 +47,8 @@ GObject::GObject() : _scale{1, 1},
                      _data(nullptr),
                      _touchDisabled(false),
                      _alignToBL(false),
-                     _weakPtrRef(0)
+                     _weakPtrRef(0),
+                     _deferredCallsCancelled(false)
 {
     static uint64_t _gInstanceCounter = 1;
     _uid = _gInstanceCounter++;

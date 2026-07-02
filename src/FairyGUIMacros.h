@@ -14,9 +14,13 @@
     void __FUNC__()
 
 #define CALL_LATER(__TYPE__,__FUNC__,...) \
-    call_deferred(StringName(#__FUNC__))
+    { \
+        _deferredCallsCancelled = false; \
+        call_deferred(StringName(#__FUNC__)); \
+    }
 
-#define CALL_LATER_CANCEL(__TYPE__,__FUNC__)
+#define CALL_LATER_CANCEL(__TYPE__,__FUNC__) \
+    _deferredCallsCancelled = true
 
 // FAIRYGUI_CREATE - returns Ref<TYPE>. memnew sets refcount=1,
 // Ref<TYPE>(pRet) calls reference() once (refcount=2). When the

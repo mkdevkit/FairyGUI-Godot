@@ -62,7 +62,8 @@ void TouchInfo::reset()
 }
 
 InputProcessor::InputProcessor(GComponent* owner) :
-    _keyModifiers(0)
+    _keyModifiers(0),
+    _touchListenerEnabled(true)
 {
     _owner = owner;
     _recentInput._inputProcessor = this;
@@ -295,7 +296,7 @@ bool InputProcessor::isTouchOnUI()
 
 void InputProcessor::disableDefaultTouchEvent()
 {
-    // GODOT_TODO: disable default touch handling
+    _touchListenerEnabled = false;
 }
 
 // === Godot input handlers ===

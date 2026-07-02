@@ -124,6 +124,7 @@ void GLoader::setPlaying(bool value)
     if (_playing != value)
     {
         _playing = value;
+        updateMovieClipProcess();
         updateGear(5);
     }
 }
@@ -146,42 +147,163 @@ void GLoader::setFrame(int value)
 
 FillMethod GLoader::getFillMethod() const
 {
-    return (FillMethod)0;
+    return _content ? _content->getFillMethod() : FillMethod::None;
 }
 
 void GLoader::setFillMethod(FillMethod value)
 {
-    // stub
+    if (_content)
+        _content->setFillMethod(value);
 }
 
 FillOrigin GLoader::getFillOrigin() const
 {
-    return (FillOrigin)0;
+    return _content ? _content->getFillOrigin() : FillOrigin::Left;
 }
 
 void GLoader::setFillOrigin(FillOrigin value)
 {
-    // stub
+    if (_content)
+        _content->setFillOrigin(value);
 }
 
 bool GLoader::isFillClockwise() const
 {
-    return false;
+    return _content ? _content->isFillClockwise() : false;
 }
 
 void GLoader::setFillClockwise(bool value)
 {
-    // stub
+    if (_content)
+        _content->setFillClockwise(value);
 }
 
 float GLoader::getFillAmount() const
 {
-    return 0;
+    return _content ? _content->getFillAmount() : 0;
 }
 
 void GLoader::setFillAmount(float value)
 {
-    // stub
+    if (_content)
+        _content->setFillAmount(value);
+}
+
+ActionMovieClip::ActionMovieClip() :
+    _sprite(nullptr),
+    _md(nullptr),
+    _timeScale(1.0f),
+    _repeatDelay(0),
+    _frame(0),
+    _displayFrame(-1),
+    _frameElapsed(0)
+{
+}
+
+ActionMovieClip* ActionMovieClip::create(MovieClipData* md, float repeatDelay)
+{
+    ActionMovieClip* amc = new ActionMovieClip();
+    amc->setAnimation(md, repeatDelay);
+    return amc;
+}
+
+void ActionMovieClip::setAnimation(MovieClipData* md, float repeatDelay)
+{
+    _md = md;
+    _repeatDelay = repeatDelay;
+    _frame = 0;
+    _displayFrame = -1;
+    _frameElapsed = 0;
+    if (_md)
+        drawFrame();
+}
+
+void ActionMovieClip::setFrame(int f)
+{
+    if (_md == nullptr)
+        return;
+
+    int totalFrames = (int)_md->frames.size();
+    if (totalFrames == 0)
+        return;
+
+    if (f < 0)
+        f = 0;
+    if (f >= totalFrames)
+        f = totalFrames - 1;
+
+    _frame = f;
+    _frameElapsed = 0;
+    _displayFrame = -1;
+    drawFrame();
+}
+
+void ActionMovieClip::advance(float dt)
+{
+    if (_md == nullptr || _sprite == nullptr)
+        return;
+
+    int totalFrames = (int)_md->frames.size();
+    if (totalFrames == 0)
+        return;
+
+    _frameElapsed += dt * _timeScale;
+    float frameDelay = _md->interval + _md->frames[_frame].addDelay + _repeatDelay;
+    if (_frameElapsed >= frameDelay)
+    {
+        _frameElapsed -= frameDelay;
+        _frame++;
+        if (_frame >= totalFrames)
+            _frame = 0;
+    }
+
+    drawFrame();
+}
+
+void ActionMovieClip::drawFrame()
+{
+    if (_md == nullptr || _sprite == nullptr)
+        return;
+
+    int totalFrames = (int)_md->frames.size();
+    if (totalFrames == 0)
+        return;
+
+    if (_frame < 0)
+        _frame = 0;
+    if (_frame >= totalFrames)
+        _frame = totalFrames - 1;
+
+    if (_displayFrame == _frame)
+        return;
+
+    _displayFrame = _frame;
+    MovieClipFrameData& frameData = _md->frames[_frame];
+    _sprite->setRegion(frameData.imageData.region);
+    _sprite->setImageFrameInfo(frameData.imageData.originalSize, frameData.imageData.offset);
+    _sprite->setTexture(frameData.imageData.texture);
+    _sprite->setRegionEnabled(true);
+}
+
+void GLoader::updateMovieClipProcess()
+{
+    if (!_content || _contentStatus != 2 || !_playAction)
+        return;
+
+    _playAction->setSprite(_content);
+    if (_playing)
+    {
+        _content->_processCallback = [this](float dt) {
+            if (_playAction)
+                _playAction->advance(dt);
+        };
+        _content->set_process(true);
+    }
+    else
+    {
+        _content->_processCallback = nullptr;
+        _content->set_process(false);
+    }
 }
 
 void GLoader::loadContent()
@@ -233,12 +355,11 @@ void GLoader::loadFromPackage()
             }
             else
                 _playAction->setAnimation(_contentItem->movieclip, _contentItem->repeatDelay);
-            if (_playing)
-            {
-                // stub: runAction
-            }
-            else
+
+            _playAction->setSprite(_content);
+            if (!_playing)
                 _playAction->setFrame(_frame);
+            updateMovieClipProcess();
 
             updateLayout();
         }
@@ -315,7 +436,13 @@ void GLoader::clearContent()
 
     if (_contentStatus == 2)
     {
-        _playAction->setAnimation(nullptr);
+        if (_playAction)
+            _playAction->setAnimation(nullptr);
+        if (_content)
+        {
+            _content->_processCallback = nullptr;
+            _content->set_process(false);
+        }
     }
 
     if (_content2 != nullptr)

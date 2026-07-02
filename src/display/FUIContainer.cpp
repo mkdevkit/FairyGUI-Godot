@@ -1,10 +1,20 @@
 #include "FUIContainer.h"
 #include "GComponent.h"
 #include "GRoot.h"
+#include "display/FUISprite.h"
 #include "event/InputProcessor.h"
+#include "scene/resources/shader.h"
+#include "scene/resources/material.h"
+#include "scene/main/viewport.h"
 #include "servers/rendering_server.h"
 
 NS_FGUI_BEGIN
+
+static void mark_input_handled(Node* node)
+{
+    if (Viewport* vp = node->get_viewport())
+        vp->set_input_as_handled();
+}
 
 static void _queue_redraw_all(Node* node) {
     CanvasItem* ci = Object::cast_to<CanvasItem>(node);
@@ -12,6 +22,50 @@ static void _queue_redraw_all(Node* node) {
     int count = node->get_child_count();
     for (int i = 0; i < count; i++)
         _queue_redraw_all(node->get_child(i));
+}
+
+static Ref<Shader> _mask_shader;
+
+static Ref<Shader> get_mask_shader()
+{
+    if (_mask_shader.is_null())
+    {
+        _mask_shader.instantiate();
+        _mask_shader->set_code(
+            "shader_type canvas_item;\n"
+            "uniform float alpha_threshold : hint_range(0.0, 1.0) = 0.05;\n"
+            "uniform bool inverted = false;\n"
+            "void fragment() {\n"
+            "    float a = texture(TEXTURE, UV).a * COLOR.a;\n"
+            "    bool keep = inverted ? (a <= alpha_threshold) : (a >= alpha_threshold);\n"
+            "    if (!keep)\n"
+            "        discard;\n"
+            "}\n");
+    }
+    return _mask_shader;
+}
+
+static Ref<ShaderMaterial> create_mask_material(float threshold, bool inverted)
+{
+    Ref<ShaderMaterial> mat;
+    mat.instantiate();
+    mat->set_shader(get_mask_shader());
+    mat->set_shader_parameter("alpha_threshold", threshold);
+    mat->set_shader_parameter("inverted", inverted);
+    return mat;
+}
+
+static void apply_mask_material_recursive(Node* node, float threshold, bool inverted)
+{
+    if (CanvasItem* ci = Object::cast_to<CanvasItem>(node))
+    {
+        if (threshold < 1.0f || inverted)
+            ci->set_material(create_mask_material(threshold, inverted));
+        else
+            ci->set_material(Ref<Material>());
+    }
+    for (int i = 0; i < node->get_child_count(); i++)
+        apply_mask_material_recursive(node->get_child(i), threshold, inverted);
 }
 
 FUIContainer::FUIContainer() :
@@ -22,7 +76,7 @@ FUIContainer::FUIContainer() :
     _clipMode(CanvasItem::CLIP_CHILDREN_AND_DRAW),
     gOwner(nullptr)
 {
-    item_rect_changed(); // enable NOTIFICATION_DRAW for Node2D
+    item_rect_changed();
     set_process_unhandled_input(true);
 }
 
@@ -62,8 +116,7 @@ void FUIContainer::_bind_methods()
 
 FUIContainer* FUIContainer::create()
 {
-    FUIContainer* ret = memnew(FUIContainer);
-    return ret;
+    return memnew(FUIContainer);
 }
 
 void FUIContainer::_notification(int p_what)
@@ -85,8 +138,6 @@ void FUIContainer::_notification(int p_what)
     }
     if (p_what == NOTIFICATION_PREDELETE)
     {
-        // Remove all children before Godot's recursive PREDELETE cascade.
-        // Prevents StringName/Callable double-free during SceneTree::finalize().
         while (get_child_count() > 0)
             remove_child(get_child(0));
     }
@@ -98,8 +149,51 @@ void FUIContainer::_deferred_redraw_all()
     _queue_redraw_all(this);
 }
 
+void FUIContainer::_drawStencilSilhouette()
+{
+    FUISprite* sp = Object::cast_to<FUISprite>(_stencil);
+    if (!sp)
+        return;
+
+    Ref<Texture2D> tex = sp->getRealTexture();
+    if (tex.is_null())
+        return;
+
+    Transform2D xf = get_global_transform().affine_inverse() * sp->get_global_transform();
+    draw_set_transform_matrix(xf);
+
+    Rect2 texRect = sp->getRegion();
+    if (texRect.size.x <= 0 || texRect.size.y <= 0)
+        texRect.size = tex->get_size();
+
+    Vector2 size = sp->getContentSize();
+    if (size.x <= 0 || size.y <= 0)
+        size = sp->get_rect().size;
+
+    draw_texture_rect_region(tex, Rect2(Vector2(), size), texRect, Color(1, 1, 1, 1));
+
+    draw_set_transform_matrix(Transform2D());
+}
+
 void FUIContainer::_draw()
 {
+    if (_stencil)
+        _drawStencilSilhouette();
+    else if (_clippingEnabled && _clippingRegion.size.x > 0 && _clippingRegion.size.y > 0)
+        draw_rect(_clippingRegion, Color(1, 1, 1, 0));
+}
+
+void FUIContainer::applyStencilEffects()
+{
+    if (!_stencil)
+        return;
+
+    apply_mask_material_recursive(_stencil, _alphaThreshold, _inverted);
+
+    if (CanvasItem* ci = Object::cast_to<CanvasItem>(_stencil))
+        ci->set_visible(false);
+
+    queue_redraw();
 }
 
 void FUIContainer::unhandled_input(const Ref<::InputEvent>& event)
@@ -110,7 +204,27 @@ void FUIContainer::unhandled_input(const Ref<::InputEvent>& event)
     if (!root) return;
 
     InputProcessor* ip = root->getInputProcessor();
-    if (!ip) return;
+    if (!ip || !ip->isTouchListenerEnabled())
+        return;
+
+    Ref<InputEventScreenTouch> st = event;
+    if (st.is_valid())
+    {
+        if (st->is_pressed())
+            ip->onTouchBegin(st->get_position(), st->get_index());
+        else
+            ip->onTouchEnd(st->get_position(), st->get_index());
+        mark_input_handled(this);
+        return;
+    }
+
+    Ref<InputEventScreenDrag> sd = event;
+    if (sd.is_valid())
+    {
+        ip->onTouchMove(sd->get_position(), sd->get_index());
+        mark_input_handled(this);
+        return;
+    }
 
     Ref<InputEventMouseButton> mb = event;
     if (mb.is_valid()) {
@@ -118,14 +232,15 @@ void FUIContainer::unhandled_input(const Ref<::InputEvent>& event)
         if (mb->is_pressed()) {
             if (btn == (int)MouseButton::WHEEL_UP) {
                 ip->onMouseScroll(mb->get_position(), 1);
+                mark_input_handled(this);
                 return;
             }
             if (btn == (int)MouseButton::WHEEL_DOWN) {
                 ip->onMouseScroll(mb->get_position(), -1);
+                mark_input_handled(this);
                 return;
             }
             if (btn == (int)MouseButton::LEFT) {
-                // Left button uses TouchBegin/TouchEnd for click+drag detection
                 ip->onTouchBegin(mb->get_position(), 0);
             } else {
                 ip->onMouseDown(mb->get_position(), btn);
@@ -137,19 +252,31 @@ void FUIContainer::unhandled_input(const Ref<::InputEvent>& event)
                 ip->onMouseUp(mb->get_position(), btn);
             }
         }
+        mark_input_handled(this);
         return;
     }
 
     Ref<InputEventMouseMotion> mm = event;
     if (mm.is_valid()) {
-        // When left button is held, use onTouchMove for drag detection.
-        // Otherwise use onMouseMove for hover/rollover.
         if (mm->get_button_mask().has_flag(::MouseButtonMask::LEFT)) {
             ip->onTouchMove(mm->get_position(), 0);
         } else {
             ip->onMouseMove(mm->get_position());
         }
+        mark_input_handled(this);
         return;
+    }
+
+    Ref<InputEventKey> key = event;
+    if (key.is_valid())
+    {
+        if (key->is_echo())
+            return;
+        if (key->is_pressed())
+            ip->onKeyDown((int)key->get_keycode());
+        else
+            ip->onKeyUp((int)key->get_keycode());
+        mark_input_handled(this);
     }
 }
 
@@ -164,6 +291,7 @@ void FUIContainer::setClippingEnabled(bool value)
     {
         _clippingEnabled = value;
         applyClipping();
+        queue_redraw();
     }
 }
 
@@ -176,7 +304,10 @@ void FUIContainer::setClippingRegion(const Rect2& clippingRegion)
 {
     _clippingRegion = clippingRegion;
     if (_clippingEnabled)
+    {
         applyClipping();
+        queue_redraw();
+    }
 }
 
 Node* FUIContainer::getStencil() const
@@ -186,13 +317,13 @@ Node* FUIContainer::getStencil() const
 
 void FUIContainer::setStencil(Node* stencil)
 {
-    // In Godot, stencil-style clipping is done via clip_children mode.
-    // The stencil node is added as a child and used as a mask.
     if (_stencil == stencil)
         return;
 
     if (_stencil)
     {
+        if (CanvasItem* ci = Object::cast_to<CanvasItem>(_stencil))
+            ci->set_visible(true);
         _stencil->queue_free();
         _stencil = nullptr;
     }
@@ -202,10 +333,12 @@ void FUIContainer::setStencil(Node* stencil)
     if (_stencil)
     {
         add_child(_stencil);
-        // GODOT_TODO: set up alpha threshold shader for stencil
+        move_child(_stencil, 0);
+        applyStencilEffects();
     }
 
     applyClipping();
+    queue_redraw();
 }
 
 float FUIContainer::getAlphaThreshold() const
@@ -215,8 +348,12 @@ float FUIContainer::getAlphaThreshold() const
 
 void FUIContainer::setAlphaThreshold(float alphaThreshold)
 {
-    _alphaThreshold = alphaThreshold;
-    // GODOT_TODO: apply alpha threshold to stencil children via shader
+    if (_alphaThreshold != alphaThreshold)
+    {
+        _alphaThreshold = alphaThreshold;
+        applyStencilEffects();
+        queue_redraw();
+    }
 }
 
 bool FUIContainer::isInverted() const
@@ -226,13 +363,19 @@ bool FUIContainer::isInverted() const
 
 void FUIContainer::setInverted(bool inverted)
 {
-    _inverted = inverted;
-    // GODOT_TODO: implement inverted stencil
+    if (_inverted != inverted)
+    {
+        _inverted = inverted;
+        applyStencilEffects();
+        queue_redraw();
+    }
 }
 
 void FUIContainer::applyClipping()
 {
-    if (_clippingEnabled || _stencil != nullptr)
+    if (_stencil != nullptr)
+        set_clip_children_mode(CanvasItem::CLIP_CHILDREN_AND_DRAW);
+    else if (_clippingEnabled)
         set_clip_children_mode(_clipMode);
     else
         set_clip_children_mode(CanvasItem::CLIP_CHILDREN_DISABLED);
@@ -241,8 +384,7 @@ void FUIContainer::applyClipping()
 void FUIContainer::setClipMode(int mode)
 {
     _clipMode = (CanvasItem::ClipChildrenMode)mode;
-    if (_clippingEnabled || _stencil != nullptr)
-        applyClipping();
+    applyClipping();
 }
 
 NS_FGUI_END

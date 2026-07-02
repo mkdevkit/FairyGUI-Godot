@@ -6,6 +6,7 @@
 #include "UIObjectFactory.h"
 #include "UIPackage.h"
 #include "display/FUIContainer.h"
+#include "event/HitTest.h"
 #include "utils/ByteBuffer.h"
 #include "utils/ToolSet.h"
 #include <cfloat>
@@ -688,6 +689,8 @@ void GComponent::setBounds(float ax, float ay, float aw, float ah)
 
 void GComponent::doUpdateBounds()
 {
+    if (_deferredCallsCancelled)
+        return;
     if (_boundsChanged)
         updateBounds();
 }
@@ -781,6 +784,8 @@ void GComponent::childSortingOrderChanged(GObject* child, int oldValue, int newV
 
 void GComponent::buildNativeDisplayList()
 {
+    if (_deferredCallsCancelled)
+        return;
     int cnt = (int)_children.size();
     if (cnt == 0)
         return;
@@ -1330,7 +1335,9 @@ void GComponent::constructFromResource(std::vector<GObject*>* objectPool, int po
     }
     else if (i1 != 0 && i2 != -1)
     {
-        //setHitArea(new ChildHitArea(getChildAt(i2)));
+        GObject* child = getChildAt(i2);
+        if (child)
+            setHitArea(new ChildHitArea(child));
     }
 
     buffer->seek(0, 5);

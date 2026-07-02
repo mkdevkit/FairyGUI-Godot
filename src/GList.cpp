@@ -1159,6 +1159,8 @@ void GList::setVirtualListChangedFlag(bool layoutChanged)
 
 void GList::doRefreshVirtualList()
 {
+    if (_deferredCallsCancelled)
+        return;
     bool layoutChanged = _virtualListChanged == 2;
     _virtualListChanged = 0;
     _eventLocked = true;

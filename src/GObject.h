@@ -45,6 +45,8 @@ public:
     bool isPixelSnapping() const { return _pixelSnapping; }
     void setPixelSnapping(bool value);
 
+    bool isDeferredCallCancelled() const { return _deferredCallsCancelled; }
+
     float getWidth() const { return _size.width; }
     void setWidth(float value) { setSize(value, _rawSize.height); }
     float getHeight() const { return _size.height; }
@@ -252,6 +254,7 @@ protected:
     bool _touchable;
     bool _grayed;
     bool _finalGrayed;
+    bool _deferredCallsCancelled;
 
 private:
     bool internalVisible() const;

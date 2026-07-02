@@ -107,6 +107,8 @@ void GGroup::setBoundsChangedFlag(bool positionChangedOnly)
 
 void GGroup::ensureBoundsCorrect()
 {
+    if (_deferredCallsCancelled)
+        return;
     if (_parent == nullptr || !_boundsChanged)
         return;
 

@@ -202,6 +202,8 @@ private:
     int _loop;
     bool _hover;
 
+    bool _deferredCallsCancelled;
+
     int _headerLockedSize;
     int _footerLockedSize;
 

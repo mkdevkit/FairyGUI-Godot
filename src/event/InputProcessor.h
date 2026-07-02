@@ -34,6 +34,7 @@ public:
 
     // === Godot input entry points ===
     void disableDefaultTouchEvent();
+    bool isTouchListenerEnabled() const { return _touchListenerEnabled; }
     bool onTouchBegin(const Vector2& screenPos, int touchId);
     void onTouchMove(const Vector2& screenPos, int touchId);
     void onTouchEnd(const Vector2& screenPos, int touchId);
@@ -64,6 +65,7 @@ private:
     CaptureEventCallback _captureCallback;
     InputEvent _recentInput;
     uint16_t _keyModifiers;
+    bool _touchListenerEnabled;
 
     static bool _touchOnUI;
     static unsigned int _touchOnUIFlagFrameId;

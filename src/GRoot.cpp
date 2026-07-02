@@ -557,6 +557,8 @@ void GRoot::showTooltipsWin(GObject* tooltipWin)
 
 void GRoot::doShowTooltipsWin()
 {
+    if (_deferredCallsCancelled)
+        return;
     if (_tooltipWin == nullptr)
         return;
 
@@ -697,7 +699,12 @@ void GRoot::onInitWithParent(Node* parent, int zOrder, bool deferAdd)
     if (fc)
     {
         fc->set_process(true);
-        fc->_processCallback = [](float dt) { TweenManager::update(dt); };
+        fc->_processCallback = [](float dt) {
+            TweenManager::update(dt);
+            GRoot* root = GRoot::getInstance();
+            if (root && root->getInputProcessor())
+                root->getInputProcessor()->onFrameUpdate();
+        };
     }
 
     if (parent)

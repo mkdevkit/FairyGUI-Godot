@@ -34,6 +34,7 @@ public:
 
     void editBoxReturn();
     void editBoxTextChanged(const std::string& text);
+    void onTextSubmitted();
 
 protected:
     virtual void handleInit() override;

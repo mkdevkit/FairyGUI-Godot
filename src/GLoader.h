@@ -14,24 +14,28 @@ class FUISprite;
 class ActionMovieClip
 {
 public:
-    ActionMovieClip() : _md(nullptr), _timeScale(1.0f), _frame(0) {}
-    
-    static ActionMovieClip* create(MovieClipData* md, float repeatDelay = 0) {
-        ActionMovieClip* amc = new ActionMovieClip();
-        amc->setAnimation(md, repeatDelay);
-        return amc;
-    }
-    
-    void setAnimation(MovieClipData* md, float repeatDelay = 0) { _md = md; }
+    ActionMovieClip();
+    ~ActionMovieClip() = default;
+
+    static ActionMovieClip* create(MovieClipData* md, float repeatDelay = 0);
+
+    void setSprite(FUISprite* sprite) { _sprite = sprite; }
+    void setAnimation(MovieClipData* md, float repeatDelay = 0);
     void setTimeScale(float ts) { _timeScale = ts; }
     float getTimeScale() const { return _timeScale; }
-    void setFrame(int f) { _frame = f; }
-    void advance(float dt) { /* stub */ }
-    
+    void setFrame(int f);
+    void advance(float dt);
+
 private:
+    void drawFrame();
+
+    FUISprite* _sprite;
     MovieClipData* _md;
     float _timeScale;
+    float _repeatDelay;
     int _frame;
+    int _displayFrame;
+    float _frameElapsed;
 };
 
 class GLoader : public GObject
@@ -127,6 +131,7 @@ private:
     void updateLayout();
     void setErrorState();
     void clearErrorState();
+    void updateMovieClipProcess();
 
     std::string _url;
     AlignType _align;

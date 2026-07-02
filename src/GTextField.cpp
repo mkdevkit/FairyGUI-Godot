@@ -353,12 +353,28 @@ void GBasicTextField::handleSizeChanged()
         return;
 
     _label->_contentSize = Vector2(_size.width, _size.height);
+
+    if (_autoSize == AutoSizeType::SHRINK && !_text.empty() && _size.width > 0 && _size.height > 0)
+    {
+        int fontSize = (int)getTextFormat()->fontSize;
+        while (fontSize > 1)
+        {
+            _label->setDrawFontSize(fontSize);
+            Vector2 sz = _label->getTextSize();
+            if (sz.x <= _size.width && sz.y <= _size.height)
+                break;
+            fontSize--;
+        }
+    }
+    else
+    {
+        _label->setDrawFontSize(0);
+    }
+
     _label->queue_redraw();
 
     if (_autoSize != AutoSizeType::BOTH)
     {
-        // GODOT_ADAPT: set_size not available on FUILabel
-
         if (_autoSize == AutoSizeType::HEIGHT)
         {
             if (!_text.empty())
