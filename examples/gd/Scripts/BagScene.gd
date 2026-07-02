@@ -1,6 +1,5 @@
 extends DemoSceneBase
 
-var _view: Object
 var _bag_window: Object = null
 var _bag_window_inited: bool = false
 

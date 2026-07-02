@@ -1,6 +1,5 @@
 extends DemoSceneBase
 
-var _view: Object
 var _btn_group: Object
 
 var _g1: Object = null

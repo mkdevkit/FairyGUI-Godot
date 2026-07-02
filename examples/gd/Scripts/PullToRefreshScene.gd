@@ -1,6 +1,5 @@
 extends DemoSceneBase
 
-var _view: Object
 var _list1: Object
 var _list2: Object
 var _refreshing1: bool = false

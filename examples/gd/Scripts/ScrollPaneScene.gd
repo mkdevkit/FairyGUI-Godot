@@ -1,6 +1,5 @@
 extends DemoSceneBase
 
-var _view: Object
 var _list: Object
 
 func continue_init() -> void:

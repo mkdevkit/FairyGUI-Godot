@@ -1,6 +1,5 @@
 extends DemoSceneBase
 
-var _view: Object
 var _test_win: Object = null
 
 func continue_init() -> void:

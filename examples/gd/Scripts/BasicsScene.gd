@@ -1,6 +1,5 @@
 extends DemoSceneBase
 
-var _view: Object
 var _back_btn: Object
 var _demo_container: Object
 var _cc: Object

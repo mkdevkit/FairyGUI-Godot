@@ -1,6 +1,5 @@
 extends DemoSceneBase
 
-var _view: Object
 var _guide_layer: Object
 var _bag_btn: Object
 

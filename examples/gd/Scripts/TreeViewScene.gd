@@ -1,6 +1,5 @@
 extends DemoSceneBase
 
-var _view: Object
 var _tree1: Object
 var _tree2: Object
 

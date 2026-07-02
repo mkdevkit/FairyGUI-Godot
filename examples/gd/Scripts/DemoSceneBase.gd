@@ -2,6 +2,7 @@ class_name DemoSceneBase
 extends Node
 
 var _groot: Object
+var _view: Object = null
 
 func _ready() -> void:
 	# GRoot 需要先创建才能使用，如果尚未创建则延迟到下一帧

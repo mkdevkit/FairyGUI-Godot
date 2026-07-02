@@ -1,6 +1,5 @@
 extends DemoSceneBase
 
-var _view: Object
 var _list: Object
 var _input: Object
 var _messages: Array = []

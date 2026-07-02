@@ -1,6 +1,5 @@
 extends DemoSceneBase
 
-var _view: Object
 var _joystick: JoystickModule
 
 func continue_init() -> void:

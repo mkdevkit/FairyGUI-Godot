@@ -152,7 +152,7 @@ void GComponent::removeChildAt(int index)
         _sortingChildCount--;
 
     child->setGroup(nullptr);
-    if (child->_displayObject->get_parent() != nullptr)
+    if (child->_displayObject != nullptr && child->_displayObject->get_parent() != nullptr)
     {
         _container->remove_child(child->_displayObject);
         if (_childrenRenderOrder == ChildrenRenderOrder::ARCH)
