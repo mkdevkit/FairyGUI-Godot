@@ -36,6 +36,7 @@ class DrawNode : public Node2D {
 
         void clear() {
             _cmds.clear();
+            _outlinePts.clear();
             queue_redraw();
         }
 
@@ -58,6 +59,7 @@ class DrawNode : public Node2D {
                 pts.push_back(Vector2(center.x + radius * cos(angle), center.y + radius * sin(angle) * scaleY));
             }
             _outlinePts.push_back({pts, color, _lineWidth});
+            queue_redraw();
         }
 
         void drawSolidCircle(const Vector2& center, float radius, float, float, int, float scaleY, const Color& color) {
@@ -147,6 +149,42 @@ static void drawVertRect(DrawNode* shape, float x, float y, float width, float h
     float my = y + height;
     shape->drawTriangle(Vector2(x, y), Vector2(mx, y), Vector2(x, my), color);
     shape->drawTriangle(Vector2(mx, y), Vector2(mx, my), Vector2(x, my), color);
+}
+
+static void appendArc(std::vector<Vector2>& pts, const Vector2& center, float radius, float startRad, float endRad, int segments)
+{
+    if (radius <= 0)
+        return;
+    for (int i = 0; i <= segments; i++)
+    {
+        float t = startRad + (endRad - startRad) * i / segments;
+        pts.push_back(center + Vector2(Math::cos(t) * radius, Math::sin(t) * radius));
+    }
+}
+
+static void drawRoundedFill(DrawNode* shape, float x, float y, float w, float h, const float* radii, const Color& color)
+{
+    float rtl = radii ? radii[0] : 0;
+    float rtr = radii ? radii[1] : 0;
+    float rbl = radii ? radii[2] : 0;
+    float rbr = radii ? radii[3] : 0;
+    float maxR = std::min(w, h) * 0.5f;
+    rtl = std::min(rtl, maxR);
+    rtr = std::min(rtr, maxR);
+    rbl = std::min(rbl, maxR);
+    rbr = std::min(rbr, maxR);
+
+    const int seg = 8;
+    std::vector<Vector2> pts;
+    pts.reserve(64);
+
+    appendArc(pts, Vector2(x + rtl, y + rtl), rtl, (float)M_PI, (float)M_PI * 1.5f, seg);
+    appendArc(pts, Vector2(x + w - rtr, y + rtr), rtr, (float)M_PI * 1.5f, (float)M_PI * 2.0f, seg);
+    appendArc(pts, Vector2(x + w - rbr, y + h - rbr), rbr, 0, (float)M_PI * 0.5f, seg);
+    appendArc(pts, Vector2(x + rbl, y + h - rbl), rbl, (float)M_PI * 0.5f, (float)M_PI, seg);
+
+    if (pts.size() >= 3)
+        shape->drawPolygon(pts.data(), (int)pts.size(), color, 0, Color(0, 0, 0, 0));
 }
 
 GGraph::GGraph() : _shape(nullptr),
@@ -249,17 +287,32 @@ void GGraph::updateShape()
     {
     case 1:
     {
+        bool hasRadius = _cornerRadius != nullptr &&
+                (_cornerRadius[0] > 0 || _cornerRadius[1] > 0 || _cornerRadius[2] > 0 || _cornerRadius[3] > 0);
+
         if (_lineSize > 0)
         {
             float wl = _size.width - _lineSize;
             float hl = _size.height - _lineSize;
-            drawVertRect(_shape, 0, 0, wl, _lineSize, _lineColor);
-            drawVertRect(_shape, wl, 0, _lineSize, hl, _lineColor);
-            drawVertRect(_shape, _lineSize, hl, wl, _lineSize, _lineColor);
-            drawVertRect(_shape, 0, _lineSize, _lineSize, hl, _lineColor);
-
-            drawVertRect(_shape, _lineSize, _lineSize, _size.width - _lineSize * 2, _size.height - _lineSize * 2, _fillColor);
+            if (hasRadius)
+            {
+                drawRoundedFill(_shape, 0, 0, _size.width, _size.height, _cornerRadius, _lineColor);
+                float innerRadii[4];
+                for (int i = 0; i < 4; i++)
+                    innerRadii[i] = std::max(0.0f, _cornerRadius[i] - _lineSize);
+                drawRoundedFill(_shape, _lineSize, _lineSize, wl, hl, innerRadii, _fillColor);
+            }
+            else
+            {
+                drawVertRect(_shape, 0, 0, wl, _lineSize, _lineColor);
+                drawVertRect(_shape, wl, 0, _lineSize, hl, _lineColor);
+                drawVertRect(_shape, _lineSize, hl, wl, _lineSize, _lineColor);
+                drawVertRect(_shape, 0, _lineSize, _lineSize, hl, _lineColor);
+                drawVertRect(_shape, _lineSize, _lineSize, wl, hl, _fillColor);
+            }
         }
+        else if (hasRadius)
+            drawRoundedFill(_shape, 0, 0, _size.width, _size.height, _cornerRadius, _fillColor);
         else
             drawVertRect(_shape, 0, 0, _size.width, _size.height, _fillColor);
         break;

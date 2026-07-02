@@ -130,6 +130,7 @@ protected:
     virtual void setup_afterAdd(ByteBuffer* buffer, int beginPos) override;
     virtual void handleInit() override;
     virtual void handleSizeChanged() override;
+    virtual void applyPivotOffset() override;
     virtual void handleGrayedChanged() override;
     virtual void handleControllerChanged(GController* c) override;
 
@@ -159,6 +160,7 @@ protected:
 private:
     int getInsertPosForSortingChild(GObject* target);
     int moveChild(GObject* child, int oldIndex, int index);
+    static void ensure_display_child_added(FUIInnerContainer* container, GObject* child);
 
     CALL_LATER_FUNC(GComponent, doUpdateBounds);
     CALL_LATER_FUNC(GComponent, buildNativeDisplayList);

@@ -2,6 +2,7 @@
 #include "PackageItem.h"
 #include "UIPackage.h"
 #include "utils/ByteBuffer.h"
+#include "core/io/xml_parser.h"
 
 NS_FGUI_BEGIN
 
@@ -14,95 +15,60 @@ static std::string intToStr(int v)
     return std::string(Variant(v).stringify().utf8().get_data());
 }
 
-static void skipWhitespace(const char*& p, const char* end)
-{
-    while (p < end && (*p == ' ' || *p == '\t' || *p == '\n' || *p == '\r'))
-        ++p;
-}
-
-static std::string extractAttrValue(const char*& p, const char* end, const char* attrName)
-{
-    std::string result;
-    int nameLen = (int)strlen(attrName);
-    while (p < end)
-    {
-        skipWhitespace(p, end);
-        if (p >= end || *p == '>' || *p == '/' || *p == '?')
-            break;
-        if (strncmp(p, attrName, nameLen) == 0 && (p[nameLen] == '=' || p[nameLen] == ' '))
-        {
-            p += nameLen;
-            skipWhitespace(p, end);
-            if (p < end && *p == '=')
-            {
-                ++p;
-                skipWhitespace(p, end);
-                if (p < end && (*p == '"' || *p == '\''))
-                {
-                    char quote = *p++;
-                    while (p < end && *p != quote)
-                        result += *p++;
-                    if (p < end) ++p;
-                    return result;
-                }
-            }
-        }
-        ++p;
-    }
-    return result;
-}
-
 void TranslationHelper::loadFromXML(const char* xmlString, size_t nBytes)
 {
     strings.clear();
 
-    const char* p = xmlString;
-    const char* end = xmlString + nBytes;
+    if (xmlString == nullptr || nBytes == 0)
+        return;
 
-    while (p < end)
+    PackedByteArray buffer;
+    buffer.resize((int)nBytes);
+    memcpy(buffer.ptrw(), xmlString, nBytes);
+
+    Ref<XMLParser> parser;
+    parser.instantiate();
+    if (parser->open_buffer(buffer) != OK)
+        return;
+
+    while (true)
     {
-        // Find start of <string> element
-        const char* tagStart = strstr(p, "<string");
-        if (!tagStart || tagStart >= end)
+        Error err = parser->read();
+        if (err != OK)
             break;
 
-        p = tagStart + 7; // skip "<string"
-
-        // Extract name attribute
-        std::string key = extractAttrValue(p, end, "name");
-        if (key.empty())
-        {
-            // Couldn't find name, try to find next element
-            p = strstr(p, "<string");
-            if (!p) break;
-            p += 7;
+        if (parser->get_node_type() != XMLParser::NODE_ELEMENT)
             continue;
+
+        if (parser->get_node_name() != String("string"))
+            continue;
+
+        String nameAttr = parser->get_named_attribute_value("name");
+        if (nameAttr.is_empty())
+            continue;
+
+        std::string key = nameAttr.utf8().get_data();
+        std::string text;
+
+        if (!parser->is_empty())
+        {
+            while (true)
+            {
+                Error inner = parser->read();
+                if (inner != OK)
+                    break;
+                if (parser->get_node_type() == XMLParser::NODE_ELEMENT_END)
+                    break;
+                if (parser->get_node_type() == XMLParser::NODE_TEXT)
+                    text += std::string(parser->get_node_data().utf8().get_data());
+            }
         }
 
-        // Find closing '>' of the opening tag
-        const char* dataStart = (const char*)memchr(p, '>', end - p);
-        if (!dataStart) break;
-        dataStart++; // skip past '>'
-
-        // Find closing tag
-        const char* closingTag = strstr(dataStart, "</string>");
-        if (!closingTag) break;
-
-        std::string text(dataStart, closingTag - dataStart);
-
-        size_t i = key.find("-");
+        size_t i = key.find('-');
         if (i == std::string::npos)
-        {
-            p = closingTag + 9; // skip "</string>"
             continue;
-        }
 
-        std::string key2 = key.substr(0, i);
-        std::string key3 = key.substr(i + 1);
-        std::unordered_map<std::string, std::string>& col = strings[key2];
-        col[key3] = text;
-
-        p = closingTag + 9; // skip "</string>"
+        strings[key.substr(0, i)][key.substr(i + 1)] = text;
     }
 }
 

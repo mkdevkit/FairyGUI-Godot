@@ -1,5 +1,6 @@
 #include "utils/ToolSet.h"
 #include "core/io/file_access.h"
+#include "servers/display_server.h"
 
 NS_FGUI_BEGIN
 using namespace std;
@@ -67,6 +68,14 @@ int ToolSet::findInStringArray(const std::vector<std::string>& arr, const std::s
 bool ToolSet::isFileExist(const std::string& fileName)
 {
     return FileAccess::exists(String(fileName.c_str()));
+}
+
+bool ToolSet::isDesktopInput()
+{
+    DisplayServer* ds = DisplayServer::get_singleton();
+    if (!ds)
+        return true;
+    return !ds->is_touchscreen_available();
 }
 
 FastSplitter::FastSplitter() : data(nullptr), dataLength(-1), delimiter('\0')

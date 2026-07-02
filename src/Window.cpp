@@ -223,7 +223,7 @@ void GWindow::layoutModalWaitPane()
     {
         Vector2 pt = _frame->localToGlobal(Vector2());
         pt = globalToLocal(pt);
-        ((Node2D*)_modalWaitPane->displayObject())->set_position(Vector2((int)pt.x + _contentArea->getX(), (int)pt.y + _contentArea->getY()));
+        _modalWaitPane->setPosition((int)pt.x + _contentArea->getX(), (int)pt.y + _contentArea->getY());
         _modalWaitPane->setSize(_contentArea->getWidth(), _contentArea->getHeight());
     }
     else

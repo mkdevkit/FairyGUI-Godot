@@ -9,6 +9,7 @@
 #include "gears/GearDisplay.h"
 #include "gears/GearDisplay2.h"
 #include "utils/ByteBuffer.h"
+#include "utils/ToolSet.h"
 #include "utils/WeakPtr.h"
 #include <sstream>
 #include <cfloat>
@@ -25,6 +26,8 @@ GObject::GObject() : _scale{1, 1},
                      _pivotAsAnchor(false),
                      _alpha(1.0f),
                      _rotation(0.0f),
+                     _skewX(0.0f),
+                     _skewY(0.0f),
                      _visible(true),
                      _internalVisible(true),
                      _handlingController(false),
@@ -85,8 +88,8 @@ bool GObject::init()
 
     if (_displayObject != nullptr)
     {
-        _displayObject->connect("tree_entered", callable_mp(this, &GObject::_enter_tree), CONNECT_REFERENCE_COUNTED);
-        _displayObject->connect("tree_exiting", callable_mp(this, &GObject::_exit_tree), CONNECT_REFERENCE_COUNTED);
+        _displayObject->connect("tree_entered", callable_mp(this, &GObject::onDisplayTreeEntered), CONNECT_REFERENCE_COUNTED);
+        _displayObject->connect("tree_exiting", callable_mp(this, &GObject::onDisplayTreeExiting), CONNECT_REFERENCE_COUNTED);
     }
     return true;
 }
@@ -260,6 +263,7 @@ void GObject::setPivot(float xv, float yv, bool asAnchor)
     {
         _pivot = Vector2(xv, yv);
         _pivotAsAnchor = asAnchor;
+        applyPivotOffset();
         handlePositionChanged();
     }
 }
@@ -278,12 +282,40 @@ void GObject::setScale(float xv, float yv)
 
 void GObject::setSkewX(float value)
 {
-    _skewX = value;
+    if (_skewX != value)
+    {
+        _skewX = value;
+        if (_skewX == 0.0f && _skewY == 0.0f)
+        {
+            if (Node2D* node = Object::cast_to<Node2D>(_displayObject))
+            {
+                node->set_position(computeDisplayPosition());
+                node->set_rotation(Math::deg_to_rad(_rotation));
+                node->set_scale(computeDisplayScale());
+            }
+        }
+        else
+            rebuildSkewedTransform();
+    }
 }
 
 void GObject::setSkewY(float value)
 {
-    _skewY = value;
+    if (_skewY != value)
+    {
+        _skewY = value;
+        if (_skewX == 0.0f && _skewY == 0.0f)
+        {
+            if (Node2D* node = Object::cast_to<Node2D>(_displayObject))
+            {
+                node->set_position(computeDisplayPosition());
+                node->set_rotation(Math::deg_to_rad(_rotation));
+                node->set_scale(computeDisplayScale());
+            }
+        }
+        else
+            rebuildSkewedTransform();
+    }
 }
 
 void GObject::setRotation(float value)
@@ -291,7 +323,13 @@ void GObject::setRotation(float value)
     if (_rotation != value)
     {
         _rotation = value;
-        ((Node2D*)_displayObject)->set_rotation(_rotation);
+        if (_displayObject)
+        {
+            if (_skewX != 0.0f || _skewY != 0.0f)
+                rebuildSkewedTransform();
+            else if (Node2D* node = Object::cast_to<Node2D>(_displayObject))
+                node->set_rotation(Math::deg_to_rad(_rotation));
+        }
         updateGear(3);
     }
 }
@@ -459,8 +497,8 @@ Vector2 GObject::localToGlobal(const Vector2& pt)
         pt2.x += _size.width * _pivot.x;
         pt2.y += _size.height * _pivot.y;
     }
-    // FairyGUI + Godot both Y-down: no Y flip needed (cocos had: pt2.y = _size.height - pt2.y)
-    pt2 = ((Node2D*)_displayObject)->to_global(pt2);
+    // FairyGUI + Godot both Y-down: no Y flip (Cocos had: pt2.y = _size.height - pt2.y)
+    pt2 = ((CanvasItem*)_displayObject)->get_global_transform_with_canvas().xform(pt2);
     return GRoot::getInstance()->worldToRoot(pt2);
 }
 
@@ -479,8 +517,8 @@ Rect2 GObject::localToGlobal(const Rect2& rect)
 Vector2 GObject::globalToLocal(const Vector2& pt)
 {
     Vector2 pt2 = GRoot::getInstance()->rootToWorld(pt);
-    pt2 = ((Node2D*)_displayObject)->to_local(pt2);
-    // FairyGUI + Godot both Y-down: no Y flip needed (cocos had: pt2.y = _size.height - pt2.y)
+    pt2 = ((CanvasItem*)_displayObject)->get_global_transform_with_canvas().affine_inverse().xform(pt2);
+    // FairyGUI + Godot both Y-down: no Y flip (Cocos had: pt2.y = _size.height - pt2.y)
     if (_pivotAsAnchor)
     {
         pt2.x -= _size.width * _pivot.x;
@@ -709,8 +747,7 @@ GObject* GObject::hitTest(const Vector2& worldPoint, const Camera2D* camera)
 
     Rect rect;
     rect.size = _size;
-    //if (isScreenPointInRect(worldPoint, camera, _displayObject->getWorldToNodeTransform(), rect, nullptr))
-    if (rect.has_point(((Node2D*)_displayObject)->to_local(worldPoint)))
+    if (rect.has_point(globalToLocal(worldPoint)))
         return this;
     else
         return nullptr;
@@ -720,6 +757,18 @@ void GObject::handleInit()
 {
     _displayObject = memnew(FUISprite);
 
+}
+
+void GObject::onDisplayTreeEntered()
+{
+    _enter_tree();
+    if (FUISprite* sp = Object::cast_to<FUISprite>(_displayObject))
+        sp->queue_redraw();
+}
+
+void GObject::onDisplayTreeExiting()
+{
+    _exit_tree();
 }
 
 void GObject::_enter_tree()
@@ -779,42 +828,99 @@ void GObject::gd_removeChild(Object* node)
     if (go) removeChild(go);
 }
 
+Vector2 GObject::computeDisplayPosition() const
+{
+    Vector2 pt = _position;
+    if (!_pivotAsAnchor)
+    {
+        pt.x += _size.width * _pivot.x;
+        pt.y += _size.height * _pivot.y;
+    }
+    if (_alignToBL)
+    {
+        float parentH = 0;
+        if (_parent != nullptr)
+            parentH = _parent->getSize().height;
+        else if (_displayObject)
+        {
+            Node* pn = _displayObject->get_parent();
+            if (pn)
+            {
+                FUIContainer* fc = Object::cast_to<FUIContainer>(pn);
+                if (fc && fc->gOwner)
+                    parentH = fc->gOwner->getSize().height;
+            }
+        }
+        pt.y = parentH - pt.y;
+    }
+    if (_pixelSnapping)
+    {
+        pt.x = (int)pt.x;
+        pt.y = (int)pt.y;
+    }
+    return pt;
+}
+
+Vector2 GObject::computeContentPivotOffset() const
+{
+    // Cocos: setAnchorPoint(pivot.x, 1 - pivot.y) on Y-up engine.
+    // Godot Y-down: shift content so node origin sits on the pivot (rotation/scale center).
+    return Vector2(-_size.width * _pivot.x, -_size.height * _pivot.y);
+}
+
+void GObject::applyPivotOffset()
+{
+    if (!_displayObject)
+        return;
+
+    if (FUISprite* sp = Object::cast_to<FUISprite>(_displayObject))
+        sp->set_offset(computeContentPivotOffset());
+}
+
+Vector2 GObject::computeDisplayScale() const
+{
+    if (_sizeImplType == 0 || sourceSize.width == 0 || sourceSize.height == 0)
+        return Vector2(_scale.x, _scale.y);
+    return Vector2(_scale.x * _size.width / sourceSize.width, _scale.y * _size.height / sourceSize.height);
+}
+
+void GObject::rebuildSkewedTransform()
+{
+    if (!_displayObject)
+        return;
+
+    Node2D* node = Object::cast_to<Node2D>(_displayObject);
+    if (!node)
+        return;
+
+    const Vector2 scale = computeDisplayScale();
+    const Vector2 origin = computeDisplayPosition();
+
+    const float cx = Math::cos(Math::deg_to_rad(_skewX));
+    const float sx = Math::sin(Math::deg_to_rad(_skewX));
+    const float cy = -Math::sin(Math::deg_to_rad(_skewY));
+    const float sy = Math::cos(Math::deg_to_rad(_skewY));
+    const float cz = Math::cos(Math::deg_to_rad(_rotation));
+    const float sz = Math::sin(Math::deg_to_rad(_rotation));
+
+    Transform2D xf;
+    xf.columns[0][0] = (cx * cz - sx * sz) * scale.x;
+    xf.columns[0][1] = (cx * sz + sx * cz) * scale.x;
+    xf.columns[1][0] = (cy * cz - sy * sz) * scale.y;
+    xf.columns[1][1] = (cy * sz + sy * cz) * scale.y;
+    xf.set_origin(origin);
+    node->set_transform(xf);
+}
+
 void GObject::handlePositionChanged()
 {
-    if (_displayObject)
-    {
-        Vector2 pt = _position;
-        // FairyGUI editor uses top-left Y-down, same as Godot Node2D. No Y flip needed.
-        // pt.y = -pt.y;
-        if (!_pivotAsAnchor)
-        {
-            pt.x += _size.width * _pivot.x;
-            pt.y += _size.height * _pivot.y; // Y-down: add pivot offset
-        }
-        if (_alignToBL)
-        {
-            float parentH = 0;
-            if (_parent != nullptr)
-                parentH = _parent->getSize().height;
-            else
-            {
-                // Try parent node's gOwner for size
-                Node* pn = _displayObject->get_parent();
-                if (pn) {
-                    FUIContainer* fc = Object::cast_to<FUIContainer>(pn);
-                    if (fc && fc->gOwner)
-                        parentH = fc->gOwner->getSize().height;
-                }
-            }
-            pt.y = parentH - pt.y;
-        }
-        if (_pixelSnapping)
-        {
-            pt.x = (int)pt.x;
-            pt.y = (int)pt.y;
-        }
-        ((Node2D*)_displayObject)->set_position(pt);
-    }
+    if (!_displayObject)
+        return;
+
+    if (_skewX != 0.0f || _skewY != 0.0f)
+        rebuildSkewedTransform();
+    else if (Node2D* node = Object::cast_to<Node2D>(_displayObject))
+        node->set_position(computeDisplayPosition());
 }
 
 void GObject::handleSizeChanged()
@@ -822,10 +928,17 @@ void GObject::handleSizeChanged()
     if (!_displayObject)
         return;
 
+    // Match Cocos: size change only updates content size or size-impl scale,
+    // never rebuilds position / rotation (avoids gear hover artifacts).
     if (_sizeImplType == 0 || sourceSize.width == 0 || sourceSize.height == 0)
-        ((Node2D*)_displayObject)->set_scale(Vector2(1, 1));
+    {
+        if (FUISprite* sp = Object::cast_to<FUISprite>(_displayObject))
+            sp->set_content_size(_size);
+    }
     else
-        ((Node2D*)_displayObject)->set_scale(Vector2(_scale.x * _size.width / sourceSize.width, _scale.y * _size.height / sourceSize.height));
+        handleScaleChanged();
+
+    applyPivotOffset();
 }
 
 void GObject::handleScaleChanged()
@@ -833,10 +946,10 @@ void GObject::handleScaleChanged()
     if (!_displayObject)
         return;
 
-    if (_sizeImplType == 0 || sourceSize.width == 0 || sourceSize.height == 0)
-        ((Node2D*)_displayObject)->set_scale(Vector2(_scale.x, _scale.y));
-    else
-        ((Node2D*)_displayObject)->set_scale(Vector2(_scale.x * _size.width / sourceSize.width, _scale.y * _size.height / sourceSize.height));
+    if (_skewX != 0.0f || _skewY != 0.0f)
+        rebuildSkewedTransform();
+    else if (Node2D* node = Object::cast_to<Node2D>(_displayObject))
+        node->set_scale(computeDisplayScale());
 }
 
 void GObject::handleAlphaChanged()
@@ -1027,12 +1140,9 @@ void GObject::onTouchMove(EventContext* context)
 
     if (_draggingObject != this && _draggable && _dragTesting)
     {
-        int sensitivity;
-#ifdef CC_PLATFORM_PC
-        sensitivity = UIConfig::clickDragSensitivity;
-#else
-        sensitivity = UIConfig::touchDragSensitivity;
-#endif
+        int sensitivity = ToolSet::isDesktopInput()
+                ? UIConfig::clickDragSensitivity
+                : UIConfig::touchDragSensitivity;
         if (std::abs(_dragTouchStartPos.x - evt->getPosition().x) < sensitivity && std::abs(_dragTouchStartPos.y - evt->getPosition().y) < sensitivity)
             return;
 

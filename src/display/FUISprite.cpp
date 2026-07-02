@@ -139,6 +139,7 @@ void FUISprite::setImageFrameInfo(const Vector2& originalSize, const Vector2& tr
 {
     _originalContentSize = originalSize;
     _trimOffset = trimOffset;
+    queue_redraw();
 }
 
 void FUISprite::setScale9Grid(const Rect2& value)
@@ -199,6 +200,36 @@ void FUISprite::setScaleByTile(bool value)
     else
         set_texture_repeat(CanvasItem::TEXTURE_REPEAT_DISABLED);
     queue_redraw();
+}
+
+void FUISprite::setFlippedH(bool v)
+{
+    set_flip_h(v);
+    queue_redraw();
+}
+
+void FUISprite::setFlippedV(bool v)
+{
+    set_flip_v(v);
+    queue_redraw();
+}
+
+static void draw_texture_region_with_flip(CanvasItem* item, const Ref<Texture2D>& tex,
+        const Rect2& dst, const Rect2& src, const Color& modulate, bool flipH, bool flipV)
+{
+    if (!flipH && !flipV)
+    {
+        item->draw_texture_rect_region(tex, dst, src, modulate);
+        return;
+    }
+
+    const Vector2 center = dst.get_center();
+    const Vector2 scale(flipH ? -1.0f : 1.0f, flipV ? -1.0f : 1.0f);
+    item->draw_set_transform(center, 0.0f, scale);
+    item->draw_texture_rect_region(tex,
+        Rect2(-dst.size.x * 0.5f, -dst.size.y * 0.5f, dst.size.x, dst.size.y),
+        src, modulate);
+    item->draw_set_transform(Vector2(), 0.0f, Vector2(1.0f, 1.0f));
 }
 
 void FUISprite::setGrayed(bool value)
@@ -265,6 +296,7 @@ void FUISprite::setTexture(const Ref<Texture2D>& t)
     _realTexture = t;
     // Keep Sprite2D texture null to block auto-rendering via RenderingServer
     Sprite2D::set_texture(nullptr);
+    queue_redraw();
 }
 
 void FUISprite::set_content_size(const Vector2& size)
@@ -274,6 +306,7 @@ void FUISprite::set_content_size(const Vector2& size)
     {
         set_region_rect(Rect2(Vector2(), size));
     }
+    queue_redraw();
 }
 
 void FUISprite::setupFill()
@@ -476,6 +509,10 @@ void FUISprite::_draw()
     if (texRect.size.x <= 0 || texRect.size.y <= 0)
         return; // region not set yet — nothing to draw
 
+    const Vector2 drawOrigin = get_offset();
+    const bool flipH = is_flipped_h();
+    const bool flipV = is_flipped_v();
+
     if (_fillMethod != FillMethod::None)
     {
         // Fill mode: draw custom triangles
@@ -493,7 +530,7 @@ void FUISprite::_draw()
             {
                 int idx = _fillIndices[i * 3 + j];
                 // Map vertex from normalized coords to pixel coords
-                tri.set(j, Vector2(
+                tri.set(j, drawOrigin + Vector2(
                     _fillVertices[idx].x * contentSize.x,
                     -_fillVertices[idx].y * contentSize.y));
             }
@@ -508,14 +545,23 @@ void FUISprite::_draw()
         return;
     }
 
+    Vector2 origSize = _originalContentSize;
+    if (origSize.x <= 0.0f || origSize.y <= 0.0f)
+        origSize = contentSize;
+    const float sx = origSize.x > 0.0f ? (contentSize.x / origSize.x) : 1.0f;
+    const float sy = origSize.y > 0.0f ? (contentSize.y / origSize.y) : 1.0f;
+    const bool hasTrim = (_trimOffset.length_squared() > 0.01f)
+        || (_originalContentSize.x > 0.0f && _originalContentSize.y > 0.0f
+            && (Math::abs(_originalContentSize.x - contentSize.x) > 0.5f
+                || Math::abs(_originalContentSize.y - contentSize.y) > 0.5f));
+
     // Normal sprite draw
     if (_rotated)
     {
         // Sprite is rotated 90° CW in atlas. texRect has swapped dims (H_orig, W_orig).
-        // Un-rotate by applying -90° transform, drawing atlas rect centered at origin.
         Vector2 atlasSize = texRect.size; // (H, W) for rotated sprite
         Vector2 displaySize = _contentSize.x > 0 ? _contentSize : Vector2(atlasSize.y, atlasSize.x);
-        Vector2 center(displaySize.x * 0.5f, displaySize.y * 0.5f);
+        Vector2 center = drawOrigin + displaySize * 0.5f;
         draw_set_transform(center, Math::deg_to_rad(-90.0f), Vector2(1, 1));
         draw_texture_rect_region(tex,
             Rect2(-atlasSize.x * 0.5f, -atlasSize.y * 0.5f, atlasSize.x, atlasSize.y),
@@ -523,12 +569,21 @@ void FUISprite::_draw()
             get_modulate());
         draw_set_transform(Vector2(), 0, Vector2(1, 1));
     }
+    else if (hasTrim)
+    {
+        const Vector2 dstPos = drawOrigin + Vector2(_trimOffset.x * sx, _trimOffset.y * sy);
+        const Vector2 dstSize(texRect.size.x * sx, texRect.size.y * sy);
+        draw_texture_region_with_flip(this, tex,
+            Rect2(dstPos, dstSize),
+            texRect,
+            get_modulate(), flipH, flipV);
+    }
     else
     {
-        draw_texture_rect_region(tex,
-            Rect2(0, 0, contentSize.x, contentSize.y),
+        draw_texture_region_with_flip(this, tex,
+            Rect2(drawOrigin.x, drawOrigin.y, contentSize.x, contentSize.y),
             texRect,
-            get_modulate());
+            get_modulate(), flipH, flipV);
     }
 }
 
@@ -542,6 +597,10 @@ void FUISprite::drawScale9()
     Rect2 texRect = get_region_rect();
     if (texRect.size.x == 0)
         texRect.size = tex->get_size();
+
+    const Vector2 drawOrigin = get_offset();
+    const bool flipH = is_flipped_h();
+    const bool flipV = is_flipped_v();
 
     float srcX = texRect.position.x;
     float srcY = texRect.position.y;
@@ -598,7 +657,7 @@ void FUISprite::drawScale9()
     if (_rotated)
     {
         // ... keep existing rotated code
-        Vector2 center(contentSize.x * 0.5f, contentSize.y * 0.5f);
+        Vector2 center = drawOrigin + contentSize * 0.5f;
         draw_set_transform(center, Math::deg_to_rad(-90.0f), Vector2(1, 1));
 
         for (int i = 0; i < 9; i++)
@@ -632,11 +691,11 @@ void FUISprite::drawScale9()
 
         Rect2 src(srcX + ox - 0.5f, srcY + oy - 0.5f, ow + 1.0f, oh + 1.0f);
 
-        Rect2 dst(destRects[i][0], destRects[i][1],
+        Rect2 dst(drawOrigin.x + destRects[i][0], drawOrigin.y + destRects[i][1],
                   destRects[i][2], destRects[i][3]);
         if (dst.size.x <= 0 || dst.size.y <= 0) continue;
 
-        draw_texture_rect_region(tex, dst, src, get_modulate());
+        draw_texture_region_with_flip(this, tex, dst, src, get_modulate(), flipH, flipV);
     }
 }
 

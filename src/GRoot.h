@@ -131,6 +131,7 @@ private:
     Vector2 _designResolution;
     ScreenMatchMode _screenMatchMode;
     bool _hasDesignResolution;
+    bool _viewportSizeConnected;
 
     static GRoot* _inst;
 };

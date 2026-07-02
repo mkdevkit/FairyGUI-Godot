@@ -23,6 +23,9 @@ public:
     static int findInStringArray(const std::vector<std::string>& arr, const std::string& str);
 
     static bool isFileExist(const std::string& fileName);
+
+    // Replaces Cocos CC_PLATFORM_PC for input/scroll sensitivity.
+    static bool isDesktopInput();
 };
 
 class FastSplitter

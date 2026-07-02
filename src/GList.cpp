@@ -161,7 +161,7 @@ Ref<GObject> GList::getFromPool(const std::string& url)
     else
         ref = _pool->getObject(url);
     if (ref.is_valid())
-        ((CanvasItem*)ref->displayObject())->set_visible(true);
+        ref->setVisible(true);
     return ref;
 }
 

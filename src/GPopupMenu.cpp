@@ -112,9 +112,9 @@ void GPopupMenu::setItemText(const std::string & name, const std::string & capti
 void GPopupMenu::setItemVisible(const std::string & name, bool visible)
 {
     GButton* item = _list->getChild(name)->as<GButton>();
-    if (((CanvasItem*)item->displayObject())->is_visible() != visible)
+    if (item->isVisible() != visible)
     {
-        ((CanvasItem*)item->displayObject())->set_visible(visible);
+        item->setVisible(visible);
         _list->setBoundsChangedFlag();
     }
 }

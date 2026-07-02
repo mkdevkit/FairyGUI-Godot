@@ -24,9 +24,9 @@ public:
     bool isGrayed() const { return _grayed; }
 
     // Wrapper methods for Godot Sprite2D API
-    void setFlippedH(bool v) { set_flip_h(v); }
+    void setFlippedH(bool v);
     bool isFlippedH() const { return is_flipped_h(); }
-    void setFlippedV(bool v) { set_flip_v(v); }
+    void setFlippedV(bool v);
     bool isFlippedV() const { return is_flipped_v(); }
     Color getColor() const { return get_modulate(); }
     void setColor(const Color& c) { set_modulate(c); }

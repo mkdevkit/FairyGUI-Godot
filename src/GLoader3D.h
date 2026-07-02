@@ -80,9 +80,12 @@ public:
     bool isLoop() const { return _loop; }
     void setLoop(bool value);
 
-    void play(const std::string& name = EMPTY_STRING);
+    void play(const std::string& animName = EMPTY_STRING);
     void stop();
-    void gd_play(const String& name);
+    void gd_play(const String& animName);
+
+    Node* getContent() const;
+    void setContent(Node* value);
 
     virtual Variant getProp(ObjectPropID propId) override;
     virtual void setProp(ObjectPropID propId, const Variant& value) override;
@@ -90,6 +93,8 @@ public:
 protected:
     virtual void handleInit() override;
     virtual void handleSizeChanged() override;
+    virtual void _enter_tree() override;
+    virtual void applyPivotOffset() override;
     virtual void handleGrayedChanged() override;
     virtual void setup_beforeAdd(ByteBuffer* buffer, int beginPos) override;
     virtual GObject* hitTest(const Vector2& worldPoint, const Camera2D* camera) override;
@@ -124,10 +129,13 @@ private:
     Color _color;
 
     FUIContainer* _container;
+    Node* _content;
 
 #ifndef SPINE_GODOT_DISABLED
     SpineSprite* _spineSprite;
 #endif
+
+    Node* getContentNode() const;
 };
 
 NS_FGUI_END

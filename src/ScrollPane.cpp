@@ -6,6 +6,7 @@
 #include "event/InputProcessor.h"
 #include "tween/GTween.h"
 #include "utils/ByteBuffer.h"
+#include "utils/ToolSet.h"
 #include "scene/main/viewport.h"
 
 NS_FGUI_BEGIN
@@ -198,11 +199,10 @@ void ScrollPane::setup(ByteBuffer* buffer)
 
     if (scrollBarDisplay == ScrollBarDisplayType::DEFAULT)
     {
-#ifdef CC_PLATFORM_PC
-        scrollBarDisplay = UIConfig::defaultScrollBarDisplay;
-#else
-        scrollBarDisplay = ScrollBarDisplayType::AUTO;
-#endif
+        if (ToolSet::isDesktopInput())
+            scrollBarDisplay = UIConfig::defaultScrollBarDisplay;
+        else
+            scrollBarDisplay = ScrollBarDisplayType::AUTO;
     }
 
     if (scrollBarDisplay != ScrollBarDisplayType::HIDDEN)
@@ -246,9 +246,9 @@ void ScrollPane::setup(ByteBuffer* buffer)
         if (_scrollBarDisplayAuto)
         {
             if (_vtScrollBar != nullptr)
-                ((CanvasItem*)_vtScrollBar->displayObject())->set_visible(false);
+                _vtScrollBar->setVisible(false);
             if (_hzScrollBar != nullptr)
-                ((CanvasItem*)_hzScrollBar->displayObject())->set_visible(false);
+                _hzScrollBar->setVisible(false);
 
             _owner->addEventListener(UIEventType::RollOver, [this](EventContext* ctx) { ScrollPane::onRollOver(ctx); });
             _owner->addEventListener(UIEventType::RollOut, [this](EventContext* ctx) { ScrollPane::onRollOut(ctx); });
@@ -265,7 +265,7 @@ void ScrollPane::setup(ByteBuffer* buffer)
             // CCLOGWARN("FairyGUI: cannot create scrollPane header from %s", headerRes.c_str());
             ;
         {
-            ((CanvasItem*)_header->displayObject())->set_visible(false);
+            _header->setVisible(false);
             _header->_alignToBL = true;
             _owner->displayObject()->add_child(_header->displayObject());
         }
@@ -279,7 +279,7 @@ void ScrollPane::setup(ByteBuffer* buffer)
             // CCLOGWARN("FairyGUI: cannot create scrollPane footer from %s", footerRes.c_str());
             ;
         {
-            ((CanvasItem*)_footer->displayObject())->set_visible(false);
+            _footer->setVisible(false);
             _footer->_alignToBL = true;
             _owner->displayObject()->add_child(_footer->displayObject());
         }
@@ -809,11 +809,21 @@ void ScrollPane::handleSizeChanged()
 
     updateScrollBarVisible();
 
-    // Clipping region in _maskContainer's local space (position set by adjustMaskContainer).
+    // Viewport origin in owner space (Y-down). Cocos adjustMaskContainer used a Y-up flip;
+    // Godot places the mask directly at margin + alignOffset.
+    float mx, my;
+    if (_displayOnLeft && _vtScrollBar != nullptr && !_floating)
+        mx = floor(_owner->_margin.left + _vtScrollBar->getWidth());
+    else
+        mx = floor(_owner->_margin.left);
+    my = floor(_owner->_margin.top);
+    mx += _owner->_alignOffset.x;
+    my += _owner->_alignOffset.y;
+
     // _viewSize already has scrollbar widths and margins subtracted in setSize().
     // Re-add scrollbar size when scrollNone (not subtracted from _viewSize) and
     // margin when dontClipMargin is set.
-    Rect2 maskRect(0, 0, _viewSize.width, _viewSize.height);
+    Rect2 maskRect(mx, my, _viewSize.width, _viewSize.height);
     if (_vScrollNone && _vtScrollBar != nullptr)
         maskRect.size.x += _vtScrollBar->getWidth();
     if (_hScrollNone && _hzScrollBar != nullptr)
@@ -1037,7 +1047,7 @@ void ScrollPane::updateScrollBarVisible()
     if (_vtScrollBar != nullptr)
     {
         if (_viewSize.height <= _vtScrollBar->getMinSize() || _vScrollNone)
-            ((CanvasItem*)_vtScrollBar->displayObject())->set_visible(false);
+            _vtScrollBar->setVisible(false);
         else
             updateScrollBarVisible2(_vtScrollBar.ptr());
     }
@@ -1045,7 +1055,7 @@ void ScrollPane::updateScrollBarVisible()
     if (_hzScrollBar != nullptr)
     {
         if (_viewSize.width <= _hzScrollBar->getMinSize() || _hScrollNone)
-            ((CanvasItem*)_hzScrollBar->displayObject())->set_visible(false);
+            _hzScrollBar->setVisible(false);
         else
             updateScrollBarVisible2(_hzScrollBar.ptr());
     }
@@ -1067,7 +1077,7 @@ void ScrollPane::updateScrollBarVisible2(GScrollBar* bar)
     else
     {
         bar->setAlpha(1);
-        ((CanvasItem*)bar->displayObject())->set_visible(true);
+        bar->setVisible(true);
     }
 }
 
@@ -1075,7 +1085,7 @@ void ScrollPane::onBarTweenComplete(GTweener* tweener)
 {
     GObject* bar = (GObject*)tweener->getTarget();
     bar->setAlpha(1);
-    ((CanvasItem*)bar->displayObject())->set_visible(false);
+    bar->setVisible(false);
 }
 
 float ScrollPane::getLoopPartSize(float division, int axis)
@@ -1288,24 +1298,27 @@ float ScrollPane::updateTargetAndDuration(float pos, int axis)
     {
         float v2 = std::abs(v) * _velocityScale;
         float ratio = 0;
-#ifdef CC_PLATFORM_PC
-        if (v2 > 500)
-            ratio = pow((v2 - 500) / 500, 2);
-#else
-        const Vector2 winSize = ((Node*)_owner->displayObject())->get_viewport()->get_visible_rect().size;
-        v2 *= 1136.0f / std::max(winSize.x, winSize.y);
-
-        if (_pageMode)
+        if (ToolSet::isDesktopInput())
         {
             if (v2 > 500)
                 ratio = pow((v2 - 500) / 500, 2);
         }
         else
         {
-            if (v2 > 1000)
-                ratio = pow((v2 - 1000) / 1000, 2);
+            const Vector2 winSize = ((Node*)_owner->displayObject())->get_viewport()->get_visible_rect().size;
+            v2 *= 1136.0f / std::max(winSize.x, winSize.y);
+
+            if (_pageMode)
+            {
+                if (v2 > 500)
+                    ratio = pow((v2 - 500) / 500, 2);
+            }
+            else
+            {
+                if (v2 > 1000)
+                    ratio = pow((v2 - 1000) / 1000, 2);
+            }
         }
-#endif
 
         if (ratio != 0)
         {
@@ -1377,7 +1390,7 @@ void ScrollPane::checkRefreshBar()
     {
         if (pos > 0)
         {
-            ((CanvasItem*)_header->displayObject())->set_visible(true);
+            _header->setVisible(true);
             Vector2 vec;
 
             vec = _header->getSize();
@@ -1385,7 +1398,7 @@ void ScrollPane::checkRefreshBar()
             _header->setSize(vec.x, vec.y);
         }
         else
-            ((CanvasItem*)_header->displayObject())->set_visible(false);
+            _header->setVisible(false);
     }
 
     if (_footer != nullptr)
@@ -1393,26 +1406,26 @@ void ScrollPane::checkRefreshBar()
         float max = sp_getField(_overlapSize, _refreshBarAxis);
         if (pos < -max || (max == 0 && _footerLockedSize > 0))
         {
-            ((CanvasItem*)_footer->displayObject())->set_visible(true);
+            _footer->setVisible(true);
 
             Vector2 vec;
 
-            vec = ((Node2D*)_footer->displayObject())->get_position();
+            vec = _footer->getPosition();
             if (max > 0)
                 sp_setField(vec, _refreshBarAxis, pos + sp_getField(_contentSize, _refreshBarAxis));
             else
                 sp_setField(vec, _refreshBarAxis, std::max(std::min(pos + sp_getField(_viewSize, _refreshBarAxis), sp_getField(_viewSize, _refreshBarAxis) - _footerLockedSize), sp_getField(_viewSize, _refreshBarAxis) - sp_getField(_contentSize, _refreshBarAxis)));
-            ((Node2D*)_footer->displayObject())->set_position(Vector2(vec.x, vec.y));
+            _footer->setPosition(vec.x, vec.y);
 
             vec = _footer->getSize();
             if (max > 0)
                 sp_setField(vec, _refreshBarAxis, -max - pos);
             else
-                sp_setField(vec, _refreshBarAxis, sp_getField(_viewSize, _refreshBarAxis) - sp_getField(((Node2D*)_footer->displayObject())->get_position(), _refreshBarAxis));
+                sp_setField(vec, _refreshBarAxis, sp_getField(_viewSize, _refreshBarAxis) - sp_getField(_footer->getPosition(), _refreshBarAxis));
             _footer->setSize(vec.x, vec.y);
         }
         else
-            ((CanvasItem*)_footer->displayObject())->set_visible(false);
+            _footer->setVisible(false);
     }
 }
 
@@ -1562,12 +1575,7 @@ void ScrollPane::onTouchMove(EventContext* context)
     InputEvent* evt = context->getInput();
     Vector2 pt = _owner->globalToLocal(evt->getPosition());
 
-    int sensitivity;
-#ifdef CC_PLATFORM_PC
-    sensitivity = 8;
-#else
-    sensitivity = UIConfig::touchScrollSensitivity;
-#endif
+    int sensitivity = ToolSet::isDesktopInput() ? 8 : UIConfig::touchScrollSensitivity;
 
     float diff;
     bool sv = false, sh = false;

@@ -76,7 +76,8 @@ GRoot::GRoot()
       _modalWaitPane(nullptr),
       _tooltipWin(nullptr),
       _defaultTooltipWin(nullptr),
-      _hasDesignResolution(false)
+      _hasDesignResolution(false),
+      _viewportSizeConnected(false)
 {
 }
 
@@ -349,13 +350,13 @@ GObject* GRoot::getTouchTarget()
 
 Vector2 GRoot::worldToRoot(const Vector2& pt)
 {
-    // FairyGUI coordinate system matches Godot (Y-down), no flip needed.
-    return ((Node2D*)_displayObject)->to_local(pt);
+    // FairyGUI + Godot both Y-down: no Y flip (Cocos flipped Y here for Y-up engine)
+    return ((CanvasItem*)_displayObject)->get_global_transform_with_canvas().affine_inverse().xform(pt);
 }
 
 Vector2 GRoot::rootToWorld(const Vector2& pt)
 {
-    return ((Node2D*)_displayObject)->to_global(pt);
+    return ((CanvasItem*)_displayObject)->get_global_transform_with_canvas().xform(pt);
 }
 
 void GRoot::showPopup(GObject* popup)
@@ -660,10 +661,31 @@ void GRoot::_enter_tree()
 {
     GComponent::_enter_tree();
     _inst = this;
+
+    if (_displayObject && _displayObject->is_inside_tree())
+    {
+        Viewport* viewport = _displayObject->get_viewport();
+        if (viewport && !_viewportSizeConnected)
+        {
+            viewport->connect("size_changed", callable_mp(this, &GRoot::onWindowSizeChanged));
+            _viewportSizeConnected = true;
+        }
+        onWindowSizeChanged();
+    }
 }
 
 void GRoot::_exit_tree()
 {
+    if (_displayObject)
+    {
+        Viewport* viewport = _displayObject->get_viewport();
+        if (viewport && _viewportSizeConnected)
+        {
+            viewport->disconnect("size_changed", callable_mp(this, &GRoot::onWindowSizeChanged));
+            _viewportSizeConnected = false;
+        }
+    }
+
     FUIContainer* fc = Object::cast_to<FUIContainer>(_displayObject);
     if (fc)
     {

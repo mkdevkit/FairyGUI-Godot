@@ -5,6 +5,9 @@
 #include "utils/ByteBuffer.h"
 #include "utils/ToolSet.h"
 
+#include "scene/2d/sprite_2d.h"
+#include "scene/gui/control.h"
+
 #ifndef SPINE_GODOT_DISABLED
 #include "SpineSprite.h"
 #include "SpineSkeleton.h"
@@ -16,6 +19,19 @@
 #endif
 
 NS_FGUI_BEGIN
+
+static Vector2 get_node_content_size(Node* node)
+{
+    if (!node)
+        return Vector2();
+
+    if (Control* ctrl = Object::cast_to<Control>(node))
+        return ctrl->get_rect().size;
+    if (Sprite2D* sprite = Object::cast_to<Sprite2D>(node))
+        return sprite->get_rect().size;
+
+    return Vector2();
+}
 
 GLoader3D::GLoader3D()
     : _align(AlignType::LEFT)
@@ -30,6 +46,7 @@ GLoader3D::GLoader3D()
     , _loop(false)
     , _color(Color(1, 1, 1, 1))
     , _container(nullptr)
+    , _content(nullptr)
 #ifndef SPINE_GODOT_DISABLED
     , _spineSprite(nullptr)
 #endif
@@ -175,7 +192,7 @@ void GLoader3D::setLoop(bool value)
     onChange();
 }
 
-void GLoader3D::play(const std::string& name)
+void GLoader3D::play(const std::string& animName)
 {
 #ifndef SPINE_GODOT_DISABLED
     if (!_spineSprite)
@@ -185,11 +202,11 @@ void GLoader3D::play(const std::string& name)
     if (!state.is_valid())
         return;
 
-    std::string animName = name.empty() ? _animationName : name;
-    if (animName.empty())
+    std::string animation = animName.empty() ? _animationName : animName;
+    if (animation.empty())
         state->clear_track(0);
     else
-        state->set_animation(animName.c_str(), _loop, 0);
+        state->set_animation(animation.c_str(), _loop, 0);
 
     _playing = true;
     onChangeSpine();
@@ -207,6 +224,44 @@ void GLoader3D::stop()
     }
 #endif
     _playing = false;
+}
+
+Node* GLoader3D::getContentNode() const
+{
+    if (_content)
+        return _content;
+#ifndef SPINE_GODOT_DISABLED
+    if (_spineSprite)
+        return _spineSprite;
+#endif
+    return nullptr;
+}
+
+Node* GLoader3D::getContent() const
+{
+    return getContentNode();
+}
+
+void GLoader3D::setContent(Node* value)
+{
+    setURL("");
+
+    clearContent();
+    _content = value;
+    if (_content)
+    {
+        _container->add_child(_content);
+        if (sourceSize.width == 0 || sourceSize.height == 0)
+        {
+            Vector2 contentSize = get_node_content_size(_content);
+            if (contentSize.x > 0 && contentSize.y > 0)
+            {
+                sourceSize.width = contentSize.x;
+                sourceSize.height = contentSize.y;
+            }
+        }
+    }
+    updateLayout();
 }
 
 void GLoader3D::onChange()
@@ -376,13 +431,25 @@ void GLoader3D::clearContent()
     }
 #endif
 
+    if (_content)
+    {
+        _container->remove_child(_content);
+        _content = nullptr;
+    }
+
     _contentItem = nullptr;
+}
+
+void GLoader3D::applyPivotOffset()
+{
+    if (!_updatingLayout)
+        updateLayout();
 }
 
 void GLoader3D::updateLayout()
 {
-#ifndef SPINE_GODOT_DISABLED
-    if (!_spineSprite)
+    Node* contentNode = getContentNode();
+    if (!contentNode)
     {
         if (_autoSize)
         {
@@ -392,15 +459,6 @@ void GLoader3D::updateLayout()
         }
         return;
     }
-#else
-    if (_autoSize)
-    {
-        _updatingLayout = true;
-        setSize(50, 30);
-        _updatingLayout = false;
-    }
-    return;
-#endif
 
     Vector2 contentSize = sourceSize;
 
@@ -417,7 +475,7 @@ void GLoader3D::updateLayout()
         if (_size == contentSize)
         {
             _container->set_scale(Vector2(1, 1));
-            _container->set_position(Vector2(0, 0));
+            _container->set_position(Vector2());
             return;
         }
     }
@@ -475,9 +533,9 @@ void GLoader3D::updateLayout()
     if (_verticalAlign == VertAlignType::CENTER)
         ny = floor((_size.height - contentSize.height) / 2);
     else if (_verticalAlign == VertAlignType::BOTTOM)
-        ny = 0;
-    else
         ny = _size.height - contentSize.height;
+    else
+        ny = 0;
 
     _container->set_position(Vector2(nx, ny));
 }
@@ -493,6 +551,14 @@ void GLoader3D::clearErrorState()
 void GLoader3D::handleSizeChanged()
 {
     GObject::handleSizeChanged();
+
+    if (!_updatingLayout)
+        updateLayout();
+}
+
+void GLoader3D::_enter_tree()
+{
+    GObject::_enter_tree();
 
     if (!_updatingLayout)
         updateLayout();
@@ -568,7 +634,7 @@ GObject* GLoader3D::hitTest(const Vector2& worldPoint, const Camera2D* camera)
         return nullptr;
 
     Rect2 rect(Vector2(), _size);
-    if (rect.has_point(((Node2D*)_displayObject)->to_local(worldPoint)))
+    if (rect.has_point(globalToLocal(worldPoint)))
         return this;
     return nullptr;
 }
@@ -616,6 +682,8 @@ void GLoader3D::_bind_methods()
     ClassDB::bind_method(D_METHOD("play", "name"), &GLoader3D::gd_play);
     ClassDB::bind_method(D_METHOD("stop"), &GLoader3D::stop);
     ClassDB::bind_method(D_METHOD("dispose"), &GLoader3D::dispose);
+    ClassDB::bind_method(D_METHOD("getContent"), &GLoader3D::getContent);
+    ClassDB::bind_method(D_METHOD("setContent", "node"), &GLoader3D::setContent);
 
     ClassDB::bind_method(D_METHOD("setColor", "color"), &GLoader3D::setColor);
     ClassDB::bind_method(D_METHOD("getColor"), &GLoader3D::getColor);
@@ -628,7 +696,7 @@ void GLoader3D::gd_setAnimationName(const String& value) { setAnimationName(valu
 String GLoader3D::gd_getPlayingAnimationName() const { return String(getAnimationName().c_str()); }
 void GLoader3D::gd_setSkinName(const String& value) { setSkinName(value.utf8().get_data()); }
 String GLoader3D::gd_getSkinName() const { return String(getSkinName().c_str()); }
-void GLoader3D::gd_play(const String& name) { play(name.utf8().get_data()); }
+void GLoader3D::gd_play(const String& animName) { play(animName.utf8().get_data()); }
 void GLoader3D::gd_setAlign(int value) { setAlign(static_cast<AlignType>(value)); }
 int GLoader3D::gd_getAlign() const { return static_cast<int>(getAlign()); }
 void GLoader3D::gd_setVerticalAlign(int value) { setVerticalAlign(static_cast<VertAlignType>(value)); }

@@ -469,7 +469,9 @@ void Transition::stopItem(TransitionItem* item, bool setToComplete)
         if (item->type == TransitionActionType::Shake && !setToComplete)
         {
             item->target->_gearLocked = true;
-            ((Node2D*)item->target->displayObject())->set_position(Vector2(item->target->getX() - ((TValue_Shake*)item->value)->lastOffset.x, item->target->getY() - ((TValue_Shake*)item->value)->lastOffset.y));
+            item->target->setPosition(
+                item->target->getX() - ((TValue_Shake*)item->value)->lastOffset.x,
+                item->target->getY() - ((TValue_Shake*)item->value)->lastOffset.y);
             item->target->_gearLocked = false;
         }
     }
@@ -1216,7 +1218,7 @@ void Transition::applyValue(TransitionItem* item)
         if (item->target == _owner)
         {
             if (value->b1 && value->b2)
-                ((Node2D*)item->target->displayObject())->set_position(Vector2(value->f1 + _ownerBaseX, value->f2 + _ownerBaseY));
+                item->target->setPosition(value->f1 + _ownerBaseX, value->f2 + _ownerBaseY);
             else if (value->b1)
                 item->target->setX(value->f1 + _ownerBaseX);
             else
@@ -1227,7 +1229,7 @@ void Transition::applyValue(TransitionItem* item)
             if (value->b3) //position in percent
             {
                 if (value->b1 && value->b2)
-                    ((Node2D*)item->target->displayObject())->set_position(Vector2(value->f1 * _owner->getWidth(), value->f2 * _owner->getHeight()));
+                    item->target->setPosition(value->f1 * _owner->getWidth(), value->f2 * _owner->getHeight());
                 else if (value->b1)
                     item->target->setX(value->f1 * _owner->getWidth());
                 else if (value->b2)
@@ -1236,7 +1238,7 @@ void Transition::applyValue(TransitionItem* item)
             else
             {
                 if (value->b1 && value->b2)
-                    ((Node2D*)item->target->displayObject())->set_position(Vector2(value->f1, value->f2));
+                    item->target->setPosition(value->f1, value->f2);
                 else if (value->b1)
                     item->target->setX(value->f1);
                 else if (value->b2)
@@ -1266,11 +1268,11 @@ void Transition::applyValue(TransitionItem* item)
         break;
 
     case TransitionActionType::Rotation:
-        ((Node2D*)item->target->displayObject())->set_rotation(((TValue*)item->value)->f1);
+        item->target->setRotation(((TValue*)item->value)->f1);
         break;
 
     case TransitionActionType::Scale:
-        ((Node2D*)item->target->displayObject())->set_scale(Vector2(((TValue*)item->value)->f1, ((TValue*)item->value)->f2));
+        item->target->setScale(((TValue*)item->value)->f1, ((TValue*)item->value)->f2);
         break;
 
     case TransitionActionType::Skew:
@@ -1293,13 +1295,15 @@ void Transition::applyValue(TransitionItem* item)
     }
 
     case TransitionActionType::Visible:
-        ((CanvasItem*)item->target->displayObject())->set_visible(((TValue_Visible*)item->value)->visible);
+        item->target->setVisible(((TValue_Visible*)item->value)->visible);
         break;
 
     case TransitionActionType::Shake:
     {
         TValue_Shake* value = (TValue_Shake*)item->value;
-        ((Node2D*)item->target->displayObject())->set_position(Vector2(item->target->getX() - value->lastOffset.x + value->offset.x, item->target->getY() - value->lastOffset.y + value->offset.y));
+        item->target->setPosition(
+            item->target->getX() - value->lastOffset.x + value->offset.x,
+            item->target->getY() - value->lastOffset.y + value->offset.y);
         value->lastOffset = value->offset;
         break;
     }

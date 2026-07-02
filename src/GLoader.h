@@ -115,6 +115,8 @@ public:
 protected:
     virtual void handleInit() override;
     virtual void handleSizeChanged() override;
+    virtual void _enter_tree() override;
+    virtual void applyPivotOffset() override;
     virtual void handleGrayedChanged() override;
     virtual void setup_beforeAdd(ByteBuffer* buffer, int beginPos) override;
     virtual GObject* hitTest(const Vector2 & worldPoint, const Camera2D * camera) override;
@@ -148,6 +150,7 @@ private:
     FUISprite* _content;
     GComponent* _content2;
     ActionMovieClip* _playAction;
+    ImageFrame* _externalFrame;
     Vector2 _sourceSize;
 };
 

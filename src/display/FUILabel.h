@@ -40,7 +40,10 @@ public:
     void setUnderlineColor(const Color& value);
 
     void setDrawFontSize(int value) { _drawFontSize = value; queue_redraw(); }
-    int getDrawFontSize() const { return _drawFontSize > 0 ? _drawFontSize : (int)_textFormat->fontSize; }
+    int getDrawFontSize() const;
+
+    void setDrawOffset(const Vector2& value) { _drawOffset = value; queue_redraw(); }
+    const Vector2& getDrawOffset() const { return _drawOffset; }
 
     float getTextWidth() const;
     float getTextHeight() const;
@@ -54,6 +57,7 @@ protected:
 private:
     bool setBMFontFilePath(const std::string& bmfontFilePath, float fontSize = 0);
     void updateBMFontScale();
+    void updateDrawFont();
     void updateText();
     bool isBMFont() const { return !_bmFontPath.empty(); }
 
@@ -68,6 +72,7 @@ private:
     Color _underlineColor;
     bool _hasUnderlineColor;
     int _drawFontSize;
+    Vector2 _drawOffset;
 
     // BM Font
     std::string _bmFontPath;
@@ -75,6 +80,7 @@ private:
     float _bmfontScale;
     bool _bmFontCanTint;
     Ref<Font> _bmFont;
+    Ref<Font> _drawFont;
     Ref<Texture2D> _bmAtlasTexture;
 
     friend class UIPackage;

@@ -1,8 +1,11 @@
 #include "FUILabel.h"
 #include "BitmapFont.h"
+#include "GObject.h"
+#include "GRoot.h"
 #include "UIConfig.h"
 #include "UIPackage.h"
 #include "scene/resources/font.h"
+#include "servers/text_server.h"
 
 NS_FGUI_BEGIN
 
@@ -22,7 +25,8 @@ FUILabel::FUILabel() :
     _drawFontSize(0),
     _bmFontSize(0),
     _bmfontScale(1.0f),
-    _contentSize(0, 0)
+    _contentSize(0, 0),
+    _drawOffset(0, 0)
 {
     item_rect_changed(); // enable NOTIFICATION_DRAW for Node2D
 }
@@ -123,7 +127,39 @@ void FUILabel::applyTextFormat()
         set_modulate(_grayed ? toGrayed(_textFormat->color) : _textFormat->color);
     }
 
+    updateDrawFont();
     queue_redraw();
+}
+
+void FUILabel::updateDrawFont()
+{
+    _drawFont = _bmFont;
+    if (_drawFont.is_null())
+        return;
+
+    if (!_textFormat->bold && !_textFormat->italics && _textFormat->lineSpacing == 0 && _textFormat->letterSpacing == 0)
+        return;
+
+    Ref<FontVariation> variation;
+    variation.instantiate();
+    variation->set_base_font(_bmFont);
+
+    if (_textFormat->bold)
+        variation->set_variation_embolden(1.0f);
+
+    if (_textFormat->italics)
+    {
+        Transform2D slant(1.0f, Math::tan(Math::deg_to_rad(12.0f)), 0.0f, 1.0f, 0.0f, 0.0f);
+        variation->set_variation_transform(slant);
+    }
+
+    if (_textFormat->letterSpacing != 0)
+        variation->set_spacing(TextServer::SPACING_GLYPH, _textFormat->letterSpacing);
+
+    if (_textFormat->lineSpacing != 0)
+        variation->set_spacing(TextServer::SPACING_BOTTOM, _textFormat->lineSpacing);
+
+    _drawFont = variation;
 }
 
 bool FUILabel::setBMFontFilePath(const std::string& bmfontFilePath, float fontSize)
@@ -151,6 +187,7 @@ bool FUILabel::setBMFontFilePath(const std::string& bmfontFilePath, float fontSi
     _bmAtlasTexture = bmFont->getAtlasTexture();
     _bmFontCanTint = true; // GODOT: BM fonts can tint if GPU rendered
 
+    updateBMFontScale();
     return true;
 }
 
@@ -173,16 +210,51 @@ void FUILabel::setUnderlineColor(const Color& value)
 void FUILabel::updateBMFontScale()
 {
     _bmfontScale = 1.0f;
+    if (!isBMFont() || _bmFontPath.empty())
+        return;
+
+    BitmapFont* bmFont = (BitmapFont*)UIPackage::getItemAssetByURL(_bmFontPath, PackageItemType::FONT);
+    if (bmFont == nullptr)
+        return;
+
+    float contentScale = 1.0f;
+    switch (GRoot::contentScaleLevel)
+    {
+    case 1:
+        contentScale = 2.0f;
+        break;
+    case 2:
+        contentScale = 3.0f;
+        break;
+    case 3:
+        contentScale = 4.0f;
+        break;
+    default:
+        break;
+    }
+
+    float originalFontSize = bmFont->getOriginalFontSize();
+    if (originalFontSize > 0)
+        _bmfontScale = _bmFontSize * contentScale / originalFontSize;
+}
+
+int FUILabel::getDrawFontSize() const
+{
+    int size = _drawFontSize > 0 ? _drawFontSize : (int)_textFormat->fontSize;
+    if (isBMFont() && _bmfontScale > 0 && _bmfontScale != 1.0f)
+        return MAX(1, (int)Math::round(size * _bmfontScale));
+    return size;
 }
 
 float FUILabel::getTextWidth() const
 {
     if (_text.empty()) return 0;
-    if (_bmFont.is_valid())
+    Ref<Font> font = _drawFont.is_valid() ? _drawFont : _bmFont;
+    if (font.is_valid())
     {
         int fontSize = getDrawFontSize();
         float maxWidth = (_wrapEnabled && _contentSize.x > 0) ? _contentSize.x : -1;
-        Vector2 size = _bmFont->get_string_size(GObject::toGodotStr(_text),
+        Vector2 size = font->get_string_size(GObject::toGodotStr(_text),
             HORIZONTAL_ALIGNMENT_LEFT, maxWidth, fontSize);
         return size.x;
     }
@@ -192,11 +264,12 @@ float FUILabel::getTextWidth() const
 float FUILabel::getTextHeight() const
 {
     if (_text.empty()) return 0;
-    if (_bmFont.is_valid())
+    Ref<Font> font = _drawFont.is_valid() ? _drawFont : _bmFont;
+    if (font.is_valid())
     {
         int fontSize = getDrawFontSize();
         float maxWidth = (_wrapEnabled && _contentSize.x > 0) ? _contentSize.x : -1;
-        Vector2 size = _bmFont->get_string_size(GObject::toGodotStr(_text),
+        Vector2 size = font->get_string_size(GObject::toGodotStr(_text),
             HORIZONTAL_ALIGNMENT_LEFT, maxWidth, fontSize);
         return size.y;
     }
@@ -223,7 +296,7 @@ void FUILabel::_draw()
 {
     if (_text.empty()) return;
 
-    Ref<Font> font = _bmFont;
+    Ref<Font> font = _drawFont.is_valid() ? _drawFont : _bmFont;
     if (font.is_null()) return;
 
     Color textColor = _grayed ? toGrayed(_textFormat->color) : _textFormat->color;
@@ -231,12 +304,12 @@ void FUILabel::_draw()
     float maxWidth = (_wrapEnabled && _contentSize.x > 0) ? _contentSize.x : -1;
 
     // Compute alignment offset within content rect
-    Vector2 offset;
+    Vector2 offset = _drawOffset;
     if (_contentSize.x > 0 || _contentSize.y > 0)
     {
         float textW = getTextWidth();
         float textH = getTextHeight();
-        float fontAscent = _bmFont.is_valid() ? _bmFont->get_ascent(fontSize) : fontSize * 0.8f;
+        float fontAscent = font.is_valid() ? font->get_ascent(fontSize) : fontSize * 0.8f;
         if (_textFormat->align == 1)      offset.x = (_contentSize.x - textW) * 0.5f;
         else if (_textFormat->align == 2) offset.x = _contentSize.x - textW;
         if (_textFormat->verticalAlign == 1)      offset.y = (_contentSize.y - textH) * 0.5f + fontAscent;

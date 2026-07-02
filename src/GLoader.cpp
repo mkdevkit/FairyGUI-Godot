@@ -4,6 +4,7 @@
 #include "GMovieClip.h"
 #include "PackageItem.h"
 #include "UIPackage.h"
+#include "display/FUIContainer.h"
 #include "display/FUISprite.h"
 #include "utils/ByteBuffer.h"
 #include "utils/ToolSet.h"
@@ -29,23 +30,29 @@ GLoader::GLoader()
     _content2(nullptr),
     _playAction(nullptr),
     _playing(true),
-    _frame(0)
+    _frame(0),
+    _externalFrame(nullptr)
 {
 	_touchable = false; // icon, not independently interactive
 }
 
 GLoader::~GLoader()
 {
+    if (_externalFrame)
+        freeExternal(_externalFrame);
     FGUI_DELETE(_playAction);
-    FGUI_DELETE(_content);
     FGUI_DELETE(_content2);
+    // _content is owned by _displayObject (FUIContainer), freed in GObject::~GObject
 }
 
 void GLoader::handleInit()
 {
     _content = FUISprite::create();
-	_displayObject = _content;
 
+    FUIContainer* c = FUIContainer::create();
+    c->gOwner = this;
+    _displayObject = c;
+    _displayObject->add_child(_content);
 }
 
 void GLoader::setURL(const std::string& value)
@@ -417,6 +424,9 @@ void GLoader::freeExternal(ImageFrame* spriteFrame)
 
 void GLoader::onExternalLoadSuccess(ImageFrame* spriteFrame)
 {
+    if (_externalFrame && _externalFrame != spriteFrame)
+        freeExternal(_externalFrame);
+    _externalFrame = spriteFrame;
     _contentStatus = 4;
     _content->set_region_rect(Rect2(Vector2(), spriteFrame->texture->get_size()));
     ((FUISprite*)_content)->setImageFrameInfo(spriteFrame->originalSize, spriteFrame->offset);
@@ -433,6 +443,12 @@ void GLoader::onExternalLoadFailed()
 void GLoader::clearContent()
 {
     clearErrorState();
+
+    if (_contentStatus == 4 && _externalFrame)
+    {
+        freeExternal(_externalFrame);
+        _externalFrame = nullptr;
+    }
 
     if (_contentStatus == 2)
     {
@@ -454,6 +470,12 @@ void GLoader::clearContent()
 
     _contentItem = nullptr;
     _contentStatus = 0;
+}
+
+void GLoader::applyPivotOffset()
+{
+    if (!_updatingLayout)
+        updateLayout();
 }
 
 void GLoader::updateLayout()
@@ -485,13 +507,13 @@ void GLoader::updateLayout()
         {
             if (_content2 != nullptr)
             {
-                ((Node2D*)_content2->displayObject())->set_scale(Vector2(1, 1));
-                ((Node2D*)_content2->displayObject())->set_position(Vector2(0, _size.height));
+                _content2->setScale(1, 1);
+                ((Node2D*)_content2->displayObject())->set_position(Vector2());
             }
             else
             {
                 _content->set_scale(Vector2(1, 1));
-                _content->set_position(Vector2(0, 0));
+                _content->set_position(Vector2());
             }
             return;
         }
@@ -538,7 +560,7 @@ void GLoader::updateLayout()
 
     if (_content2 != nullptr)
     {
-        ((Node2D*)_content2->displayObject())->set_scale(Vector2(sx, sy));
+        _content2->setScale(sx, sy);
     }
     else
     {
@@ -593,9 +615,9 @@ void GLoader::updateLayout()
         if (_verticalAlign == VertAlignType::CENTER)
             ny = floor((_size.height - contentSize.height) / 2);
         else if (_verticalAlign == VertAlignType::BOTTOM)
-            ny = 0;
-        else
             ny = _size.height - contentSize.height;
+        else
+            ny = 0;
 
         _content->set_position(Vector2(nx, ny));
     }
@@ -612,6 +634,14 @@ void GLoader::clearErrorState()
 void GLoader::handleSizeChanged()
 {
     GObject::handleSizeChanged();
+
+    if (!_updatingLayout)
+        updateLayout();
+}
+
+void GLoader::_enter_tree()
+{
+    GObject::_enter_tree();
 
     if (!_updatingLayout)
         updateLayout();
@@ -716,7 +746,7 @@ GObject* GLoader::hitTest(const Vector2 & worldPoint, const Camera2D * camera)
     }
 
     Rect2 rect(Vector2(), _size);
-    if (rect.has_point(((CanvasItem*)_displayObject)->get_global_transform_with_canvas().affine_inverse().xform(worldPoint)))
+    if (rect.has_point(globalToLocal(worldPoint)))
         return this;
     else
         return nullptr;

@@ -42,7 +42,7 @@ void GScrollBar::setDisplayPerc(float value)
         _grip->setX(round(_bar->getX() + (_bar->getWidth() - _grip->getWidth()) * _scrollPerc));
     }
 
-    ((CanvasItem*)_grip->displayObject())->set_visible(value != 0 && value != 1);
+    _grip->setVisible(value != 0 && value != 1);
 }
 
 void GScrollBar::setScrollPerc(float value)

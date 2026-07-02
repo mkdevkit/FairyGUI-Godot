@@ -442,8 +442,16 @@ void GButton::onClick(EventContext* context)
 
 void GButton::onExit(EventContext* context)
 {
+    _down = false;
+    if (_downEffect == 2 && _downScaled)
+    {
+        _downScaled = false;
+        setScale(getScaleX() / _downEffectValue, getScaleY() / _downEffectValue);
+    }
     if (_over)
         onRollOut(context);
+    else
+        setCurrentState();
 }
 
 void GButton::_bind_methods()

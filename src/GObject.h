@@ -198,12 +198,19 @@ protected:
     virtual void handleScaleChanged();
     virtual void handleGrayedChanged();
     virtual void handlePositionChanged();
+    Vector2 computeDisplayPosition() const;
+    Vector2 computeContentPivotOffset() const;
+    Vector2 computeDisplayScale() const;
+    virtual void applyPivotOffset();
+    void rebuildSkewedTransform();
     virtual void handleControllerChanged(GController* c);
     virtual void handleAlphaChanged();
     virtual void handleVisibleChanged();
 
     virtual void _enter_tree();
     virtual void _exit_tree();
+    void onDisplayTreeEntered();
+    void onDisplayTreeExiting();
     void _ready();
     virtual void _process(double delta);
 

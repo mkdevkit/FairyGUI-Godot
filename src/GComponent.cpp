@@ -6,6 +6,7 @@
 #include "UIObjectFactory.h"
 #include "UIPackage.h"
 #include "display/FUIContainer.h"
+#include "display/FUISprite.h"
 #include "event/HitTest.h"
 #include "utils/ByteBuffer.h"
 #include "utils/ToolSet.h"
@@ -21,11 +22,18 @@ static void set_display_child_z_order(GObject* child, int z)
         Object::cast_to<CanvasItem>(display)->set_z_index(z);
 }
 
-static void ensure_display_child_added(FUIInnerContainer* container, GObject* child)
+void GComponent::ensure_display_child_added(FUIInnerContainer* container, GObject* child)
 {
     Node* display = child->displayObject();
     if (display != nullptr && display->get_parent() == nullptr)
+    {
         container->add_child(display);
+        child->handlePositionChanged();
+        child->handleAlphaChanged();
+        child->handleVisibleChanged();
+        if (FUISprite* sp = Object::cast_to<FUISprite>(display))
+            sp->queue_redraw();
+    }
 }
 
 GComponent::GComponent() : _container(nullptr),
@@ -1052,6 +1060,13 @@ GObject* GComponent::hitTest(const Vector2& worldPoint, const Camera2D* camera)
         return nullptr;
 }
 
+void GComponent::applyPivotOffset()
+{
+    // Match Cocos: inner container only carries margin; component pivot is on the outer display node.
+    if (_container)
+        _container->set_position(Vector2(_margin.left, _margin.top));
+}
+
 void GComponent::setupOverflow(OverflowType overflow)
 {
     if (overflow == OverflowType::HIDDEN)
@@ -1072,13 +1087,12 @@ void GComponent::setupScroll(ByteBuffer* buffer)
 void GComponent::handleSizeChanged()
 {
     GObject::handleSizeChanged();
+    applyPivotOffset();
 
     if (_scrollPane.is_valid())
         _scrollPane->onOwnerSizeChanged();
     else
     {
-        _container->set_position(Vector2(_margin.left, _margin.top));
-
         // Keep the non-scroll clipping region in sync with size changes.
         FUIContainer* fui = dynamic_cast<FUIContainer*>(_displayObject);
         if (fui && fui->isClippingEnabled())
@@ -1360,11 +1374,13 @@ void GComponent::constructFromResource(std::vector<GObject*>* objectPool, int po
     _underConstruct = false;
 
     buildNativeDisplayList();
-    setBoundsChangedFlag();
 
     if (contentItem->objectType != ObjectType::COMPONENT)
         constructExtension(buffer);
 
+    // GButton::setState etc. may change gearDisplay visibility after the first build.
+    buildNativeDisplayList();
+    setBoundsChangedFlag();
     onConstruct();
 }
 
