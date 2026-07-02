@@ -1,6 +1,8 @@
 #include "GRoot.h"
 #include "UIConfig.h"
 #include "UIPackage.h"
+#include "display/FUIContainer.h"
+#include "tween/TweenManager.h"
 #include "core/object/class_db.h"
 
 #include "scene/audio/audio_stream_player.h"
@@ -660,6 +662,14 @@ void GRoot::_enter_tree()
 
 void GRoot::_exit_tree()
 {
+    FUIContainer* fc = Object::cast_to<FUIContainer>(_displayObject);
+    if (fc)
+    {
+        fc->set_process(false);
+        fc->_processCallback = nullptr;
+    }
+    TweenManager::clean();
+
     GComponent::_exit_tree();
     if (_inst == this)
         _inst = nullptr;
@@ -683,6 +693,13 @@ bool GRoot::initWithParent(Node* parent, int zOrder)
 
 void GRoot::onInitWithParent(Node* parent, int zOrder, bool deferAdd)
 {
+    FUIContainer* fc = Object::cast_to<FUIContainer>(_displayObject);
+    if (fc)
+    {
+        fc->set_process(true);
+        fc->_processCallback = [](float dt) { TweenManager::update(dt); };
+    }
+
     if (parent)
     {
         if (deferAdd) {

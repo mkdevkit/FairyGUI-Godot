@@ -99,7 +99,7 @@ void GearXY::apply()
     else
     {
         _owner->_gearLocked = true;
-        ((Node2D*)_owner->displayObject())->set_position(Vector2(endPt.x, endPt.y));
+        _owner->setPosition(endPt.x, endPt.y);
         _owner->_gearLocked = false;
     }
 }
@@ -107,7 +107,7 @@ void GearXY::apply()
 void GearXY::onTweenUpdate(GTweener* tweener)
 {
     _owner->_gearLocked = true;
-    ((Node2D*)_owner->displayObject())->set_position(Vector2(_tweenConfig->_tweener->value.x, _tweenConfig->_tweener->value.y));
+    _owner->setPosition(_tweenConfig->_tweener->value.x, _tweenConfig->_tweener->value.y);
     _owner->_gearLocked = false;
 }
 

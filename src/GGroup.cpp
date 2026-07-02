@@ -238,7 +238,7 @@ void GGroup::moveChildren(float dx, float dy)
         child = _parent->getChildAt(i);
         if (child->_group == this)
         {
-            ((Node2D*)child->_displayObject)->set_position(Vector2(child->getX() + dx, child->getY() + dy));
+            child->setPosition(child->getX() + dx, child->getY() + dy);
         }
     }
 
