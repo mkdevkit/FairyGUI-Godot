@@ -149,7 +149,8 @@ private:
     void setVirtual(bool loop);
     void checkVirtualList();
     void setVirtualListChangedFlag(bool layoutChanged);
-    CALL_LATER_FUNC(GList, doRefreshVirtualList);
+    CALL_LATER_FUNC(GList, doRefreshVirtualListDeferred);
+    void doRefreshVirtualList();
 
     void onScroll(EventContext* context);
 

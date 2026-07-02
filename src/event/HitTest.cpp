@@ -1,8 +1,9 @@
 #include "HitTest.h"
-#include "utils/ToolSet.h"
+#include "GGraph.h"
 #include "GComponent.h"
 #include "GObject.h"
 #include "utils/ByteBuffer.h"
+#include "utils/ToolSet.h"
 
 NS_FGUI_BEGIN
 
@@ -41,8 +42,10 @@ PixelHitTest::PixelHitTest(PixelHitTestData * data, int offsetX, int offsetY) :
 
 bool PixelHitTest::hitTest(GComponent * obj, const Vector2 & localPoint)
 {
+    // FairyGUI pixel data is row-major from the top (Y-down). Cocos flips with
+    // (height - y) because convertToNodeSpace is Y-up; Godot localPoint is already Y-down.
     int x = floor((localPoint.x / scaleX - offsetX) * _data->scale);
-    int y = floor(((localPoint.y) / scaleY - offsetY) * _data->scale);
+    int y = floor((localPoint.y / scaleY - offsetY) * _data->scale);
     if (x < 0 || y < 0 || x >= _data->pixelWidth)
         return false;
 
@@ -61,13 +64,37 @@ ChildHitArea::ChildHitArea(GObject* child) :
 {
 }
 
-bool ChildHitArea::hitTest(GComponent* obj, const Vector2& localPoint)
+bool ChildHitArea::hitTestCanvas(GComponent* obj, const Vector2& canvasPoint)
 {
-    if (_child == nullptr || obj == nullptr)
+    if (_child == nullptr || obj == nullptr || !_child->displayObject())
         return false;
 
-    Vector2 globalPt = obj->localToGlobal(localPoint);
-    return _child->hitTest(globalPt, nullptr) != nullptr;
+    CanvasItem* childDisplay = Object::cast_to<CanvasItem>(_child->displayObject());
+    if (!childDisplay || !childDisplay->get_parent())
+        return false;
+
+    // Match Cocos ShapeHitTest: test in the hit-area child's display local space.
+    Vector2 childLocal = childDisplay->get_global_transform_with_canvas().affine_inverse().xform(canvasPoint);
+
+    if (GGraph* graph = dynamic_cast<GGraph*>(_child))
+        return graph->hitTestShape(childLocal);
+
+    Rect rect;
+    rect.size = _child->getSize();
+    return rect.has_point(childLocal);
+}
+
+bool ChildHitArea::hitTest(GComponent* obj, const Vector2& localPoint)
+{
+    if (_child == nullptr || obj == nullptr || !obj->displayObject())
+        return false;
+
+    CanvasItem* compDisplay = Object::cast_to<CanvasItem>(obj->displayObject());
+    if (!compDisplay)
+        return false;
+
+    Vector2 canvasPoint = compDisplay->get_global_transform_with_canvas().xform(localPoint);
+    return hitTestCanvas(obj, canvasPoint);
 }
 
 NS_FGUI_END

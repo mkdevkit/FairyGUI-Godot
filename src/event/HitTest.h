@@ -55,6 +55,9 @@ public:
     explicit ChildHitArea(GObject* child);
 
     virtual bool hitTest(GComponent* obj, const Vector2& localPoint) override;
+    bool hitTestCanvas(GComponent* obj, const Vector2& canvasPoint);
+
+    GObject* getHitChild() const { return _child; }
 
 private:
     GObject* _child;

@@ -260,6 +260,7 @@ void FUIRichText::setAnchorFontColor(const Color& color)
 
 void FUIRichText::setText(const std::string& value)
 {
+    _text = value;
     _dirty = true;
 
     if (!_parser) {
@@ -287,7 +288,7 @@ void FUIRichText::setText(const std::string& value)
         return;
     }
 
-    _parser->parse(value, _textFormat, _elements, _parseOptions);
+    _parser->parse(_text, _textFormat, _elements, _parseOptions);
     for (auto& elem : _elements)
     {
         HtmlObject* obj = _objectFactory ? _objectFactory(elem) : nullptr;
@@ -306,8 +307,14 @@ void FUIRichText::setText(const std::string& value)
 
 void FUIRichText::applyTextFormat()
 {
-    _dirty = true;
-    formatText();
+    // Match Cocos: re-parse HTML/UBB so inline styles pick up the updated base format.
+    if (!_text.empty())
+        setText(_text);
+    else
+    {
+        _dirty = true;
+        formatText();
+    }
 }
 
 HtmlObject* FUIRichText::getControl(const std::string& name) const

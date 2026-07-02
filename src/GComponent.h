@@ -98,6 +98,7 @@ public:
 
     IHitTest* getHitArea() const { return _hitArea; }
     void setHitArea(IHitTest* value);
+    void ensureHitAreaChildAttached();
 
     ScrollPane* getScrollPane() const { return _scrollPane.ptr(); }
 

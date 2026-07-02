@@ -3,6 +3,7 @@
 #include "UIPackage.h"
 #include "display/FUIContainer.h"
 #include "utils/ByteBuffer.h"
+#include "core/io/resource_uid.h"
 #include "utils/ToolSet.h"
 
 #include "scene/2d/sprite_2d.h"
@@ -323,6 +324,8 @@ void GLoader3D::loadContent()
 
     if (_url.compare(0, 5, "ui://") == 0)
         loadFromPackage();
+    else
+        loadExternal();
 }
 
 void GLoader3D::loadFromPackage()
@@ -365,10 +368,8 @@ void GLoader3D::loadFromPackage()
 }
 
 #ifndef SPINE_GODOT_DISABLED
-bool GLoader3D::loadSpineContent()
+bool GLoader3D::loadSpineFromFiles(const std::string& skelFile, const Vector2& anchor)
 {
-    std::string skelFile = _contentItem->file;
-
     std::string atlasFile;
     size_t dotPos = skelFile.find_last_of('.');
     if (dotPos != std::string::npos)
@@ -408,15 +409,60 @@ bool GLoader3D::loadSpineContent()
     _spineSprite = memnew(SpineSprite);
     _container->add_child(_spineSprite);
     _spineSprite->set_skeleton_data_res(skeletonDataResource);
-
-    if (_contentItem->hasSkeletonAnchor)
-        _spineSprite->set_position(_contentItem->skeletonAnchor);
+    _spineSprite->set_position(anchor);
 
     setColor(_color);
-
     return true;
 }
+
+bool GLoader3D::loadSpineContent()
+{
+    Vector2 anchor;
+    if (_contentItem->hasSkeletonAnchor)
+        anchor = _contentItem->skeletonAnchor;
+    return loadSpineFromFiles(_contentItem->file, anchor);
+}
 #endif
+
+void GLoader3D::loadExternal()
+{
+#ifndef SPINE_GODOT_DISABLED
+    String path = ResourceUID::ensure_path(GObject::toGodotStr(_url));
+    std::string skelFile = path.utf8().get_data();
+    if (skelFile.empty() || !ToolSet::isFileExist(skelFile))
+    {
+        setErrorState();
+        return;
+    }
+
+    size_t dotPos = skelFile.find_last_of('.');
+    std::string ext = dotPos != std::string::npos ? skelFile.substr(dotPos) : "";
+    if (ext != ".skel" && ext != ".json")
+    {
+        setErrorState();
+        return;
+    }
+
+    if (!loadSpineFromFiles(skelFile, Vector2()))
+    {
+        setErrorState();
+        return;
+    }
+
+    Vector2 contentSize = get_node_content_size(_spineSprite);
+    if (contentSize.x > 0 && contentSize.y > 0)
+    {
+        sourceSize.width = contentSize.x;
+        sourceSize.height = contentSize.y;
+    }
+
+    clearErrorState();
+    onChangeSpine();
+    updateLayout();
+#else
+    setErrorState();
+#endif
+}
 
 void GLoader3D::clearContent()
 {

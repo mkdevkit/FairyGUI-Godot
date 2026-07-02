@@ -83,6 +83,7 @@ private:
     float _leftSpaceWidth;
     float _textRectWidth;
     int _numLines;
+    std::string _text;
 };
 
 NS_FGUI_END

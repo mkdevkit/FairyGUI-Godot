@@ -102,6 +102,7 @@ protected:
 private:
     void loadContent();
     void loadFromPackage();
+    void loadExternal();
     void clearContent();
     void updateLayout();
     void onChange();
@@ -111,6 +112,7 @@ private:
 
 #ifndef SPINE_GODOT_DISABLED
     bool loadSpineContent();
+    bool loadSpineFromFiles(const std::string& skelFile, const Vector2& anchor);
 #endif
 
     std::string _url;

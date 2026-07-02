@@ -30,8 +30,13 @@ public:
     Color getColor() const;
     void setColor(const Color& value);
 
+    // Shape hit-area helper: geometry only, ignores touch/visibility (invisible hit graph child).
+    bool hitTestShape(const Vector2& localPoint) const;
+
     virtual Variant getProp(ObjectPropID propId) override;
     virtual void setProp(ObjectPropID propId, const Variant& value) override;
+
+    virtual GObject* hitTest(const Vector2& worldPoint, const Camera2D* camera) override;
 
 protected:
     virtual void handleInit() override;
@@ -47,6 +52,7 @@ private:
     int _lineSize;
     float* _cornerRadius;
     std::vector<Vector2>* _polygonPoints;
+    float _polygonBaseWidth;
     float _polygonPointOffset;
     int _sides;
     float _startAngle;

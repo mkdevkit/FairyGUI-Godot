@@ -708,12 +708,17 @@ void UIPackage::createSpriteTexture(AtlasSprite* sprite, ImageFrame& outFrame)
     outFrame.texture = sprite->atlas->texture;
     outFrame.region = sprite->rect;
     outFrame.rotated = sprite->rotated;
+    const Vector2 trimSize = sprite->rotated
+        && (Math::abs(sprite->rect.size.x - sprite->originalSize.x) > 0.5f
+            || Math::abs(sprite->rect.size.y - sprite->originalSize.y) > 0.5f)
+        ? Vector2(sprite->rect.size.y, sprite->rect.size.x)
+        : sprite->rect.size;
     outFrame.offset = Vector2(
-        sprite->offset.x - (sprite->originalSize.x - sprite->rect.size.x) / 2,
-        -(sprite->offset.y - (sprite->originalSize.y - sprite->rect.size.y) / 2)
+        sprite->offset.x - (sprite->originalSize.x - trimSize.x) / 2,
+        -(sprite->offset.y - (sprite->originalSize.y - trimSize.y) / 2)
     );
     outFrame.originalSize = sprite->originalSize;
-    outFrame.originalSizeInPixels = sprite->rect.size;
+    outFrame.originalSizeInPixels = trimSize;
 }
 
 void UIPackage::loadImage(PackageItem* item)

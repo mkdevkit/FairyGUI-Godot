@@ -893,21 +893,42 @@ void GObject::rebuildSkewedTransform()
     if (!node)
         return;
 
+    // FairyGUI "skew" maps to Cocos Node::setRotationSkewX/Y (Flash-style rotational skew),
+    // NOT Node::setSkewX/Y (tan shear). See cocos2d-x Node::getNodeToParentTransform().
     const Vector2 scale = computeDisplayScale();
     const Vector2 origin = computeDisplayPosition();
 
-    const float cx = Math::cos(Math::deg_to_rad(_skewX));
-    const float sx = Math::sin(Math::deg_to_rad(_skewX));
-    const float cy = -Math::sin(Math::deg_to_rad(_skewY));
-    const float sy = Math::cos(Math::deg_to_rad(_skewY));
-    const float cz = Math::cos(Math::deg_to_rad(_rotation));
-    const float sz = Math::sin(Math::deg_to_rad(_rotation));
+    float m0, m1, m2, m3;
+    if (_skewX == _skewY)
+    {
+        const float deg = (_skewX != 0.0f || _skewY != 0.0f) ? _skewX : _rotation;
+        const float rad = Math::deg_to_rad(deg);
+        const float cz = Math::cos(rad);
+        const float sz = Math::sin(rad);
+        m0 = cz;
+        m1 = sz;
+        m2 = -sz;
+        m3 = cz;
+    }
+    else
+    {
+        const float radiansX = -Math::deg_to_rad(_skewX);
+        const float radiansY = -Math::deg_to_rad(_skewY);
+        const float cx = Math::cos(radiansX);
+        const float sx = Math::sin(radiansX);
+        const float cy = Math::cos(radiansY);
+        const float sy = Math::sin(radiansY);
+        m0 = cy;
+        m1 = sy;
+        m2 = -sx;
+        m3 = cx;
+    }
 
     Transform2D xf;
-    xf.columns[0][0] = (cx * cz - sx * sz) * scale.x;
-    xf.columns[0][1] = (cx * sz + sx * cz) * scale.x;
-    xf.columns[1][0] = (cy * cz - sy * sz) * scale.y;
-    xf.columns[1][1] = (cy * sz + sy * cz) * scale.y;
+    xf.columns[0][0] = m0 * scale.x;
+    xf.columns[0][1] = m1 * scale.x;
+    xf.columns[1][0] = m2 * scale.y;
+    xf.columns[1][1] = m3 * scale.y;
     xf.set_origin(origin);
     node->set_transform(xf);
 }

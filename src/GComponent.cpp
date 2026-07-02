@@ -591,7 +591,22 @@ void GComponent::setHitArea(IHitTest* value)
     {
         FGUI_DELETE(_hitArea);
         _hitArea = value;
+        ensureHitAreaChildAttached();
     }
+}
+
+void GComponent::ensureHitAreaChildAttached()
+{
+    ChildHitArea* childHit = dynamic_cast<ChildHitArea*>(_hitArea);
+    if (!childHit)
+        return;
+
+    GObject* child = childHit->getHitChild();
+    if (!child || !_container)
+        return;
+
+    ensure_display_child_added(_container, child);
+    child->handlePositionChanged();
 }
 
 const std::string& GComponent::getBaseUserData() const
@@ -953,10 +968,17 @@ GObject* GComponent::hitTest(const Vector2& worldPoint, const Camera2D* camera)
     {
         Rect rect;
         rect.size = _size;
+        // Match Cocos convertToNodeSpace: canvas coords -> component display local.
         Vector2 localPoint = ((CanvasItem*)_displayObject)->get_global_transform_with_canvas().affine_inverse().xform(worldPoint);
         flag = rect.has_point(localPoint) ? 1 : 2;
 
-        if (!_hitArea->hitTest(this, localPoint))
+        ChildHitArea* childHit = dynamic_cast<ChildHitArea*>(_hitArea);
+        if (childHit)
+        {
+            if (!childHit->hitTestCanvas(this, worldPoint))
+                return nullptr;
+        }
+        else if (!_hitArea->hitTest(this, localPoint))
             return nullptr;
     }
     else
@@ -1144,6 +1166,7 @@ void GComponent::handleControllerChanged(GController* c)
 void GComponent::_enter_tree()
 {
     GObject::_enter_tree();
+    ensureHitAreaChildAttached();
 
     if (!_transitions.empty())
     {
@@ -1346,9 +1369,17 @@ void GComponent::constructFromResource(std::vector<GObject*>* objectPool, int po
         PackageItem* pi = contentItem->owner->getItem(hitTestId);
         if (pi != nullptr && pi->pixelHitTestData != nullptr)
             setHitArea(new PixelHitTest(pi->pixelHitTestData, i1, i2));
+        else
+        {
+            // Shape hit test: editor hitTest="childId" (button4.xml style).
+            GObject* child = getChildById(hitTestId);
+            if (child)
+                setHitArea(new ChildHitArea(child));
+        }
     }
     else if (i1 != 0 && i2 != -1)
     {
+        // Shape hit test: Unity / binary format uses child index (i2).
         GObject* child = getChildAt(i2);
         if (child)
             setHitArea(new ChildHitArea(child));

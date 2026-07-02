@@ -4,6 +4,24 @@
 
 NS_FGUI_BEGIN
 
+static bool pointInPolygon(const Vector2& p, const std::vector<Vector2>& polygon)
+{
+    if (polygon.size() < 3)
+        return false;
+
+    bool inside = false;
+    size_t count = polygon.size();
+    for (size_t i = 0, j = count - 1; i < count; j = i++)
+    {
+        const Vector2& a = polygon[i];
+        const Vector2& b = polygon[j];
+        if (((a.y > p.y) != (b.y > p.y)) &&
+                (p.x < (b.x - a.x) * (p.y - a.y) / (b.y - a.y) + a.x))
+            inside = !inside;
+    }
+    return inside;
+}
+
 // Helper: convert std::vector<Vector2> to PackedVector2Array
 static PackedVector2Array to_pva(const std::vector<Vector2>& v) {
     PackedVector2Array arr;
@@ -194,6 +212,8 @@ GGraph::GGraph() : _shape(nullptr),
                    _fillColor(Color(1, 1, 1, 1)),
                    _cornerRadius(nullptr),
                    _polygonPoints(nullptr),
+                   _polygonBaseWidth(0),
+                   _polygonPointOffset(0),
                    _distances(nullptr)
 {
     _touchDisabled = true;
@@ -245,6 +265,7 @@ void GGraph::drawPolygon(int lineSize, const Color& lineColor, const Color& fill
         _polygonPoints = new std::vector<Vector2>();
     else
         _polygonPoints->clear();
+    _polygonBaseWidth = getWidth();
     _polygonPointOffset = getHeight();
     for (int i = 0; i < count; i++)
         _polygonPoints->push_back(points[i]);
@@ -402,17 +423,62 @@ void GGraph::setProp(ObjectPropID propId, const Variant& value)
     }
 }
 
+GObject* GGraph::hitTest(const Vector2& worldPoint, const Camera2D* camera)
+{
+    if (_touchDisabled || !_touchable || !((CanvasItem*)_displayObject)->is_visible() || !_displayObject->get_parent())
+        return nullptr;
+
+    Vector2 localPoint = globalToLocal(worldPoint);
+    if (hitTestShape(localPoint))
+        return this;
+    return nullptr;
+}
+
+bool GGraph::hitTestShape(const Vector2& localPoint) const
+{
+    if (_type == 3 && _polygonPoints != nullptr && _polygonPoints->size() >= 3)
+        return pointInPolygon(localPoint, *_polygonPoints);
+
+    if (_type == 4 && _polygonPoints != nullptr && _polygonPoints->size() >= 3)
+        return pointInPolygon(localPoint, *_polygonPoints);
+
+    if (_type == 2)
+    {
+        float rx = _size.width * 0.5f;
+        float ry = _size.height * 0.5f;
+        if (rx <= 0 || ry <= 0)
+            return false;
+        Vector2 c(_size.width * 0.5f, _size.height * 0.5f);
+        Vector2 d = localPoint - c;
+        return (d.x * d.x) / (rx * rx) + (d.y * d.y) / (ry * ry) <= 1.0f;
+    }
+
+    if (_type == 1 || _type == 0)
+    {
+        Rect rect;
+        rect.size = _size;
+        return rect.has_point(localPoint);
+    }
+
+    return false;
+}
+
 void GGraph::handleSizeChanged()
 {
     GObject::handleSizeChanged();
 
-    if ((_type == 3 || _type == 4) && _polygonPoints != nullptr && _polygonPointOffset > 0)
+    if ((_type == 3 || _type == 4) && _polygonPoints != nullptr && _polygonBaseWidth > 0 && _polygonPointOffset > 0)
     {
-        float ratio = getHeight() / _polygonPointOffset;
-        if (ratio != 1.0f)
+        float ratioX = getWidth() / _polygonBaseWidth;
+        float ratioY = getHeight() / _polygonPointOffset;
+        if (ratioX != 1.0f || ratioY != 1.0f)
         {
             for (size_t i = 0; i < _polygonPoints->size(); i++)
-                (*_polygonPoints)[i].y *= ratio;
+            {
+                (*_polygonPoints)[i].x *= ratioX;
+                (*_polygonPoints)[i].y *= ratioY;
+            }
+            _polygonBaseWidth = getWidth();
             _polygonPointOffset = getHeight();
         }
     }
@@ -443,6 +509,7 @@ void GGraph::setup_beforeAdd(ByteBuffer* buffer, int beginPos)
         {
             int cnt = buffer->readShort() / 2;
             _polygonPoints = new std::vector<Vector2>(cnt);
+            _polygonBaseWidth = getWidth();
             _polygonPointOffset = getHeight();
             for (int i = 0; i < cnt; i++)
             {

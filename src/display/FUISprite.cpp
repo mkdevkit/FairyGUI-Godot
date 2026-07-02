@@ -10,6 +10,13 @@ Ref<Texture2D> FUISprite::_empty;
 static const char kProgressTextureCoords = 0x4b; // {0,1} {0,0} {1,0} {1,1}
 static const int kProgressTextureCoordsCount = 4;
 
+static Rect2 getRotatedAtlasSrcRect(float ox, float oy, float ow, float oh, const Rect2& atlasRect);
+static Vector2 getRotatedLogicalTrimSize(const Rect2& atlasRect, const Vector2& originalSize);
+static void drawRotatedAtlasRegion(CanvasItem* item, const Ref<Texture2D>& tex,
+        const Rect2& atlasRect, const Vector2& drawOrigin, const Vector2& contentSize,
+        const Vector2& dstPos, float logicalW, float logicalH, float sx, float sy,
+        const Color& modulate);
+
 FUISprite::FUISprite() :
     _fillMethod(FillMethod::None),
     _fillOrigin(FillOrigin::Left),
@@ -157,6 +164,12 @@ void FUISprite::setScale9Grid(const Rect2& value)
         if (_realTexture.is_valid())
             trimmedSize = _realTexture->get_size();
     }
+    if (_rotated && _originalContentSize.x > 0.0f && _originalContentSize.y > 0.0f
+        && (Math::abs(trimmedSize.x - _originalContentSize.x) > 0.5f
+            || Math::abs(trimmedSize.y - _originalContentSize.y) > 0.5f))
+    {
+        trimmedSize = getRotatedLogicalTrimSize(get_region_rect(), _originalContentSize);
+    }
 
     if (_originalContentSize.x <= 0 || _originalContentSize.y <= 0)
         _originalContentSize = trimmedSize;
@@ -230,6 +243,63 @@ static void draw_texture_region_with_flip(CanvasItem* item, const Ref<Texture2D>
         Rect2(-dst.size.x * 0.5f, -dst.size.y * 0.5f, dst.size.x, dst.size.y),
         src, modulate);
     item->draw_set_transform(Vector2(), 0.0f, Vector2(1.0f, 1.0f));
+}
+
+static Rect2 getRotatedAtlasSrcRect(float ox, float oy, float ow, float oh, const Rect2& atlasRect)
+{
+    const float atlasX = atlasRect.position.x;
+    const float atlasY = atlasRect.position.y;
+    const float atlasW = atlasRect.size.x;
+    const float atlasH = atlasRect.size.y;
+
+    if (Math::is_equal_approx(ox, 0.0f) && Math::is_equal_approx(oy, 0.0f)
+            && Math::is_equal_approx(ow, atlasW) && Math::is_equal_approx(oh, atlasH))
+    {
+        return Rect2(
+            atlasRect.position - Vector2(0.5f, 0.5f),
+            Vector2(atlasH + 1.0f, atlasW + 1.0f)
+        );
+    }
+
+    return Rect2(
+        atlasX + oy - 0.5f,
+        atlasY + atlasW - ox - ow - 0.5f,
+        oh + 1.0f,
+        ow + 1.0f
+    );
+}
+
+static Vector2 getRotatedLogicalTrimSize(const Rect2& atlasRect, const Vector2& originalSize)
+{
+    if (originalSize.x > 0.0f && originalSize.y > 0.0f
+        && Math::is_equal_approx(atlasRect.size.x, originalSize.x)
+        && Math::is_equal_approx(atlasRect.size.y, originalSize.y))
+    {
+        return originalSize;
+    }
+    return Vector2(atlasRect.size.y, atlasRect.size.x);
+}
+
+static void drawRotatedAtlasRegion(CanvasItem* item, const Ref<Texture2D>& tex,
+        const Rect2& atlasRect, const Vector2& drawOrigin, const Vector2& contentSize,
+        const Vector2& dstPos, float logicalW, float logicalH, float sx, float sy,
+        const Color& modulate)
+{
+    const Rect2 src(
+        atlasRect.position - Vector2(0.5f, 0.5f),
+        Vector2(atlasRect.size.y + 1.0f, atlasRect.size.x + 1.0f)
+    );
+    const float dw = logicalW * sx;
+    const float dh = logicalH * sy;
+    const float dx = dstPos.x - drawOrigin.x;
+    const float dy = dstPos.y - drawOrigin.y;
+    const Vector2 center = drawOrigin + contentSize * 0.5f;
+
+    item->draw_set_transform(center, Math::deg_to_rad(-90.0f), Vector2(1, 1));
+    item->draw_texture_rect_region(tex,
+        Rect2(dy - center.y, center.x - dx - dw, dh, dw),
+        src, modulate);
+    item->draw_set_transform(Vector2(), 0, Vector2(1, 1));
 }
 
 void FUISprite::setGrayed(bool value)
@@ -558,16 +628,13 @@ void FUISprite::_draw()
     // Normal sprite draw
     if (_rotated)
     {
-        // Sprite is rotated 90° CW in atlas. texRect has swapped dims (H_orig, W_orig).
-        Vector2 atlasSize = texRect.size; // (H, W) for rotated sprite
-        Vector2 displaySize = _contentSize.x > 0 ? _contentSize : Vector2(atlasSize.y, atlasSize.x);
-        Vector2 center = drawOrigin + displaySize * 0.5f;
-        draw_set_transform(center, Math::deg_to_rad(-90.0f), Vector2(1, 1));
-        draw_texture_rect_region(tex,
-            Rect2(-atlasSize.x * 0.5f, -atlasSize.y * 0.5f, atlasSize.x, atlasSize.y),
-            texRect,
-            get_modulate());
-        draw_set_transform(Vector2(), 0, Vector2(1, 1));
+        Vector2 logicalTrim = getRotatedLogicalTrimSize(texRect, _originalContentSize);
+        if (logicalTrim.x <= 0.0f || logicalTrim.y <= 0.0f)
+            logicalTrim = texRect.size;
+
+        const Vector2 dstPos = drawOrigin + Vector2(_trimOffset.x * sx, _trimOffset.y * sy);
+        drawRotatedAtlasRegion(this, tex, texRect, drawOrigin, contentSize,
+            dstPos, logicalTrim.x, logicalTrim.y, sx, sy, get_modulate());
     }
     else if (hasTrim)
     {
@@ -656,7 +723,6 @@ void FUISprite::drawScale9()
 
     if (_rotated)
     {
-        // ... keep existing rotated code
         Vector2 center = drawOrigin + contentSize * 0.5f;
         draw_set_transform(center, Math::deg_to_rad(-90.0f), Vector2(1, 1));
 
@@ -666,9 +732,7 @@ void FUISprite::drawScale9()
             float ow = origRects[i][2], oh = origRects[i][3];
             if (ow <= 0 || oh <= 0) continue;
 
-            Rect2 src(srcX + oy - 0.5f,
-                      srcY + origW - ox - ow - 0.5f,
-                      oh + 1.0f, ow + 1.0f);
+            Rect2 src = getRotatedAtlasSrcRect(ox, oy, ow, oh, texRect);
 
             float dx = destRects[i][0], dy = destRects[i][1];
             float dw = destRects[i][2], dh = destRects[i][3];
