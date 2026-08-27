@@ -5,8 +5,8 @@
 
 > **中文文档：[README.zh.md](README.zh.md)**
 
-[JavaScript demo (online)](https://fairygui.niceaddons.com/js/)  
-[GDScript demo (online)](https://fairygui.niceaddons.com/gd/)
+[JavaScript demo (online)](https://fairygui.demo.store.loongdusk.com/js/)  
+[GDScript demo (online)](https://fairygui.demo.store.loongdusk.com/gd/)
 
 FairyGUI runtime for Godot Engine, integrated as a built-in C++ module.
 

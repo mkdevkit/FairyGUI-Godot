@@ -3,8 +3,8 @@
 > 当前项目是基于FairyGUI的cocos2dx版本重构，支持C#、gdscript、javascript/typescript或其它godot支持的脚本语言。
 > 目前支持Godot 4.5-4.6
 
-[javascript版demo在线预览](https://fairygui.niceaddons.com/js/)
-[gdscript版demo在线预览](https://fairygui.niceaddons.com/gd/)
+[javascript版demo在线预览](https://fairygui.demo.store.loongdusk.com/js/)
+[gdscript版demo在线预览](https://fairygui.demo.store.loongdusk.com/gd/)
 
 FairyGUI 的 Godot 引擎运行时，以内置 C++ Module 形式集成。
 
